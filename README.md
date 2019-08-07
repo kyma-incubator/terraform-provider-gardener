@@ -1,5 +1,5 @@
 
-# Gardner Plugin
+# Gardener Plugin
 
 ## Overview
-Creating a new terraform provider plugin for gardner using the gardner client
+Creating a new terraform provider plugin for gardener using the gardener client
