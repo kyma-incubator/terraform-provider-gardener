@@ -1,8 +1,7 @@
-package main
+package gardener
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"k8s.io/client-go/tools/clientcmd"
 
 	//"log"
 	"fmt"
@@ -12,7 +11,6 @@ import (
 
 	//apierrors "k8s.io/apimachinery/pkg/api/errors"
 	gardner_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
-	gardner_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	util "k8s.io/apimachinery/pkg/util/intstr"
@@ -23,7 +21,7 @@ import (
 // 	core.Command
 // }
 
-func resourceServer() *schema.Resource {
+func resourceGCPShoot() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServerCreate,
 		Read:   resourceServerRead,
@@ -34,15 +32,7 @@ func resourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"profile": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"region": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"secret_binding": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -97,22 +87,11 @@ func resourceServer() *schema.Resource {
 	}
 }
 func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
+	client := m.(*GardenerClient)
 	name := d.Get("name").(string)
 	d.SetId(name)
-	profile := d.Get("profile").(string)
-	nameSpace := "garden-" + profile
-	kubeconfig := "C:\\Users\\D074188\\.kube\\config"
-	fmt.Println(kubeconfig)
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		panic(err)
-	}
-	clientset, err := gardner_apis.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
-	shoots := clientset.Shoots("garden-icke")
-	shoot, err := shoots.Create(CreateCRD(name, profile, nameSpace))
+	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
+	shoot, err := shoots.Create(CreateCRD(name, client))
 	if err != nil {
 		panic(err)
 	}
@@ -126,23 +105,11 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
+	client := m.(*GardenerClient)
 	name := d.Get("name").(string)
 	d.SetId(name)
-	profile := d.Get("profile").(string)
-	nameSpace := "garden-" + profile
-	fmt.Println(d.Get("workers"))
-	kubeconfig := "C:\\Users\\D074188\\.kube\\config"
-	fmt.Println(kubeconfig)
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		panic(err)
-	}
-	clientset, err := gardner_apis.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
-	shoots := clientset.Shoots(nameSpace)
-	shoot, err := shoots.Update(CreateCRD(name, profile, nameSpace))
+	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
+	shoot, err := shoots.Update(CreateCRD(name, client))
 	if err != nil {
 		panic(err)
 	}
@@ -151,33 +118,23 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
+	client := m.(*GardenerClient)
 	name := d.Get("name").(string)
-	d.SetId("")
-	kubeconfig := "C:\\Users\\D074188\\.kube\\config"
-	fmt.Println(kubeconfig)
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		panic(err)
-	}
-	clientset, err := gardner_apis.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
-	shoots := clientset.Shoots("garden-icke")
+	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
 	shoots.Delete(name, &meta_v1.DeleteOptions{})
 	d.SetId("")
 	return nil
 }
 
 //CreateCRD return deployment structure
-func CreateCRD(name string, profile string, nameSpace string) *gardner_types.Shoot {
+func CreateCRD(name string, client *GardenerClient) *gardner_types.Shoot {
 	var internal gardencorev1alpha1.CIDR = "10.250.112.0/22"
-	domain := name + "." + profile + ".shoot.canary.k8s-hana.ondemand.com"
+	domain := name + "." + client.DNSBase
 	//domain := "johndoe-gcp.garden-dev.exam"ple.com"
 	allowPrivilegedContainers := true
 	return &gardner_types.Shoot{
 		TypeMeta:   meta_v1.TypeMeta{Kind: "Shoot", APIVersion: "garden.sapcloud.io/v1beta1"},
-		ObjectMeta: meta_v1.ObjectMeta{Name: name, Namespace: nameSpace},
+		ObjectMeta: meta_v1.ObjectMeta{Name: name, Namespace: client.NameSpace},
 		Spec: gardner_types.ShootSpec{
 			Cloud: gardner_types.Cloud{
 				Profile: "gcp",
