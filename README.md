@@ -1,5 +1,7 @@
 
-# Gardener Plugin
+# Terraform Provider for Gardener
+
+- Website: https://www.terraform.io
 
 ## Overview
-Creating a new terraform provider plugin for gardener using the gardener client
+Creating a new Terraform provider for Gardener using the Gardener client. 
