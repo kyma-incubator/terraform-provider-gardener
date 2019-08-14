@@ -1,44 +1,56 @@
 package gardener
 
 import (
+	"github.com/hashicorp/terraform/helper/mutexkv"
 	"github.com/hashicorp/terraform/helper/schema"
 )
+
+// Global MutexKV
+var mutexKV = mutexkv.NewMutexKV()
 
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"profile": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+			"profile": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("PROFILE", ""),
 			},
-			"kube_path": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+			"kube_path": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("KUBE_PATH", ""),
 			},
-			"aws_secret_binding": &schema.Schema{
+			"aws_secret_binding": {
 				Type:     schema.TypeString,
-				Required: false,
+				Optional: true,
+				Default:  "",
 			},
-			"azure_secret_binding": &schema.Schema{
+			"azure_secret_binding": {
 				Type:     schema.TypeString,
-				Required: false,
+				Optional: true,
+				Default:  "",
 			},
-			"gcp_secret_binding": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: false,
+			"gcp_secret_binding": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				InputDefault: "icke-architecture",
 			},
-			"openstack_secret_binding": &schema.Schema{
+			"openstack_secret_binding": {
 				Type:     schema.TypeString,
-				Required: false,
+				Optional: true,
+				Default:  "",
 			},
-			"alicloud_secret_binding": &schema.Schema{
+			"alicloud_secret_binding": {
 				Type:     schema.TypeString,
-				Required: false,
+				Optional: true,
+				Default:  "",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"gcp_shoot": resourceGCPShoot(),
+			"gardener_gcp_shoot": resourceGCPShoot(),
 		},
+		ConfigureFunc: providerConfigure,
 	}
 }
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
