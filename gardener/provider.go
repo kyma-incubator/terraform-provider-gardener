@@ -19,7 +19,7 @@ func Provider() *schema.Provider {
 			"kube_path": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("KUBE_PATH", ""),
+				DefaultFunc: schema.EnvDefaultFunc("KUBECONFIG", ""),
 			},
 			"aws_secret_binding": {
 				Type:     schema.TypeString,
@@ -34,7 +34,7 @@ func Provider() *schema.Provider {
 			"gcp_secret_binding": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				InputDefault: "icke-architecture",
+				InputDefault: "",
 			},
 			"openstack_secret_binding": {
 				Type:     schema.TypeString,

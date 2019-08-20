@@ -1,11 +1,12 @@
-provider "example" {
+provider "gardener" {
+  profile        = "<my-gardener-project>"
+  gcp_secret_binding = "<my-gardener-gcp-secret>"
+  kube_path = "<my-gardener-service-account-kubeconfig>"
 }
 
-resource "example_server" "my-server" {
-  name           = "demo2-gcp"
-  profile        = "omar"
+resource "gardener_gcp_shoot" "my-server" {
+  name           = "tf-gardener-gcp"
   region         = "europe-west3"
-  secret_binding = "icke-architecture"
   zones          = ["europe-west3-b"]
   workers {
     name           = "cpu-worker"

@@ -91,7 +91,7 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 	name := d.Get("name").(string)
 	d.SetId(name)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	shoot, err := shoots.Create(CreateCRD(name, client))
+	shoot, err := shoots.Create(createCRD(d, client))
 	if err != nil {
 		panic(err)
 	}
@@ -109,7 +109,7 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 	name := d.Get("name").(string)
 	d.SetId(name)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	shoot, err := shoots.Update(CreateCRD(name, client))
+	shoot, err := shoots.Update(createCRD(d, client))
 	if err != nil {
 		panic(err)
 	}
@@ -126,9 +126,10 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-//CreateCRD return deployment structure
-func CreateCRD(name string, client *GardenerClient) *gardner_types.Shoot {
-	var internal gardencorev1alpha1.CIDR = "10.250.112.0/22"
+//createCRD return deployment structure
+func createCRD(d *schema.ResourceData, client *GardenerClient) *gardner_types.Shoot {
+	var internal gardencorev1alpha1.CIDR = "10.250.112.0/22" // TODO replace hardcoded
+	name := d.Get("name").(string)
 	domain := name + "." + client.DNSBase
 	//domain := "johndoe-gcp.garden-dev.exam"ple.com"
 	allowPrivilegedContainers := true
@@ -137,21 +138,21 @@ func CreateCRD(name string, client *GardenerClient) *gardner_types.Shoot {
 		ObjectMeta: meta_v1.ObjectMeta{Name: name, Namespace: client.NameSpace},
 		Spec: gardner_types.ShootSpec{
 			Cloud: gardner_types.Cloud{
-				Profile: "gcp",
-				Region:  "europe-west3",
+				Profile: "gcp", // TODO replace hardcoded
+				Region:  d.Get("region").(string),
 				SecretBindingRef: corev1.LocalObjectReference{
-					Name: "icke-architecture",
+					Name: client.SecretBindings.GcpSecretBinding, // TODO use the correct secret per provider
 				},
 				GCP: &gardner_types.GCPCloud{
 					Networks: gardner_types.GCPNetworks{
 						Internal: &internal,
-						Workers:  []gardencorev1alpha1.CIDR{"10.250.0.0/19"},
+						Workers:  []gardencorev1alpha1.CIDR{"10.250.0.0/19"}, // TODO replace hardcoded
 					},
 					Workers: []gardner_types.GCPWorker{
 						gardner_types.GCPWorker{
 							Worker: gardner_types.Worker{
-								Name:          "cpu-worker",
-								MachineType:   "n1-standard-4",
+								Name:          d.Get("workers.name").(string),
+								MachineType:   d.Get("workers.machinetype").(string),
 								AutoScalerMin: 2,
 								AutoScalerMax: 2,
 								MaxSurge: &util.IntOrString{
@@ -161,15 +162,15 @@ func CreateCRD(name string, client *GardenerClient) *gardner_types.Shoot {
 									IntVal: 0,
 								},
 							},
-							VolumeSize: "20Gi",
-							VolumeType: "pd-standard",
+							VolumeSize: d.Get("workers.volumesize").(string),
+							VolumeType: d.Get("workers.volumetype").(string),
 						},
 					},
-					Zones: []string{"europe-west3-b"},
+					Zones: d.Get("zones").([]string),
 				},
 			},
 			Kubernetes: gardner_types.Kubernetes{
-				Version:                   "1.15.2",
+				Version:                   "1.15.2", // TODO replace hardcoded
 				AllowPrivilegedContainers: &allowPrivilegedContainers,
 			},
 			DNS: gardner_types.DNS{
