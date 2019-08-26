@@ -5,8 +5,10 @@ import (
 
 	//"log"
 	"fmt"
+
 	//  appsv1 "k8s.io/api/apps/v1"
 	//  apiv1 "k8s.io/api/core/v1"
+	//"github.com/aws/aws-sdk-go/aws/awsutil"
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 
 	//apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -43,8 +45,9 @@ func resourceGCPShoot() *schema.Resource {
 				},
 				Required: true,
 			},
-			"workers": &schema.Schema{
-				Type: schema.TypeList,
+			"worker": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": &schema.Schema{
@@ -81,7 +84,6 @@ func resourceGCPShoot() *schema.Resource {
 						},
 					},
 				},
-				Required: true,
 			},
 		},
 	}
@@ -100,7 +102,17 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerRead(d *schema.ResourceData, m interface{}) error {
+	client := m.(*GardenerClient)
+	name := d.Get("name").(string)
+	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
+	obj, err := shoots.Get(name, meta_v1.GetOptions{})
+	if err != nil {
+		d.SetId("")
+		panic(err)
+	}
 
+	fmt.Println("obj: ", obj)
+	d.SetId(name)
 	return nil
 }
 
@@ -131,28 +143,28 @@ func createCRD(d *schema.ResourceData, client *GardenerClient) *gardner_types.Sh
 	var internal gardencorev1alpha1.CIDR = "10.250.112.0/22" // TODO replace hardcoded
 	name := d.Get("name").(string)
 	domain := name + "." + client.DNSBase
-	//domain := "johndoe-gcp.garden-dev.exam"ple.com"
+	region := d.Get("region").(string)
 	allowPrivilegedContainers := true
 	return &gardner_types.Shoot{
 		TypeMeta:   meta_v1.TypeMeta{Kind: "Shoot", APIVersion: "garden.sapcloud.io/v1beta1"},
 		ObjectMeta: meta_v1.ObjectMeta{Name: name, Namespace: client.NameSpace},
 		Spec: gardner_types.ShootSpec{
 			Cloud: gardner_types.Cloud{
-				Profile: "gcp", // TODO replace hardcoded
-				Region:  d.Get("region").(string),
+				Profile: "gcp",
+				Region:  region,
 				SecretBindingRef: corev1.LocalObjectReference{
-					Name: client.SecretBindings.GcpSecretBinding, // TODO use the correct secret per provider
+					Name: client.SecretBindings.GcpSecretBinding,
 				},
 				GCP: &gardner_types.GCPCloud{
 					Networks: gardner_types.GCPNetworks{
 						Internal: &internal,
 						Workers:  []gardencorev1alpha1.CIDR{"10.250.0.0/19"}, // TODO replace hardcoded
 					},
-					Workers: []gardner_types.GCPWorker{
+					Workers: []gardner_types.GCPWorker{ // TODO iterate on multiple workers
 						gardner_types.GCPWorker{
 							Worker: gardner_types.Worker{
-								Name:          d.Get("workers.name").(string),
-								MachineType:   d.Get("workers.machinetype").(string),
+								Name:          d.Get("worker.0.name").(string),
+								MachineType:   d.Get("worker.0.machinetype").(string),
 								AutoScalerMin: 2,
 								AutoScalerMax: 2,
 								MaxSurge: &util.IntOrString{
@@ -162,11 +174,11 @@ func createCRD(d *schema.ResourceData, client *GardenerClient) *gardner_types.Sh
 									IntVal: 0,
 								},
 							},
-							VolumeSize: d.Get("workers.volumesize").(string),
-							VolumeType: d.Get("workers.volumetype").(string),
+							VolumeSize: d.Get("worker.0.volumesize").(string),
+							VolumeType: d.Get("worker.0.volumetype").(string),
 						},
 					},
-					Zones: d.Get("zones").([]string),
+					Zones: []string{"europe-west3-b"}, //d.Get("zones").([]string), FIX THIS
 				},
 			},
 			Kubernetes: gardner_types.Kubernetes{
