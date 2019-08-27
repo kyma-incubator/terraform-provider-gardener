@@ -5,23 +5,15 @@ import (
 
 	//"log"
 	"fmt"
+	"strconv"
 
-	//  appsv1 "k8s.io/api/apps/v1"
-	//  apiv1 "k8s.io/api/core/v1"
-	//"github.com/aws/aws-sdk-go/aws/awsutil"
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 
-	//apierrors "k8s.io/apimachinery/pkg/api/errors"
 	gardner_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	util "k8s.io/apimachinery/pkg/util/intstr"
 )
-
-// type command struct {
-// 	opts *Options
-// 	core.Command
-// }
 
 func resourceGCPShoot() *schema.Resource {
 	return &schema.Resource{
@@ -38,8 +30,12 @@ func resourceGCPShoot() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"kubernetesversion": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"zones": &schema.Schema{
-				Type: schema.TypeList,
+				Type: schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -105,13 +101,11 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*GardenerClient)
 	name := d.Get("name").(string)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	obj, err := shoots.Get(name, meta_v1.GetOptions{})
+	_, err := shoots.Get(name, meta_v1.GetOptions{})
 	if err != nil {
 		d.SetId("")
-		panic(err)
+		return err
 	}
-
-	fmt.Println("obj: ", obj)
 	d.SetId(name)
 	return nil
 }
@@ -143,7 +137,6 @@ func createCRD(d *schema.ResourceData, client *GardenerClient) *gardner_types.Sh
 	var internal gardencorev1alpha1.CIDR = "10.250.112.0/22" // TODO replace hardcoded
 	name := d.Get("name").(string)
 	domain := name + "." + client.DNSBase
-	region := d.Get("region").(string)
 	allowPrivilegedContainers := true
 	return &gardner_types.Shoot{
 		TypeMeta:   meta_v1.TypeMeta{Kind: "Shoot", APIVersion: "garden.sapcloud.io/v1beta1"},
@@ -151,7 +144,7 @@ func createCRD(d *schema.ResourceData, client *GardenerClient) *gardner_types.Sh
 		Spec: gardner_types.ShootSpec{
 			Cloud: gardner_types.Cloud{
 				Profile: "gcp",
-				Region:  region,
+				Region:  d.Get("region").(string),
 				SecretBindingRef: corev1.LocalObjectReference{
 					Name: client.SecretBindings.GcpSecretBinding,
 				},
@@ -160,29 +153,12 @@ func createCRD(d *schema.ResourceData, client *GardenerClient) *gardner_types.Sh
 						Internal: &internal,
 						Workers:  []gardencorev1alpha1.CIDR{"10.250.0.0/19"}, // TODO replace hardcoded
 					},
-					Workers: []gardner_types.GCPWorker{ // TODO iterate on multiple workers
-						gardner_types.GCPWorker{
-							Worker: gardner_types.Worker{
-								Name:          d.Get("worker.0.name").(string),
-								MachineType:   d.Get("worker.0.machinetype").(string),
-								AutoScalerMin: 2,
-								AutoScalerMax: 2,
-								MaxSurge: &util.IntOrString{
-									IntVal: 1,
-								},
-								MaxUnavailable: &util.IntOrString{
-									IntVal: 0,
-								},
-							},
-							VolumeSize: d.Get("worker.0.volumesize").(string),
-							VolumeType: d.Get("worker.0.volumetype").(string),
-						},
-					},
-					Zones: []string{"europe-west3-b"}, //d.Get("zones").([]string), FIX THIS
+					Workers: getWorkers(d),
+					Zones:   getZones(d),
 				},
 			},
 			Kubernetes: gardner_types.Kubernetes{
-				Version:                   "1.15.2", // TODO replace hardcoded
+				Version:                   d.Get("kubernetesversion").(string),
 				AllowPrivilegedContainers: &allowPrivilegedContainers,
 			},
 			DNS: gardner_types.DNS{
@@ -191,4 +167,38 @@ func createCRD(d *schema.ResourceData, client *GardenerClient) *gardner_types.Sh
 		},
 	}
 
+}
+
+func getZones(d *schema.ResourceData) []string {
+	zonesSet := d.Get("zones").(*schema.Set)
+	zonesInterface := zonesSet.List()
+	zones := make([]string, len(zonesInterface))
+	for i, v := range zonesInterface {
+		zones[i] = v.(string)
+	}
+	return zones
+}
+func getWorkers(d *schema.ResourceData) []gardner_types.GCPWorker {
+	numWorkers := d.Get("worker.#").(int)
+	resultWorkers := make([]gardner_types.GCPWorker, numWorkers)
+	for i := 0; i < numWorkers; i++ {
+		var worker = "worker." + strconv.Itoa(i)
+		resultWorkers[i] = gardner_types.GCPWorker{
+			Worker: gardner_types.Worker{
+				Name:          d.Get(worker + ".name").(string),
+				MachineType:   d.Get(worker + ".machinetype").(string),
+				AutoScalerMin: d.Get(worker + ".autoscalermin").(int),
+				AutoScalerMax: d.Get(worker + ".autoscalermax").(int),
+				MaxSurge: &util.IntOrString{
+					IntVal: int32(d.Get(worker + ".maxsurge").(int)),
+				},
+				MaxUnavailable: &util.IntOrString{
+					IntVal: int32(d.Get(worker + ".maxunavailable").(int)),
+				},
+			},
+			VolumeSize: d.Get(worker + ".volumesize").(string),
+			VolumeType: d.Get(worker + ".volumetype").(string),
+		}
+	}
+	return resultWorkers
 }

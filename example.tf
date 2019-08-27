@@ -1,14 +1,15 @@
 provider "gardener" {
-  profile        = "<my-gardener-project>"
+  profile            = "<my-gardener-project>"
   gcp_secret_binding = "<my-gardener-gcp-secret>"
-  kube_path = "<my-gardener-service-account-kubeconfig>"
+  kube_path          = "<my-gardener-service-account-kubeconfig>"
 }
 
 resource "gardener_gcp_shoot" "my-server" {
-  name           = "tf-gardener-gcp"
-  region         = "europe-west3"
-  zones          = ["europe-west3-b"]
-  workers {
+  name              = "tf-gardener-gcp"
+  region            = "europe-west3"
+  zones             = ["europe-west3-b"]
+  kubernetesversion = "1.15.2"
+  worker {
     name           = "cpu-worker"
     machinetype    = "n1-standard-4"
     autoscalermin  = 2
