@@ -91,7 +91,8 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
 	shoot, err := shoots.Create(createCRD(d, client))
 	if err != nil {
-		panic(err)
+		d.SetId("")
+		return err
 	}
 	fmt.Println(shoot)
 	return resourceServerRead(d, m)
@@ -117,7 +118,8 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
 	shoot, err := shoots.Update(createCRD(d, client))
 	if err != nil {
-		panic(err)
+		d.SetId("")
+		return err
 	}
 	fmt.Println(shoot)
 	return resourceServerRead(d, m)
