@@ -13,12 +13,12 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"profile": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("PROFILE", ""),
 			},
 			"kube_path": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("KUBECONFIG", ""),
 			},
 			"aws_secret_binding": {
