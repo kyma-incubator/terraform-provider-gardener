@@ -4,11 +4,11 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceGCPShoot() *schema.Resource {
+func resourceAWSShoot() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceGCPServerCreate,
+		Create: resourceAWSServerCreate,
 		Read:   resourceServerRead,
-		Update: resourceGCPServerUpdate,
+		Update: resourceAWSServerUpdate,
 		Delete: resourceServerDelete,
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -73,10 +73,10 @@ func resourceGCPShoot() *schema.Resource {
 		},
 	}
 }
-func resourceGCPServerCreate(d *schema.ResourceData, m interface{}) error {
-	return resourceServerCreate(d, m, gcp)
+func resourceAWSServerCreate(d *schema.ResourceData, m interface{}) error {
+	return resourceServerCreate(d, m, aws)
 }
 
-func resourceGCPServerUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceServerUpdate(d, m, gcp)
+func resourceAWSServerUpdate(d *schema.ResourceData, m interface{}) error {
+	return resourceServerUpdate(d, m, aws)
 }

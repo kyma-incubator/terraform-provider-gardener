@@ -49,6 +49,7 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"gardener_gcp_shoot": resourceGCPShoot(),
+			"gardener_aws_shoot": resourceAWSShoot(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
