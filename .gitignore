@@ -18,7 +18,11 @@ bin
 
 # Terraform
 .terraform
+*.tfstate
 
 # IDEs
 .idea
 .vscode
+
+# Logs
+*.log
