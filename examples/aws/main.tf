@@ -1,6 +1,6 @@
 provider "gardener" {
   profile            = "<my-gardener-project>"
-  aws_secret_binding = "<my-gardener-gcp-secret>"
+  aws_secret_binding = "<my-gardener-aws-secret>"
   kube_path          = "<my-gardener-service-account-kubeconfig>"
 }
 
