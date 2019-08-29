@@ -18,7 +18,7 @@ bin
 
 # Terraform
 .terraform
-*.tfstate
+*.tfstate*
 
 # IDEs
 .idea
