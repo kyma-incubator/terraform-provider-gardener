@@ -1,18 +1,18 @@
-package gardener
+package shoot
 
 import (
 	"fmt"
-	"strconv"
 
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardner_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/kyma-incubator/terraform-provider-gardener/client"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	util "k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func resourceServerCreate(d *schema.ResourceData, m interface{}, provider string) error {
-	client := m.(*GardenerClient)
+	client := m.(*client.Client)
 	name := d.Get("name").(string)
 	d.SetId(name)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
@@ -26,7 +26,7 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}, provider string
 }
 
 func resourceServerRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*GardenerClient)
+	client := m.(*client.Client)
 	name := d.Get("name").(string)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
 	_, err := shoots.Get(name, meta_v1.GetOptions{})
@@ -39,7 +39,7 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerUpdate(d *schema.ResourceData, m interface{}, provider string) error {
-	client := m.(*GardenerClient)
+	client := m.(*client.Client)
 	name := d.Get("name").(string)
 	d.SetId(name)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
@@ -53,7 +53,7 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}, provider string
 }
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*GardenerClient)
+	client := m.(*client.Client)
 	name := d.Get("name").(string)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
 	shoots.Delete(name, &meta_v1.DeleteOptions{})
@@ -62,7 +62,7 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 //createCRD return deployment structure
-func createCRD(d *schema.ResourceData, client *GardenerClient, provider string) *gardner_types.Shoot {
+func createCRD(d *schema.ResourceData, client *client.Client, provider string) *gardner_types.Shoot {
 	var internal gardencorev1alpha1.CIDR = "10.250.112.0/22" // TODO replace hardcoded
 	var cidr gardencorev1alpha1.CIDR = "10.250.112.0/16"
 	name := d.Get("name").(string)
@@ -107,33 +107,7 @@ func getZones(d *schema.ResourceData) []string {
 	}
 	return zones
 }
-func getGCPWorkers(d *schema.ResourceData) []gardner_types.GCPWorker {
-	numWorkers := d.Get("worker.#").(int)
-	resultWorkers := make([]gardner_types.GCPWorker, numWorkers)
-	for i := 0; i < numWorkers; i++ {
-		var worker = "worker." + strconv.Itoa(i)
-		resultWorkers[i] = gardner_types.GCPWorker{
-			Worker:     createGardenWorker(worker, d),
-			VolumeSize: d.Get(worker + ".volumesize").(string),
-			VolumeType: d.Get(worker + ".volumetype").(string),
-		}
-	}
-	return resultWorkers
-}
 
-func getAWSWorkers(d *schema.ResourceData) []gardner_types.AWSWorker {
-	numWorkers := d.Get("worker.#").(int)
-	resultWorkers := make([]gardner_types.AWSWorker, numWorkers)
-	for i := 0; i < numWorkers; i++ {
-		var worker = "worker." + strconv.Itoa(i)
-		resultWorkers[i] = gardner_types.AWSWorker{
-			Worker:     createGardenWorker(worker, d),
-			VolumeSize: d.Get(worker + ".volumesize").(string),
-			VolumeType: d.Get(worker + ".volumetype").(string),
-		}
-	}
-	return resultWorkers
-}
 func createGardenWorker(workerindex string, d *schema.ResourceData) gardner_types.Worker {
 	return gardner_types.Worker{
 		Name:          d.Get(workerindex + ".name").(string),
@@ -147,29 +121,4 @@ func createGardenWorker(workerindex string, d *schema.ResourceData) gardner_type
 			IntVal: int32(d.Get(workerindex + ".maxunavailable").(int)),
 		},
 	}
-}
-func createGCPSpec(spec gardner_types.ShootSpec, d *schema.ResourceData, secretBinding string) gardner_types.ShootSpec {
-	spec.Cloud.SecretBindingRef.Name = secretBinding
-	spec.Cloud.GCP = &gardner_types.GCPCloud{
-		Networks: gardner_types.GCPNetworks{
-			Workers: []gardencorev1alpha1.CIDR{"10.250.0.0/19"}, // TODO replace hardcoded
-		},
-		Workers: getGCPWorkers(d),
-		Zones:   getZones(d),
-	}
-	return spec
-}
-
-func createAWSSpec(spec gardner_types.ShootSpec, d *schema.ResourceData, secretBinding string) gardner_types.ShootSpec {
-	spec.Cloud.SecretBindingRef.Name = secretBinding
-	spec.Cloud.AWS = &gardner_types.AWSCloud{
-		Networks: gardner_types.AWSNetworks{
-			Workers:  []gardencorev1alpha1.CIDR{"10.250.0.0/19"}, // TODO replace hardcoded
-			Internal: []gardencorev1alpha1.CIDR{"10.250.112.0/22"},
-			Public:   []gardencorev1alpha1.CIDR{"10.250.96.0/22"},
-		},
-		Workers: getAWSWorkers(d),
-		Zones:   getZones(d),
-	}
-	return spec
 }

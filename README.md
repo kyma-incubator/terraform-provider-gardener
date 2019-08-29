@@ -19,16 +19,17 @@ This PoC contains a terraform provider that is meant to be executed by the terra
     ```bash
     go build -o terraform-provider-gardener
     ```
-3. Move the output binary from the previous step to "$HOME/.terraform.d/plugins" folder
+3. Move the gardener provider binary into the terraform plugins folder*.
+    >\* See https://www.terraform.io/docs/plugins/basics.html#installing-plugins for more information.
 4. Go to the provider example folder
     ```bash
-    cd example/<provider>
+    cd examples/<provider>
     ```
 5. Edit the `main.tf` file providing the required gardener configuration:
     - Gardener project name
     - Gardener secret for the choosen cloud provider(s).
     - Path to the gardener kubeconfig.
-    > NOTE: To obtain gardener configurations visit the gardener dashboard
+    > NOTE: To obtain the gardener secret and kubeconfig visit the gardener dashboard.
 6. Initialise terraform:
     ```bash
     terraform init

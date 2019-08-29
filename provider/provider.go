@@ -1,14 +1,16 @@
-package gardener
+package provider
 
 import (
 	"github.com/hashicorp/terraform/helper/mutexkv"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/kyma-incubator/terraform-provider-gardener/client"
+	"github.com/kyma-incubator/terraform-provider-gardener/shoot"
 )
 
 // Global MutexKV
 var mutexKV = mutexkv.NewMutexKV()
 
-func Provider() *schema.Provider {
+func New() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"profile": {
@@ -48,24 +50,24 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"gardener_gcp_shoot": resourceGCPShoot(),
-			"gardener_aws_shoot": resourceAWSShoot(),
+			"gardener_gcp_shoot": shoot.GCPShoot(),
+			"gardener_aws_shoot": shoot.AWSShoot(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
 }
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	SecretBindings := &Bindings{
+	SecretBindings := &client.Bindings{
 		AwsSecretBinding:       d.Get("aws_secret_binding").(string),
 		GcpSecretBinding:       d.Get("gcp_secret_binding").(string),
 		AzureSecretBinding:     d.Get("azure_secret_binding").(string),
 		OpenStackSecretBinding: d.Get("openstack_secret_binding").(string),
 		AliCloudSecretBinding:  d.Get("alicloud_secret_binding").(string),
 	}
-	config := Config{
+	config := &client.Config{
 		Profile:        d.Get("profile").(string),
 		KubePath:       d.Get("kube_path").(string),
 		SecretBindings: SecretBindings,
 	}
-	return config.Client()
+	return client.New(config)
 }
