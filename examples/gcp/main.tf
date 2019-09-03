@@ -8,6 +8,7 @@ resource "gardener_gcp_shoot" "my-server" {
   name              = "tf-gardener-gcp"
   region            = "europe-west3"
   zones             = ["europe-west3-b"]
+  workerscidr       = ["10.250.0.0/19"]
   kubernetesversion = "1.15.2"
   worker {
     name           = "cpu-worker"
