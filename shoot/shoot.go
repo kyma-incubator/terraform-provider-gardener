@@ -84,21 +84,19 @@ func createCRD(d *schema.ResourceData, client *client.Client, provider string) *
 		spec = createGCPSpec(spec, d, client.SecretBindings.GcpSecretBinding)
 	case aws:
 		spec = createAWSSpec(spec, d, client.SecretBindings.AwsSecretBinding)
-		var cidr  = gardencorev1alpha1.CIDR(d.Get("vpccidr").(string))
+		var cidr = gardencorev1alpha1.CIDR(d.Get("vpccidr").(string))
 		spec.Cloud.AWS.Networks.VPC.CIDR = &cidr
 	case azure:
 		spec = createAzureSpec(spec, d, client.SecretBindings.AzureSecretBinding)
-		var cidr  = gardencorev1alpha1.CIDR(d.Get("vnetcidr").(string))
+		var cidr = gardencorev1alpha1.CIDR(d.Get("vnetcidr").(string))
 		spec.Cloud.Azure.Networks.VNet.CIDR = &cidr
 	}
-	//TODO check if secret binding is empty then return error
-	shoot := &gardner_types.Shoot{
+
+	return &gardner_types.Shoot{
 		TypeMeta:   meta_v1.TypeMeta{Kind: "Shoot", APIVersion: "garden.sapcloud.io/v1beta1"},
 		ObjectMeta: meta_v1.ObjectMeta{Name: name, Namespace: client.NameSpace},
 		Spec:       spec,
 	}
-	gardner_types.SetDefaults_Shoot(shoot)
-	return shoot
 
 }
 
@@ -134,4 +132,3 @@ func createGardenWorker(workerindex string, d *schema.ResourceData) gardner_type
 		},
 	}
 }
-
