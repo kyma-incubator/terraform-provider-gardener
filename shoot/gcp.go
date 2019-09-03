@@ -3,7 +3,6 @@ package shoot
 import (
 	"strconv"
 
-	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -27,6 +26,13 @@ func GCPShoot() *schema.Resource {
 			},
 			"kubernetesversion": &schema.Schema{
 				Type:     schema.TypeString,
+				Required: true,
+			},
+			"workerscidr": &schema.Schema{
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 				Required: true,
 			},
 			"zones": &schema.Schema{
@@ -91,7 +97,7 @@ func createGCPSpec(spec gardener_types.ShootSpec, d *schema.ResourceData, secret
 	spec.Cloud.SecretBindingRef.Name = secretBinding
 	spec.Cloud.GCP = &gardener_types.GCPCloud{
 		Networks: gardener_types.GCPNetworks{
-			Workers: []gardencorev1alpha1.CIDR{"10.250.0.0/19"}, // TODO replace hardcoded
+			Workers: getCidrs("workerscidr", d),
 		},
 		Workers: getGCPWorkers(d),
 		Zones:   getZones(d),

@@ -8,6 +8,10 @@ resource "gardener_aws_shoot" "my-server" {
   name              = "tf-gardener-aws"
   region            = "eu-west-1"
   zones             = ["eu-west-1a"]
+  workerscidr       = ["10.250.0.0/19"]
+  internalscidr     = ["10.250.112.0/22"]
+  publicscidr       = ["10.250.96.0/22"]
+  vpccidr = "10.250.112.0/16"
   kubernetesversion = "1.15.2"
   worker {
     name           = "cpu-worker"
