@@ -66,7 +66,6 @@ func createCRD(d *schema.ResourceData, client *client.Client, provider string) *
 	var internal gardencorev1alpha1.CIDR = "10.250.112.0/22" // TODO replace hardcoded
 	var cidr gardencorev1alpha1.CIDR = "10.250.112.0/16"
 	name := d.Get("name").(string)
-	domain := name + "." + client.DNSBase
 	allowPrivilegedContainers := true
 	spec := gardner_types.ShootSpec{
 		Cloud: gardner_types.Cloud{
@@ -77,9 +76,6 @@ func createCRD(d *schema.ResourceData, client *client.Client, provider string) *
 			Version:                   d.Get("kubernetesversion").(string),
 			AllowPrivilegedContainers: &allowPrivilegedContainers,
 		},
-		DNS: gardner_types.DNS{
-			Domain: &domain,
-		},
 	}
 	switch provider {
 	case gcp:
@@ -88,6 +84,9 @@ func createCRD(d *schema.ResourceData, client *client.Client, provider string) *
 	case aws:
 		spec = createAWSSpec(spec, d, client.SecretBindings.AwsSecretBinding)
 		spec.Cloud.AWS.Networks.VPC.CIDR = &cidr
+	case azure:
+		spec = createAzureSpec(spec, d, client.SecretBindings.AzureSecretBinding)
+		spec.Cloud.Azure.Networks.VNet.CIDR = &cidr
 	}
 	//TODO check if secret binding is empty then return error
 	return &gardner_types.Shoot{

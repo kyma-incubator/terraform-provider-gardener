@@ -50,8 +50,9 @@ func New() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"gardener_gcp_shoot": shoot.GCPShoot(),
-			"gardener_aws_shoot": shoot.AWSShoot(),
+			"gardener_gcp_shoot":   shoot.GCPShoot(),
+			"gardener_aws_shoot":   shoot.AWSShoot(),
+			"gardener_azure_shoot": shoot.AzureShoot(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
