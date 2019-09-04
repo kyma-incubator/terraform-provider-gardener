@@ -3,7 +3,6 @@ package shoot
 import (
 	"strconv"
 
-	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -29,7 +28,32 @@ func AWSShoot() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"vpccidr": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"zones": &schema.Schema{
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Required: true,
+			},
+			"workerscidr": &schema.Schema{
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Required: true,
+			},
+			"internalscidr": &schema.Schema{
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Required: true,
+			},
+			"publicscidr": &schema.Schema{
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -91,9 +115,9 @@ func createAWSSpec(spec gardener_types.ShootSpec, d *schema.ResourceData, secret
 	spec.Cloud.SecretBindingRef.Name = secretBinding
 	spec.Cloud.AWS = &gardener_types.AWSCloud{
 		Networks: gardener_types.AWSNetworks{
-			Workers:  []gardencorev1alpha1.CIDR{"10.250.0.0/19"}, // TODO replace hardcoded
-			Internal: []gardencorev1alpha1.CIDR{"10.250.112.0/22"},
-			Public:   []gardencorev1alpha1.CIDR{"10.250.96.0/22"},
+			Workers:  getCidrs("workerscidr", d),
+			Internal: getCidrs("internalscidr", d),
+			Public:   getCidrs("publicscidr", d),
 		},
 		Workers: getAWSWorkers(d),
 		Zones:   getZones(d),

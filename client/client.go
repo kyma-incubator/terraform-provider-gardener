@@ -31,7 +31,6 @@ func New(c *Config) (interface{}, error) {
 	}
 	client := &Client{
 		NameSpace:         "garden-" + c.Profile,
-		DNSBase:           c.Profile + ".shoot.canary.k8s-hana.ondemand.com", // TODO remove hardcoded
 		GardenerClientSet: clientset,
 		SecretBindings:    c.SecretBindings,
 	}

@@ -29,6 +29,14 @@ func AzureShoot() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"workercidr": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"vnetcidr": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"worker": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
@@ -82,10 +90,9 @@ func resourceAzureServerUpdate(d *schema.ResourceData, m interface{}) error {
 
 func createAzureSpec(spec gardener_types.ShootSpec, d *schema.ResourceData, secretBinding string) gardener_types.ShootSpec {
 	spec.Cloud.SecretBindingRef.Name = secretBinding
-	var worker gardencorev1alpha1.CIDR = "10.250.112.0/22" // TODO replace hardcoded
 	spec.Cloud.Azure = &gardener_types.AzureCloud{
 		Networks: gardener_types.AzureNetworks{
-			Workers: worker, 
+			Workers: gardencorev1alpha1.CIDR(d.Get("workercidr").(string)),
 		},
 		Workers: getAzureWorkers(d),
 	}
