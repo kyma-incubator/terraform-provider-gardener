@@ -5,6 +5,8 @@ import (
 
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardner_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
+
+	//"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/kyma-incubator/terraform-provider-gardener/client"
 
@@ -31,11 +33,12 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
 	name := d.Get("name").(string)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	_, err := shoots.Get(name, meta_v1.GetOptions{})
+	shoot, err := shoots.Get(name, meta_v1.GetOptions{})
 	if err != nil {
 		d.SetId("")
 		return err
 	}
+
 	d.SetId(name)
 	return nil
 }
@@ -59,7 +62,6 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	name := d.Get("name").(string)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
 	shoots.Delete(name, &meta_v1.DeleteOptions{})
-
 	d.SetId("")
 	return nil
 }
@@ -91,10 +93,11 @@ func createCRD(d *schema.ResourceData, client *client.Client, provider string) *
 		var cidr = gardencorev1alpha1.CIDR(d.Get("vnetcidr").(string))
 		spec.Cloud.Azure.Networks.VNet.CIDR = &cidr
 	}
-
+	annotations := make(map[string]string)
+	annotations["confirmation.garden.sapcloud.io/deletion"] = "true"
 	return &gardner_types.Shoot{
 		TypeMeta:   meta_v1.TypeMeta{Kind: "Shoot", APIVersion: "garden.sapcloud.io/v1beta1"},
-		ObjectMeta: meta_v1.ObjectMeta{Name: name, Namespace: client.NameSpace},
+		ObjectMeta: meta_v1.ObjectMeta{Name: name, Namespace: client.NameSpace, Annotations: annotations},
 		Spec:       spec,
 	}
 
