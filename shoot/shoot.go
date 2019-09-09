@@ -33,7 +33,7 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
 	name := d.Get("name").(string)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	shoot, err := shoots.Get(name, meta_v1.GetOptions{})
+	_, err := shoots.Get(name, meta_v1.GetOptions{})
 	if err != nil {
 		d.SetId("")
 		return err
