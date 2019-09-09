@@ -2,9 +2,12 @@ package shoot
 
 import (
 	"fmt"
+	"strings"
 
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardner_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
+
+	//pkgApi "k8s.io/apimachinery/pkg/types"
 
 	//"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -48,7 +51,10 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}, provider string
 	name := d.Get("name").(string)
 	d.SetId(name)
 	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	shoot, err := shoots.Update(createCRD(d, client, provider))
+	shoot, err := shoots.Get(name, meta_v1.GetOptions{})
+	//spec2 := createGCPSpec(spec, d, client.SecretBindings.GcpSecretBinding)
+	shoot, err = GetUpdatedSpec(d, shoot)
+	shoot, err = shoots.Update(shoot)
 	if err != nil {
 		d.SetId("")
 		return err
@@ -134,4 +140,42 @@ func createGardenWorker(workerindex string, d *schema.ResourceData) gardner_type
 			IntVal: int32(d.Get(workerindex + ".maxunavailable").(int)),
 		},
 	}
+}
+func flattenShoot(d *schema.ResourceData, shoot *gardner_types.Shoot) error {
+	d.Set("name", shoot.Name)
+	i := strings.Index(shoot.Namespace, "-")
+	if i > -1 {
+		profile := shoot.Namespace[i+1:]
+		d.Set("profile", profile)
+	} else {
+		err := fmt.Errorf("Unexpected Namespace format")
+		return err
+	}
+	flattenSpec(d, &shoot.Spec)
+	return nil
+}
+func flattenSpec(d *schema.ResourceData, spec *gardner_types.ShootSpec) {
+	cloud := spec.Cloud
+	d.Set("region", cloud.Region)
+	d.Set("kubernetesversion ", spec.Kubernetes.Version)
+	if cloud.GCP != nil {
+		d.Set("gcp_secret_binding", cloud.SecretBindingRef.Name)
+		d.Set("zones", cloud.GCP.Zones)
+		d.Set("workerscidr", cloud.GCP.Networks.Workers)
+	}
+}
+func GetUpdatedSpec(d *schema.ResourceData, shoot *gardner_types.Shoot) (*gardner_types.Shoot, error) {
+	if d.HasChange("name") {
+		return nil, fmt.Errorf("Can not change the name")
+	}
+	if d.HasChange("region") {
+		shoot.Spec.Cloud.Region = d.Get("region").(string)
+	}
+	if d.HasChange("kubernetesversion") {
+		shoot.Spec.Kubernetes.Version = d.Get("kubernetesversion").(string)
+	}
+	if shoot.Spec.Cloud.GCP != nil {
+		shoot.Spec.Cloud.GCP = SetGCPChanges(d, shoot.Spec.Cloud.GCP)
+	}
+	return shoot, nil
 }

@@ -118,3 +118,17 @@ func getGCPWorkers(d *schema.ResourceData) []gardener_types.GCPWorker {
 	}
 	return resultWorkers
 }
+
+func SetGCPChanges(d *schema.ResourceData, gcpSpec *gardener_types.GCPCloud) *gardener_types.GCPCloud {
+
+	if d.HasChange("workerscidr") {
+		gcpSpec.Networks.Workers = getCidrs("workerscidr", d)
+	}
+	
+	gcpSpec.Workers = getGCPWorkers(d)
+	
+	if d.HasChange("zones") {
+		gcpSpec.Zones = getZones(d)
+	}
+	return gcpSpec
+}
