@@ -162,7 +162,24 @@ func flattenSpec(d *schema.ResourceData, spec *gardner_types.ShootSpec) {
 		d.Set("gcp_secret_binding", cloud.SecretBindingRef.Name)
 		d.Set("zones", cloud.GCP.Zones)
 		d.Set("workerscidr", cloud.GCP.Networks.Workers)
+		SetGCPWorkersFromShoot(d, cloud.GCP.Workers)
 	}
+	if cloud.AWS != nil {
+		d.Set("aws_secret_binding", cloud.SecretBindingRef.Name)
+		d.Set("zones", cloud.AWS.Zones)
+		d.Set("workerscidr", cloud.AWS.Networks.Workers)
+		d.Set("internalscidr", cloud.AWS.Networks.Internal)
+		d.Set("publicscidr", cloud.AWS.Networks.Public)
+		d.Set("vpccidr", cloud.AWS.Networks.VPC.CIDR)
+		SetAWSWorkersFromShoot(d, cloud.AWS.Workers)
+	}
+	if cloud.Azure != nil {
+		d.Set("azure_secret_binding", cloud.SecretBindingRef.Name)
+		d.Set("workerscidr", cloud.AWS.Networks.Workers)
+		d.Set("vnetcidr", cloud.Azure.Networks.VNet.CIDR)
+		SetAzureWorkersFromShoot(d, cloud.Azure.Workers)
+	}
+
 }
 func GetUpdatedSpec(d *schema.ResourceData, shoot *gardner_types.Shoot) (*gardner_types.Shoot, error) {
 	if d.HasChange("name") {
@@ -176,6 +193,12 @@ func GetUpdatedSpec(d *schema.ResourceData, shoot *gardner_types.Shoot) (*gardne
 	}
 	if shoot.Spec.Cloud.GCP != nil {
 		shoot.Spec.Cloud.GCP = SetGCPChanges(d, shoot.Spec.Cloud.GCP)
+	}
+	if shoot.Spec.Cloud.Azure != nil {
+		shoot.Spec.Cloud.Azure = SetAzureChanges(d, shoot.Spec.Cloud.Azure)
+	}
+	if shoot.Spec.Cloud.AWS != nil {
+		shoot.Spec.Cloud.AWS = SetAWSChanges(d, shoot.Spec.Cloud.AWS)
 	}
 	return shoot, nil
 }

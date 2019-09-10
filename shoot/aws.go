@@ -3,6 +3,7 @@ package shoot
 import (
 	"strconv"
 
+	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -137,4 +138,60 @@ func getAWSWorkers(d *schema.ResourceData) []gardener_types.AWSWorker {
 		}
 	}
 	return resultWorkers
+}
+func SetAWSChanges(d *schema.ResourceData, awsSpec *gardener_types.AWSCloud) *gardener_types.AWSCloud {
+
+	if d.HasChange("workerscidr") {
+		awsSpec.Networks.Workers = getCidrs("workerscidr", d)
+	}
+	if d.HasChange("internalscidr") {
+		awsSpec.Networks.Internal = getCidrs("internalscidr", d)
+	}
+	if d.HasChange("publicscidr") {
+		awsSpec.Networks.Public = getCidrs("publicscidr", d)
+	}
+	var cidr = gardencorev1alpha1.CIDR(d.Get("vpccidr").(string))
+	awsSpec.Networks.VPC.CIDR = &cidr
+	awsSpec.Workers = getAWSWorkers(d)
+
+	if d.HasChange("zones") {
+		awsSpec.Zones = getZones(d)
+	}
+	return awsSpec
+}
+func SetAWSWorkersFromShoot(d *schema.ResourceData, workersarray []gardener_types.AWSWorker) {
+
+	if len(workersarray) > 0 {
+		workers := make([]interface{}, len(workersarray))
+		for i, v := range workersarray {
+			m := map[string]interface{}{}
+
+			if v.Name != "" {
+				m["name"] = v.Name
+			}
+			if v.MachineType != "" {
+				m["machine_type"] = v.MachineType
+			}
+			if v.AutoScalerMin != 0 {
+				m["auto_scaler_min"] = v.AutoScalerMin
+			}
+			if v.AutoScalerMax != 0 {
+				m["auto_scaler_max"] = v.AutoScalerMax
+			}
+			if v.MaxSurge != nil {
+				m["max_surge"] = v.MaxSurge.IntValue()
+			}
+			if v.MaxUnavailable != nil {
+				m["max_unavailable"] = v.MaxUnavailable.IntValue()
+			}
+			if len(v.VolumeType) > 0 {
+				m["volume_type"] = v.VolumeType
+			}
+			if len(v.VolumeSize) > 0 {
+				m["volume_size"] = v.VolumeSize
+			}
+			workers[i] = m
+		}
+		d.Set("worker", workers)
+	}
 }
