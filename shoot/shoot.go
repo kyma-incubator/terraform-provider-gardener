@@ -86,10 +86,10 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
 	err := shootsClient.Delete(name, &meta_v1.DeleteOptions{})
 	if err != nil {
-		log.Printf("[INFO] Error while Deleting shoot ",name)
+		log.Printf("[INFO] Error while Deleting shoot " + name)
 		return err
 	}
-	 resource.Retry(d.Timeout(schema.TimeoutDelete),
+	resource.Retry(d.Timeout(schema.TimeoutDelete),
 		waitForShootDeleteFunc(shootsClient, name))
 	d.SetId("")
 	return nil
