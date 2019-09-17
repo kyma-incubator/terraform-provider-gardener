@@ -120,7 +120,7 @@ func getGCPWorkers(d *schema.ResourceData) []gardener_types.GCPWorker {
 	return resultWorkers
 }
 
-func updateGCPSpec(d *schema.ResourceData, gcpSpec *gardener_types.GCPCloud){
+func updateGCPSpec(d *schema.ResourceData, gcpSpec *gardener_types.GCPCloud) {
 
 	if d.HasChange("workerscidr") {
 		gcpSpec.Networks.Workers = getCidrs("workerscidr", d)
