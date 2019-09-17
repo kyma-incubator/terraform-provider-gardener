@@ -231,7 +231,7 @@
   version = "v0.5.1"
 
 [[projects]]
-  digest = "1:8af4f2ec60d404a98b4b5649a15a6dd0aa7aec0a9f6071e75dadf65307ac35b4"
+  digest = "1:436774a4a3c1534a466233d24da678777ce47daa5fd9bb2d8dad89831f2c5d67"
   name = "github.com/hashicorp/go-getter"
   packages = [
     ".",

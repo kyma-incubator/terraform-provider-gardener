@@ -24,6 +24,10 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}, provider string
 	d.SetId(name)
 	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
 	shoot, err := shootsClient.Create(createCRD(d, client, provider))
+	if err != nil {
+		log.Printf("[INFO] Error while creating shoot: %#v", shoot)
+		return err
+	}
 	resource.Retry(d.Timeout(schema.TimeoutCreate),
 		waitForShootFunc(shootsClient, name))
 	if err != nil {
@@ -40,6 +44,7 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
 	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
 	if err != nil {
+		log.Printf("[INFO] Error while retrieving shoot: %#v", shoot)
 		d.SetId("")
 		return err
 	}
@@ -54,9 +59,18 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}, provider string
 	d.SetId(name)
 	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
 	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
+	if err != nil {
+		log.Printf("[INFO] Error while retrieving shoot: %#v", shoot)
+		return err
+	}
 	err = updateShootSpecFromConfig(d, shoot)
+	if err != nil {
+		log.Printf("[INFO] Error while updating shoot spec: %#v", shoot)
+		return err
+	}
 	shoot, err = shootsClient.Update(shoot)
 	if err != nil {
+		log.Printf("[INFO] Error while updating shoot cluster: %#v", shoot)
 		d.SetId("")
 		return err
 	}
@@ -70,12 +84,13 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
 	name := d.Get("name").(string)
 	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
-	shootsClient.Delete(name, &meta_v1.DeleteOptions{})
-	err := resource.Retry(d.Timeout(schema.TimeoutDelete),
-		waitForShootDeleteFunc(shootsClient, name))
+	err := shootsClient.Delete(name, &meta_v1.DeleteOptions{})
 	if err != nil {
+		log.Printf("[INFO] Error while Deleting shoot ",name)
 		return err
 	}
+	 resource.Retry(d.Timeout(schema.TimeoutDelete),
+		waitForShootDeleteFunc(shootsClient, name))
 	d.SetId("")
 	return nil
 }
