@@ -54,7 +54,7 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}, provider string
 	d.SetId(name)
 	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
 	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
-	shoot, err = updateShootSpecFromConfig(d, shoot)
+	err = updateShootSpecFromConfig(d, shoot)
 	shoot, err = shootsClient.Update(shoot)
 	if err != nil {
 		d.SetId("")
@@ -208,9 +208,9 @@ func resourceServerExists(d *schema.ResourceData, m interface{}) (bool, error) {
 	return true, err
 }
 
-func updateShootSpecFromConfig(d *schema.ResourceData, shoot *gardner_types.Shoot) (*gardner_types.Shoot, error) {
+func updateShootSpecFromConfig(d *schema.ResourceData, shoot *gardner_types.Shoot) error {
 	if d.HasChange("name") {
-		return nil, fmt.Errorf("Can not change the name")
+		return fmt.Errorf("Can not change the name")
 	}
 	if d.HasChange("region") {
 		shoot.Spec.Cloud.Region = d.Get("region").(string)
@@ -219,15 +219,15 @@ func updateShootSpecFromConfig(d *schema.ResourceData, shoot *gardner_types.Shoo
 		shoot.Spec.Kubernetes.Version = d.Get("kubernetesversion").(string)
 	}
 	if shoot.Spec.Cloud.GCP != nil {
-		shoot.Spec.Cloud.GCP = updateGCPSpec(d, shoot.Spec.Cloud.GCP)
+		updateGCPSpec(d, shoot.Spec.Cloud.GCP)
 	}
 	if shoot.Spec.Cloud.Azure != nil {
-		shoot.Spec.Cloud.Azure = updateAzureSpec(d, shoot.Spec.Cloud.Azure)
+		updateAzureSpec(d, shoot.Spec.Cloud.Azure)
 	}
 	if shoot.Spec.Cloud.AWS != nil {
-		shoot.Spec.Cloud.AWS = updateAWSSpec(d, shoot.Spec.Cloud.AWS)
+		updateAWSSpec(d, shoot.Spec.Cloud.AWS)
 	}
-	return shoot, nil
+	return nil
 }
 
 func waitForShootFunc(shootsClient gardner_apis.ShootInterface, name string) resource.RetryFunc {

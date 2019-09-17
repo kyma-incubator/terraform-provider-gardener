@@ -140,7 +140,7 @@ func getAWSWorkers(d *schema.ResourceData) []gardener_types.AWSWorker {
 	}
 	return resultWorkers
 }
-func updateAWSSpec(d *schema.ResourceData, awsSpec *gardener_types.AWSCloud) *gardener_types.AWSCloud {
+func updateAWSSpec(d *schema.ResourceData, awsSpec *gardener_types.AWSCloud) {
 
 	if d.HasChange("workerscidr") {
 		awsSpec.Networks.Workers = getCidrs("workerscidr", d)
@@ -158,7 +158,6 @@ func updateAWSSpec(d *schema.ResourceData, awsSpec *gardener_types.AWSCloud) *ga
 	if d.HasChange("zones") {
 		awsSpec.Zones = getZones(d)
 	}
-	return awsSpec
 }
 func flattenAWSWorkers(d *schema.ResourceData, workersarray []gardener_types.AWSWorker) {
 

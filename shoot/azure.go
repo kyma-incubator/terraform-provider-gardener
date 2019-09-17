@@ -113,7 +113,7 @@ func getAzureWorkers(d *schema.ResourceData) []gardener_types.AzureWorker {
 	}
 	return resultWorkers
 }
-func updateAzureSpec(d *schema.ResourceData, azureSpec *gardener_types.AzureCloud) *gardener_types.AzureCloud {
+func updateAzureSpec(d *schema.ResourceData, azureSpec *gardener_types.AzureCloud) {
 
 	if d.HasChange("workerscidr") {
 		azureSpec.Networks.Workers = gardencorev1alpha1.CIDR(d.Get("workercidr").(string))
@@ -121,8 +121,6 @@ func updateAzureSpec(d *schema.ResourceData, azureSpec *gardener_types.AzureClou
 	var cidr = gardencorev1alpha1.CIDR(d.Get("vnetcidr").(string))
 	azureSpec.Networks.VNet.CIDR = &cidr
 	azureSpec.Workers = getAzureWorkers(d)
-
-	return azureSpec
 }
 func flattenAzureWorkers(d *schema.ResourceData, workersarray []gardener_types.AzureWorker) {
 
