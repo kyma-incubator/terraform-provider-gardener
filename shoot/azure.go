@@ -14,6 +14,7 @@ func AzureShoot() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAzureServerCreate,
 		Read:   resourceServerRead,
+		Exists: resourceServerExists,
 		Update: resourceAzureServerUpdate,
 		Delete: resourceServerDelete,
 		Schema: map[string]*schema.Schema{
@@ -112,7 +113,7 @@ func getAzureWorkers(d *schema.ResourceData) []gardener_types.AzureWorker {
 	}
 	return resultWorkers
 }
-func SetAzureChanges(d *schema.ResourceData, azureSpec *gardener_types.AzureCloud) *gardener_types.AzureCloud {
+func updateAzureSpec(d *schema.ResourceData, azureSpec *gardener_types.AzureCloud) *gardener_types.AzureCloud {
 
 	if d.HasChange("workerscidr") {
 		azureSpec.Networks.Workers = gardencorev1alpha1.CIDR(d.Get("workercidr").(string))
@@ -123,7 +124,7 @@ func SetAzureChanges(d *schema.ResourceData, azureSpec *gardener_types.AzureClou
 
 	return azureSpec
 }
-func SetAzureWorkersFromShoot(d *schema.ResourceData, workersarray []gardener_types.AzureWorker) {
+func flattenAzureWorkers(d *schema.ResourceData, workersarray []gardener_types.AzureWorker) {
 
 	if len(workersarray) > 0 {
 		workers := make([]interface{}, len(workersarray))

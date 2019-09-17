@@ -14,6 +14,7 @@ func AWSShoot() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAWSServerCreate,
 		Read:   resourceServerRead,
+		Exists: resourceServerExists,
 		Update: resourceAWSServerUpdate,
 		Delete: resourceServerDelete,
 		Schema: map[string]*schema.Schema{
@@ -139,7 +140,7 @@ func getAWSWorkers(d *schema.ResourceData) []gardener_types.AWSWorker {
 	}
 	return resultWorkers
 }
-func SetAWSChanges(d *schema.ResourceData, awsSpec *gardener_types.AWSCloud) *gardener_types.AWSCloud {
+func updateAWSSpec(d *schema.ResourceData, awsSpec *gardener_types.AWSCloud) *gardener_types.AWSCloud {
 
 	if d.HasChange("workerscidr") {
 		awsSpec.Networks.Workers = getCidrs("workerscidr", d)
@@ -159,7 +160,7 @@ func SetAWSChanges(d *schema.ResourceData, awsSpec *gardener_types.AWSCloud) *ga
 	}
 	return awsSpec
 }
-func SetAWSWorkersFromShoot(d *schema.ResourceData, workersarray []gardener_types.AWSWorker) {
+func flattenAWSWorkers(d *schema.ResourceData, workersarray []gardener_types.AWSWorker) {
 
 	if len(workersarray) > 0 {
 		workers := make([]interface{}, len(workersarray))

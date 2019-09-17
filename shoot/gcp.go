@@ -13,6 +13,7 @@ func GCPShoot() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGCPServerCreate,
 		Read:   resourceServerRead,
+		Exists: resourceServerExists,
 		Update: resourceGCPServerUpdate,
 		Delete: resourceServerDelete,
 		Schema: map[string]*schema.Schema{
@@ -119,7 +120,7 @@ func getGCPWorkers(d *schema.ResourceData) []gardener_types.GCPWorker {
 	return resultWorkers
 }
 
-func SetGCPChanges(d *schema.ResourceData, gcpSpec *gardener_types.GCPCloud) *gardener_types.GCPCloud {
+func updateGCPSpec(d *schema.ResourceData, gcpSpec *gardener_types.GCPCloud) *gardener_types.GCPCloud {
 
 	if d.HasChange("workerscidr") {
 		gcpSpec.Networks.Workers = getCidrs("workerscidr", d)
@@ -133,7 +134,7 @@ func SetGCPChanges(d *schema.ResourceData, gcpSpec *gardener_types.GCPCloud) *ga
 	return gcpSpec
 }
 
-func SetGCPWorkersFromShoot(d *schema.ResourceData, workersarray []gardener_types.GCPWorker) {
+func flattenGCPWorkers(d *schema.ResourceData, workersarray []gardener_types.GCPWorker) {
 
 	if len(workersarray) > 0 {
 		workers := make([]interface{}, len(workersarray))

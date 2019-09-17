@@ -2,18 +2,18 @@ package shoot
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardner_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
+	gardner_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
 
-	//pkgApi "k8s.io/apimachinery/pkg/types"
-
-	//"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/kyma-incubator/terraform-provider-gardener/client"
 
-	//"k8s.io/apimachinery/pkg/api/errors"
+	"github.com/hashicorp/terraform/helper/resource"
+	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	util "k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -22,8 +22,10 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}, provider string
 	client := m.(*client.Client)
 	name := d.Get("name").(string)
 	d.SetId(name)
-	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	shoot, err := shoots.Create(createCRD(d, client, provider))
+	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
+	shoot, err := shootsClient.Create(createCRD(d, client, provider))
+	resource.Retry(d.Timeout(schema.TimeoutCreate),
+		waitForShootFunc(shootsClient, name))
 	if err != nil {
 		d.SetId("")
 		return err
@@ -35,13 +37,13 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}, provider string
 func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
 	name := d.Get("name").(string)
-	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	_, err := shoots.Get(name, meta_v1.GetOptions{})
+	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
+	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
 	if err != nil {
 		d.SetId("")
 		return err
 	}
-
+	flattenShoot(d, shoot)
 	d.SetId(name)
 	return nil
 }
@@ -50,24 +52,30 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}, provider string
 	client := m.(*client.Client)
 	name := d.Get("name").(string)
 	d.SetId(name)
-	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	shoot, err := shoots.Get(name, meta_v1.GetOptions{})
-	//spec2 := createGCPSpec(spec, d, client.SecretBindings.GcpSecretBinding)
-	shoot, err = GetUpdatedSpec(d, shoot)
-	shoot, err = shoots.Update(shoot)
+	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
+	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
+	shoot, err = updateShootSpecFromConfig(d, shoot)
+	shoot, err = shootsClient.Update(shoot)
 	if err != nil {
 		d.SetId("")
 		return err
 	}
-	fmt.Println(shoot)
+	resource.Retry(d.Timeout(schema.TimeoutCreate),
+		waitForShootFunc(shootsClient, name))
+	log.Printf("[INFO] Submitted updated Shoot: %#v", shoot)
 	return resourceServerRead(d, m)
 }
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
 	name := d.Get("name").(string)
-	shoots := client.GardenerClientSet.Shoots(client.NameSpace)
-	shoots.Delete(name, &meta_v1.DeleteOptions{})
+	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
+	shootsClient.Delete(name, &meta_v1.DeleteOptions{})
+	err := resource.Retry(d.Timeout(schema.TimeoutDelete),
+		waitForShootDeleteFunc(shootsClient, name))
+	if err != nil {
+		return err
+	}
 	d.SetId("")
 	return nil
 }
@@ -162,7 +170,7 @@ func flattenSpec(d *schema.ResourceData, spec *gardner_types.ShootSpec) {
 		d.Set("gcp_secret_binding", cloud.SecretBindingRef.Name)
 		d.Set("zones", cloud.GCP.Zones)
 		d.Set("workerscidr", cloud.GCP.Networks.Workers)
-		SetGCPWorkersFromShoot(d, cloud.GCP.Workers)
+		flattenGCPWorkers(d, cloud.GCP.Workers)
 	}
 	if cloud.AWS != nil {
 		d.Set("aws_secret_binding", cloud.SecretBindingRef.Name)
@@ -171,17 +179,36 @@ func flattenSpec(d *schema.ResourceData, spec *gardner_types.ShootSpec) {
 		d.Set("internalscidr", cloud.AWS.Networks.Internal)
 		d.Set("publicscidr", cloud.AWS.Networks.Public)
 		d.Set("vpccidr", cloud.AWS.Networks.VPC.CIDR)
-		SetAWSWorkersFromShoot(d, cloud.AWS.Workers)
+		flattenAWSWorkers(d, cloud.AWS.Workers)
 	}
 	if cloud.Azure != nil {
 		d.Set("azure_secret_binding", cloud.SecretBindingRef.Name)
-		d.Set("workerscidr", cloud.AWS.Networks.Workers)
+		d.Set("workerscidr", cloud.Azure.Networks.Workers)
 		d.Set("vnetcidr", cloud.Azure.Networks.VNet.CIDR)
-		SetAzureWorkersFromShoot(d, cloud.Azure.Workers)
+		flattenAzureWorkers(d, cloud.Azure.Workers)
 	}
 
 }
-func GetUpdatedSpec(d *schema.ResourceData, shoot *gardner_types.Shoot) (*gardner_types.Shoot, error) {
+
+func resourceServerExists(d *schema.ResourceData, m interface{}) (bool, error) {
+	client := m.(*client.Client)
+	name := d.Id()
+	if name == "" {
+		return false, fmt.Errorf("name is not set")
+	}
+	log.Printf("[INFO] Checking Shoot %s", name)
+	shootsClient := client.GardenerClientSet.Shoots(client.NameSpace)
+	_, err := shootsClient.Get(name, meta_v1.GetOptions{})
+	if err != nil {
+		if statusErr, ok := err.(*errors.StatusError); ok && statusErr.ErrStatus.Code == 404 {
+			return false, nil
+		}
+		log.Printf("[DEBUG] Received error: %#v", err)
+	}
+	return true, err
+}
+
+func updateShootSpecFromConfig(d *schema.ResourceData, shoot *gardner_types.Shoot) (*gardner_types.Shoot, error) {
 	if d.HasChange("name") {
 		return nil, fmt.Errorf("Can not change the name")
 	}
@@ -192,13 +219,59 @@ func GetUpdatedSpec(d *schema.ResourceData, shoot *gardner_types.Shoot) (*gardne
 		shoot.Spec.Kubernetes.Version = d.Get("kubernetesversion").(string)
 	}
 	if shoot.Spec.Cloud.GCP != nil {
-		shoot.Spec.Cloud.GCP = SetGCPChanges(d, shoot.Spec.Cloud.GCP)
+		shoot.Spec.Cloud.GCP = updateGCPSpec(d, shoot.Spec.Cloud.GCP)
 	}
 	if shoot.Spec.Cloud.Azure != nil {
-		shoot.Spec.Cloud.Azure = SetAzureChanges(d, shoot.Spec.Cloud.Azure)
+		shoot.Spec.Cloud.Azure = updateAzureSpec(d, shoot.Spec.Cloud.Azure)
 	}
 	if shoot.Spec.Cloud.AWS != nil {
-		shoot.Spec.Cloud.AWS = SetAWSChanges(d, shoot.Spec.Cloud.AWS)
+		shoot.Spec.Cloud.AWS = updateAWSSpec(d, shoot.Spec.Cloud.AWS)
 	}
 	return shoot, nil
+}
+
+func waitForShootFunc(shootsClient gardner_apis.ShootInterface, name string) resource.RetryFunc {
+	return func() *resource.RetryError {
+		// Query the shoot to get a status update.
+		shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+
+		if shoot.Generation <= shoot.Status.ObservedGeneration {
+			for _, condition := range shoot.Status.Conditions {
+				if condition.Status == gardencorev1alpha1.ConditionProgressing {
+					return resource.RetryableError(fmt.Errorf("Waiting for shoot condition to finish: %s", condition.Type))
+				}
+				if condition.Status == gardencorev1alpha1.ConditionFalse {
+					return resource.NonRetryableError(fmt.Errorf("Shoot condition failed: %s", condition.Message))
+				}
+			}
+
+			if shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStatePending || shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStateProcessing {
+				return resource.RetryableError(fmt.Errorf("Waiting for last operation to finish: %s", shoot.Status.LastOperation.Description))
+			}
+			if shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStateAborted || shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStateError || shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStateFailed {
+				return resource.NonRetryableError(fmt.Errorf("Shoot operation failed: %s", shoot.Status.LastOperation.Description))
+			}
+		} else {
+			return resource.RetryableError(fmt.Errorf("Waiting for rollout to start"))
+		}
+
+		return nil
+	}
+}
+
+func waitForShootDeleteFunc(shootsClient gardner_apis.ShootInterface, name string) resource.RetryFunc {
+	return func() *resource.RetryError {
+		// Query the shoot to get a status update.
+		_, err := shootsClient.Get(name, meta_v1.GetOptions{})
+		if err != nil {
+			if statusErr, ok := err.(*errors.StatusError); ok && statusErr.ErrStatus.Code == 404 {
+				return nil
+			}
+			return resource.NonRetryableError(fmt.Errorf("Cloud not get shoot state: %#v", err))
+		}
+		return resource.RetryableError(fmt.Errorf("Waiting for shoot to be deleted: %s", name))
+	}
 }
