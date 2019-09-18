@@ -39,7 +39,7 @@ Building the provider
 
 Using the provider
 ---------------------------
-After building the provider as stated previously, you should create your terraform config file and run [`terraform init`](https://www.terraform.io/docs/commands/init.html) and Terraform will automatically install the provider.For installation methods, documentation about the provider specific configuration options can be found on the [provider's website](https://www.terraform.io/docs/providers/aws/index.html). After the provider is installed you can apply your configurations usin the command [`terraform apply`](https://www.terraform.io/docs/commands/apply.html).
+After building the provider as stated previously, you should create your terraform config file and run [`terraform init`](https://www.terraform.io/docs/commands/init.html) and Terraform will automatically install the provider.For installation methods. After the provider is installed you can apply your configurations usin the command [`terraform apply`](https://www.terraform.io/docs/commands/apply.html).
 
 Examples of different configurations for different cluster providers could be found in the [examples](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples) folder.
 1. Go to the provider example folder
