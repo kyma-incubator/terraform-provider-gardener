@@ -13,6 +13,7 @@ func GCPShoot() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGCPServerCreate,
 		Read:   resourceServerRead,
+		Exists: resourceServerExists,
 		Update: resourceGCPServerUpdate,
 		Delete: resourceServerDelete,
 		Schema: map[string]*schema.Schema{
@@ -117,4 +118,54 @@ func getGCPWorkers(d *schema.ResourceData) []gardener_types.GCPWorker {
 		}
 	}
 	return resultWorkers
+}
+
+func updateGCPSpec(d *schema.ResourceData, gcpSpec *gardener_types.GCPCloud) {
+
+	if d.HasChange("workerscidr") {
+		gcpSpec.Networks.Workers = getCidrs("workerscidr", d)
+	}
+
+	gcpSpec.Workers = getGCPWorkers(d)
+
+	if d.HasChange("zones") {
+		gcpSpec.Zones = getZones(d)
+	}
+}
+
+func flattenGCPWorkers(d *schema.ResourceData, workersarray []gardener_types.GCPWorker) {
+
+	if len(workersarray) > 0 {
+		workers := make([]interface{}, len(workersarray))
+		for i, v := range workersarray {
+			m := map[string]interface{}{}
+
+			if v.Name != "" {
+				m["name"] = v.Name
+			}
+			if v.MachineType != "" {
+				m["machine_type"] = v.MachineType
+			}
+			if v.AutoScalerMin != 0 {
+				m["auto_scaler_min"] = v.AutoScalerMin
+			}
+			if v.AutoScalerMax != 0 {
+				m["auto_scaler_max"] = v.AutoScalerMax
+			}
+			if v.MaxSurge != nil {
+				m["max_surge"] = v.MaxSurge.IntValue()
+			}
+			if v.MaxUnavailable != nil {
+				m["max_unavailable"] = v.MaxUnavailable.IntValue()
+			}
+			if len(v.VolumeType) > 0 {
+				m["volume_type"] = v.VolumeType
+			}
+			if len(v.VolumeSize) > 0 {
+				m["volume_size"] = v.VolumeSize
+			}
+			workers[i] = m
+		}
+		d.Set("worker", workers)
+	}
 }

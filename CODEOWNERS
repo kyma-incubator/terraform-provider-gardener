@@ -6,6 +6,5 @@
 
 # These are the default owners for the whole content of the `terraform-provider-gardener` repository. The default owners are automatically added as reviewers when you open a pull request, unless different owners are specified in the file.
 * @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
-
 # README.md document
 /README.md @bszwarc

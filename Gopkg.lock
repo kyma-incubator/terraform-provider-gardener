@@ -143,7 +143,7 @@
   version = "v1.7.0"
 
 [[projects]]
-  digest = "1:e90da8e84baf900772a7180a0f5238c2ff12d897fd34a4871c6b871bb44729d9"
+  digest = "1:ea968cfea607cbf677acc7f61591d3a51b909c3cefd7b9d53cedc014cb64f4ae"
   name = "github.com/gardener/gardener"
   packages = [
     "pkg/apis/core",
@@ -231,7 +231,7 @@
   version = "v0.5.1"
 
 [[projects]]
-  digest = "1:3d262ac70f6f9c970031d83c4decf4027209d58e4b3fea3a90de4461295df848"
+  digest = "1:436774a4a3c1534a466233d24da678777ce47daa5fd9bb2d8dad89831f2c5d67"
   name = "github.com/hashicorp/go-getter"
   packages = [
     ".",
@@ -320,7 +320,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:89caa463030933f131d60ee9592c283f5900c3dbee2d7a23b472d44fc356ba47"
+  digest = "1:a8d4f715c2112d612464beaa707a8e7dcf8bfe7440e21b8c46adcd71237b4b14"
   name = "github.com/hashicorp/hcl2"
   packages = [
     "ext/dynblock",
@@ -330,6 +330,7 @@
     "hcl/hclsyntax",
     "hcl/json",
     "hcldec",
+    "hcled",
     "hclparse",
     "hclwrite",
   ]
@@ -350,24 +351,40 @@
   revision = "97b3a9cdfa9349086cfad7ea2fe3165bfe3cbf63"
 
 [[projects]]
-  digest = "1:c6967199b634b9a19683ce4fe539d9341a7324e9a4e78b005d436b7c0f18b641"
+  digest = "1:16ae35b3a854c667baaf55ff5d455c486f7c2baf040a2727f2ef0e4b096b2a95"
+  name = "github.com/hashicorp/logutils"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a335183dfd075f638afcc820c90591ca3c97eba6"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:f2b401c5a3c5a660b900b6b891464aceec7a7b4dc1320d709e0aeb7391b54728"
   name = "github.com/hashicorp/terraform"
   packages = [
     "addrs",
+    "command/format",
     "config",
     "config/hcl2shim",
     "config/module",
     "configs",
+    "configs/configload",
     "configs/configschema",
     "dag",
     "flatmap",
+    "helper/config",
     "helper/didyoumean",
     "helper/hashcode",
     "helper/hilmapstructure",
+    "helper/logging",
     "helper/mutexkv",
     "helper/plugin",
+    "helper/resource",
     "helper/schema",
     "httpclient",
+    "internal/earlyconfig",
+    "internal/initwd",
+    "internal/modsdir",
     "internal/tfplugin5",
     "lang",
     "lang/blocktoattr",
@@ -395,6 +412,14 @@
   pruneopts = "UT"
   revision = "380226f0aaa57db5685f43b824f8bda99acdf00c"
   version = "v0.12.6"
+
+[[projects]]
+  branch = "master"
+  digest = "1:edadaf345cfd25b5e3284ed7e602f910e4c617e80dcb2a355e6c8cd9ece51ab9"
+  name = "github.com/hashicorp/terraform-config-inspect"
+  packages = ["tfconfig"]
+  pruneopts = "UT"
+  revision = "82a99dc22ef46de5d9e0de955ac453674e912a45"
 
 [[projects]]
   branch = "master"
@@ -458,6 +483,14 @@
   pruneopts = "UT"
   revision = "3d22a244be8aa6fb16ac24af0e195c08b7d973aa"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f7fe69581040ed4bb2d5444e3b53088f5c458e2e242e0ae44bd90bc3aa019462"
+  name = "github.com/mitchellh/colorstring"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d06e56a500db4d08c33db0b79461e7c9beafca2d"
 
 [[projects]]
   digest = "1:09ca328575f38b80969ccf857f6d7302f2ce09d53778ea7aaba526cfd2cec739"
@@ -823,7 +856,7 @@
   revision = "24fa4b261c55da65468f2abfdae2b024eef27dfb"
 
 [[projects]]
-  digest = "1:66eb0a8f30c52554ea9ecdd3c03cb48c9cd02d85388d21d1b3f7e93f4fd3611d"
+  digest = "1:a4c72940116bf984021a7846ac751679a844dca8a21804192a2d04d44792b8c3"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -861,6 +894,7 @@
     "stats",
     "status",
     "tap",
+    "test/bufconn",
   ]
   pruneopts = "UT"
   revision = "6eaf6f47437a6b4e2153a190160ef39a92c7eceb"
@@ -994,9 +1028,11 @@
     "github.com/gardener/gardener/pkg/apis/garden/v1beta1",
     "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1",
     "github.com/hashicorp/terraform/helper/mutexkv",
+    "github.com/hashicorp/terraform/helper/resource",
     "github.com/hashicorp/terraform/helper/schema",
     "github.com/hashicorp/terraform/plugin",
     "github.com/hashicorp/terraform/terraform",
+    "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/client-go/tools/clientcmd",

@@ -14,6 +14,7 @@ func AzureShoot() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAzureServerCreate,
 		Read:   resourceServerRead,
+		Exists: resourceServerExists,
 		Update: resourceAzureServerUpdate,
 		Delete: resourceServerDelete,
 		Schema: map[string]*schema.Schema{
@@ -111,4 +112,49 @@ func getAzureWorkers(d *schema.ResourceData) []gardener_types.AzureWorker {
 		}
 	}
 	return resultWorkers
+}
+func updateAzureSpec(d *schema.ResourceData, azureSpec *gardener_types.AzureCloud) {
+
+	if d.HasChange("workerscidr") {
+		azureSpec.Networks.Workers = gardencorev1alpha1.CIDR(d.Get("workercidr").(string))
+	}
+	var cidr = gardencorev1alpha1.CIDR(d.Get("vnetcidr").(string))
+	azureSpec.Networks.VNet.CIDR = &cidr
+	azureSpec.Workers = getAzureWorkers(d)
+}
+func flattenAzureWorkers(d *schema.ResourceData, workersarray []gardener_types.AzureWorker) {
+
+	if len(workersarray) > 0 {
+		workers := make([]interface{}, len(workersarray))
+		for i, v := range workersarray {
+			m := map[string]interface{}{}
+
+			if v.Name != "" {
+				m["name"] = v.Name
+			}
+			if v.MachineType != "" {
+				m["machine_type"] = v.MachineType
+			}
+			if v.AutoScalerMin != 0 {
+				m["auto_scaler_min"] = v.AutoScalerMin
+			}
+			if v.AutoScalerMax != 0 {
+				m["auto_scaler_max"] = v.AutoScalerMax
+			}
+			if v.MaxSurge != nil {
+				m["max_surge"] = v.MaxSurge.IntValue()
+			}
+			if v.MaxUnavailable != nil {
+				m["max_unavailable"] = v.MaxUnavailable.IntValue()
+			}
+			if len(v.VolumeType) > 0 {
+				m["volume_type"] = v.VolumeType
+			}
+			if len(v.VolumeSize) > 0 {
+				m["volume_size"] = v.VolumeSize
+			}
+			workers[i] = m
+		}
+		d.Set("worker", workers)
+	}
 }
