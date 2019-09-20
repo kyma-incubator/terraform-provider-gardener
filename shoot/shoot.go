@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
-	gardner_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
-	gardner_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
+	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
+	gardener_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/kyma-incubator/terraform-provider-gardener/client"
@@ -96,16 +96,16 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 //createCRD return deployment structure
-func createCRD(d *schema.ResourceData, client *client.Client, provider string) *gardner_types.Shoot {
+func createCRD(d *schema.ResourceData, client *client.Client, provider string) *gardener_types.Shoot {
 
 	name := d.Get("name").(string)
 	allowPrivilegedContainers := true
-	spec := gardner_types.ShootSpec{
-		Cloud: gardner_types.Cloud{
+	spec := gardener_types.ShootSpec{
+		Cloud: gardener_types.Cloud{
 			Profile: provider,
 			Region:  d.Get("region").(string),
 		},
-		Kubernetes: gardner_types.Kubernetes{
+		Kubernetes: gardener_types.Kubernetes{
 			Version:                   d.Get("kubernetesversion").(string),
 			AllowPrivilegedContainers: &allowPrivilegedContainers,
 		},
@@ -124,7 +124,7 @@ func createCRD(d *schema.ResourceData, client *client.Client, provider string) *
 	}
 	annotations := make(map[string]string)
 	annotations["confirmation.garden.sapcloud.io/deletion"] = "true"
-	return &gardner_types.Shoot{
+	return &gardener_types.Shoot{
 		TypeMeta:   meta_v1.TypeMeta{Kind: "Shoot", APIVersion: "garden.sapcloud.io/v1beta1"},
 		ObjectMeta: meta_v1.ObjectMeta{Name: name, Namespace: client.NameSpace, Annotations: annotations},
 		Spec:       spec,
@@ -150,8 +150,8 @@ func getCidrs(property string, d *schema.ResourceData) []gardencorev1alpha1.CIDR
 	}
 	return cidr
 }
-func createGardenWorker(workerindex string, d *schema.ResourceData) gardner_types.Worker {
-	return gardner_types.Worker{
+func createGardenWorker(workerindex string, d *schema.ResourceData) gardener_types.Worker {
+	return gardener_types.Worker{
 		Name:          d.Get(workerindex + ".name").(string),
 		MachineType:   d.Get(workerindex + ".machinetype").(string),
 		AutoScalerMin: d.Get(workerindex + ".autoscalermin").(int),
@@ -164,7 +164,7 @@ func createGardenWorker(workerindex string, d *schema.ResourceData) gardner_type
 		},
 	}
 }
-func flattenShoot(d *schema.ResourceData, shoot *gardner_types.Shoot) error {
+func flattenShoot(d *schema.ResourceData, shoot *gardener_types.Shoot) error {
 	d.Set("name", shoot.Name)
 	i := strings.Index(shoot.Namespace, "-")
 	if i > -1 {
@@ -177,7 +177,7 @@ func flattenShoot(d *schema.ResourceData, shoot *gardner_types.Shoot) error {
 	flattenSpec(d, &shoot.Spec)
 	return nil
 }
-func flattenSpec(d *schema.ResourceData, spec *gardner_types.ShootSpec) {
+func flattenSpec(d *schema.ResourceData, spec *gardener_types.ShootSpec) {
 	cloud := spec.Cloud
 	d.Set("region", cloud.Region)
 	d.Set("kubernetesversion ", spec.Kubernetes.Version)
@@ -223,7 +223,7 @@ func resourceServerExists(d *schema.ResourceData, m interface{}) (bool, error) {
 	return true, err
 }
 
-func updateShootSpecFromConfig(d *schema.ResourceData, shoot *gardner_types.Shoot) error {
+func updateShootSpecFromConfig(d *schema.ResourceData, shoot *gardener_types.Shoot) error {
 	if d.HasChange("name") {
 		return fmt.Errorf("Can not change the name")
 	}
@@ -245,7 +245,7 @@ func updateShootSpecFromConfig(d *schema.ResourceData, shoot *gardner_types.Shoo
 	return nil
 }
 
-func waitForShootFunc(shootsClient gardner_apis.ShootInterface, name string) resource.RetryFunc {
+func waitForShootFunc(shootsClient gardener_apis.ShootInterface, name string) resource.RetryFunc {
 	return func() *resource.RetryError {
 		// Query the shoot to get a status update.
 		shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
@@ -277,7 +277,7 @@ func waitForShootFunc(shootsClient gardner_apis.ShootInterface, name string) res
 	}
 }
 
-func waitForShootDeleteFunc(shootsClient gardner_apis.ShootInterface, name string) resource.RetryFunc {
+func waitForShootDeleteFunc(shootsClient gardener_apis.ShootInterface, name string) resource.RetryFunc {
 	return func() *resource.RetryError {
 		// Query the shoot to get a status update.
 		_, err := shootsClient.Get(name, meta_v1.GetOptions{})
