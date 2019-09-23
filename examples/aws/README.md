@@ -1,9 +1,10 @@
 # Gardener Aws
 
+## Overview
 Use this configuration example to deploy an AWS cluster using Gardener.
  >**NOTE**: For the example to work properly, make sure that the **secret_binding** parameter is set to `aws_secret_binding` and that the **resource** is `gardener_aws_shoot`.
 
-For now the following cidrs are obtrained from the similar clusters deployed on gardener, in the future these values should be obtained programatically.
+Currently, values for the following CIDRs are obtained from the similar clusters deployed on Gardener:
 ```bash
   workerscidr       = ["10.250.0.0/17"]
   internalscidr     = ["10.250.112.0/22"]

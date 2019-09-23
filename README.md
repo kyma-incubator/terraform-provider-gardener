@@ -17,13 +17,8 @@ Requirements
 ## Overview
 Creating a new Terraform provider for Gardener using the Gardener client.This PoC contains a terraform provider that is meant to be executed by the terraform CLI.
 
-Developing the Provider
----------------------
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (please check the [requirements](https://github.com/kyma-incubator/terraform-provider-gardener#requirements) before proceeding).
-
-
-Building the provider
+Development
 ---------------------------
 
 1. Resolve dependencies:
@@ -37,7 +32,7 @@ Building the provider
 3. Move the gardener provider binary into the terraform plugins folder*.
     >\* See https://www.terraform.io/docs/plugins/basics.html#installing-plugins for more information.
 
-Using the provider
+Usage
 ---------------------------
 After building the provider as stated previously, you should create your terraform config file and run [`terraform init`](https://www.terraform.io/docs/commands/init.html) and Terraform will automatically install the provider.For installation methods. After the provider is installed you can apply your configurations usin the command [`terraform apply`](https://www.terraform.io/docs/commands/apply.html).
 
@@ -50,7 +45,14 @@ Examples of different configurations for different cluster providers could be fo
     - Gardener project name
     - Gardener secret for the choosen cloud provider(s).
     - Path to the gardener kubeconfig.
-    > NOTE: To obtain the gardener secret and kubeconfig visit the gardener dashboard.
+    > **NOTE:** To obtain the gardener secret and kubeconfig visit the [gardener dashboard](https://dashboard.garden.canary.k8s.ondemand.com/login).
+    ```bash
+    provider "gardener" {
+        profile            = "<my-gardener-project>"
+        gcp_secret_binding = "<my-gardener-gcp-secret>"
+        kube_path          = "<my-gardener-service-account-kubeconfig>"
+    }
+    ```
 3. Initialise terraform:
     ```bash
     terraform init
