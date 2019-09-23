@@ -1,13 +1,14 @@
-# Gardener GCP Example
+# Gardener GCP
 
-This is a configuration example to deploy an gcp cluster using gardener. You need to make sure that the secret binding parameter is "gcp_secret_binding" for the deployment to work properly and that the resource is "gardener_gcp_shoot".
+Use this configuration example to deploy a GCP cluster using Gardener.
+ >**NOTE**: For the example to work properly, make sure that the **secret_binding** parameter is set to `gcp_secret_binding` and that the **resource** is `gardener_gcp_shoot`.
 
 For now the following cidrs are obtrained from the similar clusters deployed on gardener, in the future these values should be obtained programatically.
 ```bash
    workerscidr       = ["10.250.0.0/19"]
 ```
 
-multiple workers can be defined as follows
+You can also define multiple workers:
 ```bash
  worker {
     name           = "cpu-worker1"

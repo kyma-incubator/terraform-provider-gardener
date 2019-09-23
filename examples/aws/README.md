@@ -1,6 +1,7 @@
-# Gardener Aws Example
+# Gardener Aws
 
-This is a configuration example to deploy an aws cluster using gardener. You need to make sure that the secret binding parameter is "aws_secret_binding" for the deployment to work properly and that the resource is "gardener_aws_shoot".
+Use this configuration example to deploy an AWS cluster using Gardener.
+ >**NOTE**: For the example to work properly, make sure that the **secret_binding** parameter is set to `aws_secret_binding` and that the **resource** is `gardener_aws_shoot`.
 
 For now the following cidrs are obtrained from the similar clusters deployed on gardener, in the future these values should be obtained programatically.
 ```bash
@@ -10,7 +11,7 @@ For now the following cidrs are obtrained from the similar clusters deployed on 
   vpccidr = "10.250.0.0/16"
 ```
 
-multiple workers can be defined as follows
+You can also define multiple workers:
 ```bash
 worker {
     name           = "cpu-worker1"

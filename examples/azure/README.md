@@ -1,6 +1,7 @@
-# Gardener Azure Example
+# Gardener Azure
 
-This is a configuration example to deploy an azure cluster using gardener. You need to make sure that the secret binding parameter is "azure_secret_binding" for the deployment to work properly and that the resource is "gardener_azure_shoot".
+Use this configuration example to deploy an Azure cluster using Gardener.
+ >**NOTE**: For the example to work properly, make sure that the **secret_binding** parameter is set to `azure_secret_binding` and that the **resource** is `gardener_azure_shoot`.
 
 For now the following cidrs are obtrained from the similar clusters deployed on gardener, in the future these values should be obtained programatically.
 ```bash
@@ -8,7 +9,7 @@ For now the following cidrs are obtrained from the similar clusters deployed on 
   workercidr        = "10.250.0.0/22"
 ```
 
-multiple workers can be defined as follows
+You can also define multiple workers:
 ```bash
 worker {
     name           = "cpu-worker1"
