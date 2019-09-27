@@ -3,14 +3,14 @@ package client
 import (
 	"errors"
 
-	gardner_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
+	gardener_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 type Client struct {
 	NameSpace         string
 	DNSBase           string
-	GardenerClientSet *gardner_apis.GardenV1beta1Client
+	GardenerClientSet *gardener_apis.GardenV1beta1Client
 	SecretBindings    *Bindings
 }
 
@@ -25,7 +25,7 @@ func New(c *Config) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	clientset, err := gardner_apis.NewForConfig(config)
+	clientset, err := gardener_apis.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
