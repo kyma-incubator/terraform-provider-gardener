@@ -1,25 +1,14 @@
 
-Terraform Provider
-==================
+# Terraform Provider
 
-- Website: https://www.terraform.io
-- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
-
-Requirements
-------------
-
+## Overview
+Creating a new Terraform provider for Gardener using the Gardener client.This PoC contains a terraform provider that is meant to be executed by the terraform CLI. The provider supports provisioning of three infrastructures (aws,azure,gcp) for now and in the future we will add the other infrastructures supported by Gardener.
+### Requirements
 - [Terraform](https://www.terraform.io/downloads.html) 0.10+
 - [Go](https://golang.org/doc/install) 1.12 or higher
 
-## Overview
-Creating a new Terraform provider for Gardener using the Gardener client.This PoC contains a terraform provider that is meant to be executed by the terraform CLI.
-
-
-Development
----------------------------
+## Development
 
 1. Resolve dependencies:
     ```bash
@@ -32,12 +21,11 @@ Development
 3. Move the gardener provider binary into the terraform plugins folder*.
     >\* See https://www.terraform.io/docs/plugins/basics.html#installing-plugins for more information.
 
-Usage
----------------------------
+## Usage
+
 After building the provider as stated previously, you should create your terraform config file and run [`terraform init`](https://www.terraform.io/docs/commands/init.html) and Terraform will automatically install the provider.For installation methods. After the provider is installed you can apply your configurations usin the command [`terraform apply`](https://www.terraform.io/docs/commands/apply.html).
 
-Examples of different configurations for different cluster providers could be found in the [examples](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples) folder.
-1. Go to the provider example folder
+1. Go to the provider [example](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples) folder
     ```bash
     cd examples/<provider>
     ```
@@ -65,3 +53,5 @@ Examples of different configurations for different cluster providers could be fo
     ```bash
     terraform apply
     ```
+## Examples
+Example config files can be found in the [examples](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples) folder for the three providers that we currently support.
