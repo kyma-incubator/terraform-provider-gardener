@@ -3,8 +3,10 @@
 
 
 ## Overview
-Creating a new Terraform provider for Gardener using the Gardener client.This PoC contains a terraform provider that is meant to be executed by the terraform CLI. The provider supports provisioning of three infrastructures (aws,azure,gcp) for now and in the future we will add the other infrastructures supported by Gardener.
+
+The Gardener Terraform provider supports provisioning clusters on chosen cloud providers using Terraform. Currently, it supports AWS, Azure, and GCP.
 ## Prerequisites
+
 - [Terraform](https://www.terraform.io/downloads.html) 0.10+
 - [Go](https://golang.org/doc/install) 1.12 or higher
 
@@ -20,8 +22,9 @@ Perform the following steps to build the providers:
     ```bash
     go build -o terraform-provider-gardener
     ```
-3. Move the gardener provider binary into the terraform plugins folder*.
-    >**NOTE**: For details on Terraform plugins [this](https://www.terraform.io/docs/plugins/basics.html#installing-plugins) document.
+3. Move the gardener provider binary into the terraform plugins folder.
+
+    >**NOTE**: For details on Terraform plugins see [this](https://www.terraform.io/docs/plugins/basics.html#installing-plugins) document.
 
 ## Usage
 
@@ -31,10 +34,12 @@ Perform the following steps to use the provider:
     ```bash
     cd examples/<provider>
     ```
-2. Edit the `main.tf` file providing the required gardener configuration:
+2. Edit the `main.tf` file and provide the following Gardener configuration:
+
     - Gardener project name
-    - Gardener secret for the choosen cloud provider(s).
-    - Path to the Gardener kubeconfig.
+    - Gardener secret for the choosen cloud provider(s)
+    - Path to the Gardener kubeconfig
+
     > **NOTE:** To obtain the gardener secret and kubeconfig go to the [Gardener dashboard](https://dashboard.garden.canary.k8s.ondemand.com/login).
     ```bash
     provider "gardener" {
@@ -56,4 +61,5 @@ Perform the following steps to use the provider:
     terraform apply
     ```
 ## Examples
+
 See the [examples](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples) folder to view the configuration for the currently supported providers.
