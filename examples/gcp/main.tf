@@ -9,7 +9,7 @@ resource "gardener_gcp_shoot" "my-server" {
   region            = "europe-west3"
   zones             = ["europe-west3-b"]
   workerscidr       = ["10.250.0.0/19"]
-  kubernetesversion = "1.15.2"
+  kubernetesversion = "1.15.4"
   worker {
     name           = "cpu-worker"
     machinetype    = "n1-standard-4"
