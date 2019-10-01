@@ -14,10 +14,9 @@ var mutexKV = mutexkv.NewMutexKV()
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"kube_path": {
-				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("KUBECONFIG", ""),
+			"kube_file": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -28,7 +27,7 @@ func Provider() terraform.ResourceProvider {
 }
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := &client.Config{
-		KubePath: d.Get("kube_path").(string),
+		KubeFile: d.Get("kube_file").(string),
 	}
 	return client.New(config)
 }

@@ -11,8 +11,8 @@ type Client struct {
 
 // Client configures and returns a fully initialized GardenerClient
 func New(c *Config) (interface{}, error) {
-
-	config, err := clientcmd.BuildConfigFromFlags("", c.KubePath)
+	kubeBytes := []byte(c.KubeFile)
+	config, err := clientcmd.RESTConfigFromKubeConfig(kubeBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -27,5 +27,5 @@ func New(c *Config) (interface{}, error) {
 }
 
 type Config struct {
-	KubePath string
+	KubeFile string
 }
