@@ -1,5 +1,5 @@
 provider "gardener" {
-  kube_file          = "${file("<my-gardener-service-account-kubeconfig>")}"
+  kube_file = "${file("<my-gardener-service-account-kubeconfig>")}"
   /*kube_file          =<<-EOT
     kind: Config
     clusters:
