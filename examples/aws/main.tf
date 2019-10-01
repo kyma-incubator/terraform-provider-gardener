@@ -12,7 +12,7 @@ resource "gardener_aws_shoot" "my-server" {
   internalscidr     = ["10.250.112.0/22"]
   publicscidr       = ["10.250.96.0/22"]
   vpccidr = "10.250.0.0/16"
-  kubernetesversion = "1.15.2"
+  kubernetesversion = "1.15.4"
   worker {
     name           = "cpu-worker"
     machinetype    = "m5.large"

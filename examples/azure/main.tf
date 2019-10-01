@@ -7,7 +7,7 @@ provider "gardener" {
 resource "gardener_azure_shoot" "my-server" {
   name              = "tf-gardener-azure"
   region            = "westeurope"
-  kubernetesversion = "1.15.2"
+  kubernetesversion = "1.15.4"
   vnetcidr          = "10.250.0.0/16"
   workercidr        = "10.250.0.0/22"
   worker {
