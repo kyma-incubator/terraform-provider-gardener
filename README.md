@@ -4,11 +4,13 @@
 
 ## Overview
 
-The Gardener Terraform provider supports provisioning clusters on chosen cloud providers using Terraform. Currently, it supports AWS, Azure, and GCP.
+The Gardener Terraform provider enables [Terraform](https://www.terraform.io) provisioning [Kubernetes](https://kubernetes.io) clusters on chosen cloud providers using [Gardener](https://gardener.cloud/). Currently, it supports AWS, Azure, and GCP.
+
 ## Prerequisites
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.10+
 - [Go](https://golang.org/doc/install) 1.12 or higher
+- a Gardener project with kubeconfig access and configured cloud provider secrets
 
 ## Development
 
@@ -22,9 +24,13 @@ Perform the following steps to build the providers:
     ```bash
     go build -o terraform-provider-gardener
     ```
-3. Move the gardener provider binary into the terraform plugins folder.
+3. Move the gardener provider binary into the terraform plugins folder:
 
-    >**NOTE**: For details on Terraform plugins see [this](https://www.terraform.io/docs/plugins/basics.html#installing-plugins) document.
+   On MacOS:
+   ```bash
+   mv terraform-provider-gardener ~/.terraform.d/plugins/terraform-provider-gardener
+   ```
+   For other systems and further details see [this](https://www.terraform.io/docs/plugins/basics.html#installing-plugins) document.
 
 ## Usage
 
