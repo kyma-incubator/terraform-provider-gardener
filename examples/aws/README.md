@@ -1,4 +1,4 @@
-# Gardener Aws
+# Gardener AWS
 
 ## Overview
 Use this configuration example to deploy an AWS cluster using Gardener.

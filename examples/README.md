@@ -1,7 +1,7 @@
 # Gardener Provider Examples
 
 ## Overview
-This folder contains a set of examples which use Gardener services to deploy [aws](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples/aws), [gcp](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples/gcp) and [azure](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples/azure) clusters. Although the configurations for these providers differ, they have the following common section:
+This folder contains a set of examples which use Gardener services to deploy [AWS](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples/aws), [GCP](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples/gcp) and [Azure](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples/azure) clusters. Although the configurations for these providers differ, they have the following common section:
 
 ```bash
 provider "gardener" {
