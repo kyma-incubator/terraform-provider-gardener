@@ -11,7 +11,7 @@ provider "gardener" {
 ```
 You can pass the kube_file using the raw text alone as follows:
 ```bash
-kube_path          =<<-EOT
+kube_file          =<<-EOT
     kind: Config
     clusters:
       - cluster:
