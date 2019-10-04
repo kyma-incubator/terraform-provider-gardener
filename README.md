@@ -16,15 +16,11 @@ The Gardener Terraform provider enables [Terraform](https://www.terraform.io) to
 
 Perform the following steps to build the providers:
 
-1. Resolve dependencies:
-    ```bash
-    dep ensure
-    ```
-2. Build the provider:
+1. Build the provider:
     ```bash
     go build -o terraform-provider-gardener
     ```
-3. Move the gardener provider binary into the terraform plugins folder:
+2. Move the gardener provider binary into the terraform plugins folder:
 
    On MacOS:
    ```bash
