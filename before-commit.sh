@@ -14,14 +14,14 @@ echo "GOPATH:" + $GOPATH
 echo -e "${NC}"
 
 ##
-# DEP ENSURE
+# Tidy dependencies
 ##
-dep ensure -v --vendor-only
-ensureResult=$?
-if [ ${ensureResult} != 0 ]; then
-	echo -e "${RED}✗ dep ensure -v --vendor-only${NC}\n$ensureResult${NC}"
+go mod tidy
+tidyResult=$?
+if [ ${tidyResult} != 0 ]; then
+	echo -e "${RED}✗ go mod tidy${NC}\n$tidyResult${NC}"
 	exit 1
-else echo -e "${GREEN}√ dep ensure -v --vendor-only${NC}"
+else echo -e "${GREEN}√ go mod tidy${NC}"
 fi
 
 ##
@@ -43,14 +43,14 @@ else echo -e "${GREEN}√ go build${NC}"
 fi
 
 ##
-# DEP STATUS
+# Verify dependencies
 ##
-echo "? dep status"
-depResult=$(dep status -v)
+echo "? go mod verify"
+depResult=$(go mod verify)
 if [ $? != 0 ]; then
-	echo -e "${RED}✗ dep status\n$depResult${NC}"
+	echo -e "${RED}✗ go mod verify\n$depResult${NC}"
 	exit 1
-else echo -e "${GREEN}√ dep status${NC}"
+else echo -e "${GREEN}√ go mod verify${NC}"
 fi
 
 ##
