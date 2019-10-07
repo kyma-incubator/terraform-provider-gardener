@@ -1,10 +1,10 @@
 
-# Terraform Provider
+# Terraform Provider for Gardener
 
 
 ## Overview
 
-The Gardener Terraform provider enables [Terraform](https://www.terraform.io) to provision [Kubernetes](https://kubernetes.io) clusters on chosen cloud providers using [Gardener](https://gardener.cloud/). Currently, it supports AWS, Azure, and GCP.
+The Terraform Provider for Gardener enables [Terraform](https://www.terraform.io) to provision [Kubernetes](https://kubernetes.io) clusters on chosen cloud providers using [Gardener](https://gardener.cloud/). Currently, it supports AWS, Azure, and GCP.
 
 ## Prerequisites
 
