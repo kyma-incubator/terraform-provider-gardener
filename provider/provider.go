@@ -21,16 +21,14 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"gardener_gcp_shoot":   shoot.GCPShoot(),
-			"gardener_aws_shoot":   shoot.AWSShoot(),
-			"gardener_azure_shoot": shoot.AzureShoot(),
+			"resource_shoot": shoot.ResourceShoot(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
 }
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := &client.Config{
-		KubePath:       d.Get("kube_path").(string),
+		KubePath: d.Get("kube_path").(string),
 	}
 	return client.New(config)
 }

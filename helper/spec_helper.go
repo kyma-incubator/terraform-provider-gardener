@@ -311,7 +311,7 @@ func flattenCloudAzure(in *v1beta1.AzureCloud) []interface{} {
 	}
 	networks["vnet"] = []interface{}{vnet}
 	if in.Networks.Workers != "" {
-		networks["workers"] =  in.Networks.Workers
+		networks["workers"] = in.Networks.Workers
 	}
 	att["networks"] = []interface{}{networks}
 	if len(in.Workers) > 0 {
@@ -537,7 +537,10 @@ func ExpandShoot(shoot []interface{}) v1beta1.ShootSpec {
 		obj.Cloud = expandCloud(v)
 	}
 	if v, ok := in["dns"].([]interface{}); ok && len(v) > 0 {
-		obj.DNS = expandDNS(v)
+		dns := expandDNS(v)
+		if dns.Domain != nil {
+			obj.DNS = dns
+		}
 	}
 	if v, ok := in["hibernation"].([]interface{}); ok && len(v) > 0 {
 		obj.Hibernation = expandHibernation(v)
@@ -1306,4 +1309,11 @@ func expandMaintenance(maintenance []interface{}) *v1beta1.Maintenance {
 	}
 
 	return obj
+}
+func AddMissingDataForUpdate(old *v1beta1.Shoot, new *v1beta1.Shoot) {
+	if new.Spec.DNS.Domain == nil || *new.Spec.DNS.Domain == "" {
+		new.Spec.DNS.Domain = old.Spec.DNS.Domain
+	}
+	new.ObjectMeta.ResourceVersion = old.ObjectMeta.ResourceVersion
+	new.ObjectMeta.Finalizers = old.ObjectMeta.Finalizers
 }

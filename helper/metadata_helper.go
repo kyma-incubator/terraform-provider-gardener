@@ -72,7 +72,7 @@ func ExpandMetadata(in []interface{}) metav1.ObjectMeta {
 	if v, ok := m["annotations"].(map[string]interface{}); ok && len(v) > 0 {
 		meta.Annotations = expandStringMap(m["annotations"].(map[string]interface{}))
 	}
-	if meta.Annotations == nil{
+	if meta.Annotations == nil {
 		meta.Annotations = make(map[string]string)
 	}
 	meta.Annotations["confirmation.garden.sapcloud.io/deletion"] = "true"
