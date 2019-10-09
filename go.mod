@@ -27,9 +27,8 @@ require (
 	google.golang.org/genproto v0.0.0-20190927181202-20e1ac93f88c // indirect
 	google.golang.org/grpc v1.24.0 // indirect
 	gopkg.in/yaml.v2 v2.2.3 // indirect
-	k8s.io/api v0.0.0-20190918195907-bd6ac527cfd2 // indirect
-	k8s.io/apimachinery v0.0.0-20190817020851-f2f3a405f61d
-	k8s.io/client-go v12.0.0+incompatible
+	k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
+	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 )
 
 replace github.com/census-instrumentation/opencensus-proto v0.1.0-0.20181214143942-ba49f56771b8 => github.com/census-instrumentation/opencensus-proto v0.0.3-0.20181214143942-ba49f56771b8
