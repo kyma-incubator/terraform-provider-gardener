@@ -1,5 +1,5 @@
 provider "gardener" {
-  kube_path = "<kube_path>"
+  kube_path = "<my-gardener-service-account-kubeconfig>"
 }
 
 resource "gardener_shoot" "test_cluster" {
@@ -13,7 +13,7 @@ resource "gardener_shoot" "test_cluster" {
     cloud {
       profile = "gcp"
       region  = "europe-west3"
-
+      seed    = "azure-eu2"
       secret_binding_ref {
         name = "<secret_binding>"
       }

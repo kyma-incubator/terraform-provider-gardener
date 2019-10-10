@@ -21,7 +21,7 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"resource_shoot": shoot.ResourceShoot(),
+			"gardener_shoot": shoot.ResourceShoot(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

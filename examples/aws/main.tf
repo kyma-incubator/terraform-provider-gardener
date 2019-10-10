@@ -1,5 +1,5 @@
 provider "gardener" {
-  kube_path = "<kube_path>"
+  kube_path = "<my-gardener-service-account-kubeconfig>"
 }
 
 resource "gardener_shoot" "test_cluster" {

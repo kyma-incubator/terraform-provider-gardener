@@ -6,14 +6,16 @@ Use this configuration example to deploy a cluster on Azure using Gardener.
 
 Currently, values for the following CIDRs are obtained from the similar clusters deployed on Gardener. See the example:
 ```bash
-   vnetcidr          = "10.250.0.0/16"
-  workercidr        = "10.250.0.0/22"
+   vnet{
+     cidr          = "10.250.0.0/16"
+   }
+  workers        = "10.250.0.0/22"
 ```
 
 You can define multiple workers using the following configuration:
 
 ```bash
-worker {
+workers {
     name           = "cpu-worker1"
     machinetype    = "Standard_D2_v3"
     autoscalermin  = 2
@@ -23,7 +25,7 @@ worker {
     volumesize     = "35Gi"
     volumetype     = "standard"
   }
- worker {
+ workers {
     name           = "cpu-worker2"
     machinetype    = "Standard_D2_v3"
     autoscalermin  = 2
@@ -34,5 +36,3 @@ worker {
     volumetype     = "standard"
   }
 ```
-
-

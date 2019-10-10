@@ -9,13 +9,15 @@ Currently, values for the following CIDRs are obtained from the similar clusters
   workerscidr       = ["10.250.0.0/17"]
   internalscidr     = ["10.250.112.0/22"]
   publicscidr       = ["10.250.96.0/22"]
-  vpccidr = "10.250.0.0/16"
+  vpc{
+    cidr = "10.250.0.0/16"
+  }
 ```
 
 You can define multiple workers using the following configuration:
 
 ```bash
-worker {
+workers {
     name           = "cpu-worker1"
     machinetype    = "m5.large"
     autoscalermin  = 2
@@ -25,7 +27,7 @@ worker {
     volumesize     = "20Gi"
     volumetype     = "gp2"
   }
-  worker {
+  workers {
     name           = "cpu-worker2"
     machinetype    = "m5.large"
     autoscalermin  = 2
@@ -36,5 +38,3 @@ worker {
     volumetype     = "gp2"
   }
 ```
-
-

@@ -47,21 +47,6 @@ func flattenLocalObjectReference(in *v1.LocalObjectReference) []interface{} {
 	return []interface{}{att}
 }
 
-func PatchMetadata(keyPrefix, pathPrefix string, d *schema.ResourceData) PatchOperations {
-	ops := make([]PatchOperation, 0, 0)
-	if d.HasChange(keyPrefix + "annotations") {
-		oldV, newV := d.GetChange(keyPrefix + "annotations")
-		diffOps := diffStringMap(pathPrefix+"annotations", oldV.(map[string]interface{}), newV.(map[string]interface{}))
-		ops = append(ops, diffOps...)
-	}
-	if d.HasChange(keyPrefix + "labels") {
-		oldV, newV := d.GetChange(keyPrefix + "labels")
-		diffOps := diffStringMap(pathPrefix+"labels", oldV.(map[string]interface{}), newV.(map[string]interface{}))
-		ops = append(ops, diffOps...)
-	}
-	return ops
-}
-
 func ExpandMetadata(in []interface{}) metav1.ObjectMeta {
 	meta := metav1.ObjectMeta{}
 	if len(in) < 1 {
@@ -91,19 +76,6 @@ func ExpandMetadata(in []interface{}) metav1.ObjectMeta {
 	}
 
 	return meta
-}
-
-func expandStringSlice(s []interface{}) []string {
-	result := make([]string, len(s), len(s))
-	for k, v := range s {
-		// Handle the Terraform parser bug which turns empty strings in lists to nil.
-		if v == nil {
-			result[k] = ""
-		} else {
-			result[k] = v.(string)
-		}
-	}
-	return result
 }
 
 func expandLocalObjectReference(l []interface{}) *v1.LocalObjectReference {

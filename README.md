@@ -39,19 +39,35 @@ Perform the following steps to use the provider:
     ```
 2. Edit the `main.tf` file to provide the following parameters:
 
-    * Gardener project name
-    * Gardener secret for the choosen cloud provider(s)
-    * Path to the Gardener kubeconfig
+    - Path to the Gardener kubeconfig
+    - Shoot metadata
+    - Shoot Spec
 
-     ```bash
-     provider "gardener" {
-        profile            = "<my-gardener-project>"
-        gcp_secret_binding = "<my-gardener-gcp-secret>"
+    > **NOTE:** To obtain the gardener secret and kubeconfig go to the [Gardener dashboard](https://dashboard.garden.canary.k8s.ondemand.com/login).
+    ```bash
+    provider "gardener" {
         kube_path          = "<my-gardener-service-account-kubeconfig>"
-     }
-     ```
-      >**NOTE:** To obtain the gardener secret and kubeconfig go to the [Gardener dashboard](https://dashboard.garden.canary.k8s.ondemand.com/login).
-      
+    }
+    resource "gardener_shoot" "<Name>" {
+  metadata {
+    name      = "<name-to-be-shown-in-gardener>"
+    namespace = "<gardener-profile-namespace>"
+
+  }
+ spec {
+    cloud {
+    profile = "az"
+    region  = "westeurope"
+    seed    = "az-eu1"
+            ...
+            ...
+            ...
+    }
+    ...
+    ...
+    ...
+}
+    ```
 3. Initialize Terraform:
     ```bash
     terraform init
