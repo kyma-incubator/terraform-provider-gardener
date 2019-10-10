@@ -551,13 +551,11 @@ func cloudResource() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Profile is a name of a CloudProfile object.",
 				Required:    true,
-				
 			},
 			"region": {
 				Type:        schema.TypeString,
 				Description: "Region is a name of a cloud provider region.",
 				Required:    true,
-				
 			},
 			"secret_binding_ref": {
 				Type:        schema.TypeList,
@@ -570,7 +568,6 @@ func cloudResource() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "Name of the secret.",
 							Required:    true,
-							
 						},
 					},
 				},
@@ -579,7 +576,6 @@ func cloudResource() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Seed is the name of a Seed object.",
 				Required:    true,
-				
 			},
 			"aws": {
 				Type:        schema.TypeList,
@@ -613,13 +609,11 @@ func dNSResource() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Provider is the DNS provider type for the Shoot.",
 				Optional:    true,
-				
 			},
 			"domain": {
 				Type:        schema.TypeString,
 				Description: "Domain is the external available domain of the Shoot cluster.",
 				Optional:    true,
-				
 			},
 			"secret_name": {
 				Type:        schema.TypeString,
@@ -730,8 +724,8 @@ func kubernetesResource() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "Mode specifies which proxy mode to use. defaults to IPTables.",
 							Optional:    true,
-							
-							Default:     "IPTables",
+
+							Default: "IPTables",
 						},
 					},
 				},

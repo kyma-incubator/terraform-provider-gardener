@@ -31,10 +31,10 @@ func metadataFields(objectName string) map[string]*schema.Schema {
 			DiffSuppressFunc: suppressStatusLabel,
 		},
 		"name": {
-			Type:         schema.TypeString,
-			Description:  fmt.Sprintf("Name of the %s, must be unique. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names", objectName),
-			Optional:     true,
-			
+			Type:        schema.TypeString,
+			Description: fmt.Sprintf("Name of the %s, must be unique. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names", objectName),
+			Optional:    true,
+
 			Computed:     true,
 			ValidateFunc: helper.ValidateName,
 		},
@@ -61,10 +61,10 @@ func metadataSchema(objectName string, generatableName bool) *schema.Schema {
 
 	if generatableName {
 		fields["generate_name"] = &schema.Schema{
-			Type:          schema.TypeString,
-			Description:   "Prefix, used by the server, to generate a unique name ONLY IF the `name` field has not been provided. This value will also be combined with a unique suffix. Read more: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#idempotency",
-			Optional:      true,
-			
+			Type:        schema.TypeString,
+			Description: "Prefix, used by the server, to generate a unique name ONLY IF the `name` field has not been provided. This value will also be combined with a unique suffix. Read more: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#idempotency",
+			Optional:    true,
+
 			ValidateFunc:  helper.ValidateGenerateName,
 			ConflictsWith: []string{"metadata.0.name"},
 		}
@@ -92,10 +92,10 @@ func namespacedMetadataSchema(objectName string, generatableName bool) *schema.S
 	}
 	if generatableName {
 		fields["generate_name"] = &schema.Schema{
-			Type:          schema.TypeString,
-			Description:   "Prefix, used by the server, to generate a unique name ONLY IF the `name` field has not been provided. This value will also be combined with a unique suffix. Read more: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#idempotency",
-			Optional:      true,
-			
+			Type:        schema.TypeString,
+			Description: "Prefix, used by the server, to generate a unique name ONLY IF the `name` field has not been provided. This value will also be combined with a unique suffix. Read more: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#idempotency",
+			Optional:    true,
+
 			ValidateFunc:  helper.ValidateGenerateName,
 			ConflictsWith: []string{"metadata.name"},
 		}

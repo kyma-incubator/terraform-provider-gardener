@@ -1,7 +1,6 @@
 package client
 
 import (
-
 	gardener_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -28,6 +27,5 @@ func New(c *Config) (interface{}, error) {
 }
 
 type Config struct {
-	KubePath       string
+	KubePath string
 }
-
