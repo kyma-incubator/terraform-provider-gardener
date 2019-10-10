@@ -1,8 +1,7 @@
 #  Deploy a cluster on AWS
 
 ## Overview
-Use this configuration example to deploy a cluster on AWS using Gardener.
- >**NOTE**: For the example to work properly, make sure that the **secret_binding** parameter is set to `aws_secret_binding` and that the **resource** is `gardener_aws_shoot`.
+Use this configuration example to deploy an AWS cluster using Gardener.
 
 Currently, values for the following CIDRs are obtained from the similar clusters deployed on Gardener. See the example:
 ```bash
