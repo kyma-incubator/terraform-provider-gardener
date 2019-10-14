@@ -18,5 +18,5 @@ Follow these steps to run an example:
 
 1. Clone the `terraform-provider-gardener` repository.
 2. Go to `terraform-provider-gardener/examples/{example_name}`.
-3. Run  `terraform apply`.
+3. Run `terraform apply`.
 
