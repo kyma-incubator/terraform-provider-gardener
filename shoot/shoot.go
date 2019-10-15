@@ -34,7 +34,7 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}, provider string
 		d.SetId("")
 		return err
 	}
-	fmt.Println(shoot)
+	log.Printf("[INFO] Created Shoot: %#v", shoot)
 	return resourceServerRead(d, m)
 }
 
