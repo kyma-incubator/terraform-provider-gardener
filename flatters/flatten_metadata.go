@@ -6,9 +6,9 @@ import (
 
 	v1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/kyma-incubator/terraform-provider-gardener/expand"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/kyma-incubator/terraform-provider-gardener/expand"
 )
 
 func FlattenMetadata(meta metav1.ObjectMeta, d *schema.ResourceData, metaPrefix ...string) []interface{} {
@@ -44,7 +44,6 @@ func flattenLocalObjectReference(in *v1.LocalObjectReference) []interface{} {
 	}
 	return []interface{}{att}
 }
-
 
 func IdParts(id string) (string, string, error) {
 	parts := strings.Split(id, "/")
