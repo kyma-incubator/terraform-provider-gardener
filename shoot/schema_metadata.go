@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/kyma-incubator/terraform-provider-gardener/helper"
+	"github.com/kyma-incubator/terraform-provider-gardener/validator"
 )
 
 func metadataFields(objectName string) map[string]*schema.Schema {
@@ -14,7 +14,7 @@ func metadataFields(objectName string) map[string]*schema.Schema {
 			Description:      fmt.Sprintf("An unstructured key value map stored with the %s that may be used to store arbitrary metadata. More info: http://kubernetes.io/docs/user-guide/annotations", objectName),
 			Optional:         true,
 			Elem:             &schema.Schema{Type: schema.TypeString},
-			ValidateFunc:     helper.ValidateAnnotations,
+			ValidateFunc:     validator.ValidateAnnotations,
 			DiffSuppressFunc: suppressCreatedByAnnotation,
 		},
 		"generation": {
@@ -27,7 +27,7 @@ func metadataFields(objectName string) map[string]*schema.Schema {
 			Description:      fmt.Sprintf("Map of string keys and values that can be used to organize and categorize (scope and select) the %s. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels", objectName),
 			Optional:         true,
 			Elem:             &schema.Schema{Type: schema.TypeString},
-			ValidateFunc:     helper.ValidateLabels,
+			ValidateFunc:     validator.ValidateLabels,
 			DiffSuppressFunc: suppressStatusLabel,
 		},
 		"name": {
@@ -36,7 +36,7 @@ func metadataFields(objectName string) map[string]*schema.Schema {
 			Optional:    true,
 
 			Computed:     true,
-			ValidateFunc: helper.ValidateName,
+			ValidateFunc: validator.ValidateName,
 		},
 		"resource_version": {
 			Type:        schema.TypeString,
@@ -65,7 +65,7 @@ func metadataSchema(objectName string, generatableName bool) *schema.Schema {
 			Description: "Prefix, used by the server, to generate a unique name ONLY IF the `name` field has not been provided. This value will also be combined with a unique suffix. Read more: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#idempotency",
 			Optional:    true,
 
-			ValidateFunc:  helper.ValidateGenerateName,
+			ValidateFunc:  validator.ValidateGenerateName,
 			ConflictsWith: []string{"metadata.0.name"},
 		}
 		fields["name"].ConflictsWith = []string{"metadata.0.generate_name"}
@@ -96,7 +96,7 @@ func namespacedMetadataSchema(objectName string, generatableName bool) *schema.S
 			Description: "Prefix, used by the server, to generate a unique name ONLY IF the `name` field has not been provided. This value will also be combined with a unique suffix. Read more: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#idempotency",
 			Optional:    true,
 
-			ValidateFunc:  helper.ValidateGenerateName,
+			ValidateFunc:  validator.ValidateGenerateName,
 			ConflictsWith: []string{"metadata.name"},
 		}
 		fields["name"].ConflictsWith = []string{"metadata.generate_name"}

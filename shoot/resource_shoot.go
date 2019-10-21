@@ -2,7 +2,6 @@ package shoot
 
 import (
 	"fmt"
-	"log"
 
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
@@ -11,7 +10,8 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/kyma-incubator/terraform-provider-gardener/client"
-	"github.com/kyma-incubator/terraform-provider-gardener/helper"
+	"github.com/kyma-incubator/terraform-provider-gardener/expand"
+	"github.com/kyma-incubator/terraform-provider-gardener/flatters"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -32,8 +32,8 @@ func ResourceShoot() *schema.Resource {
 
 func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
-	metadata := helper.ExpandMetadata(d.Get("metadata").([]interface{}))
-	spec := helper.ExpandShoot(d.Get("spec").([]interface{}))
+	metadata := expand.ExpandMetadata(d.Get("metadata").([]interface{}))
+	spec := expand.ExpandShoot(d.Get("spec").([]interface{}))
 
 	shootCRD := gardener_types.Shoot{
 		ObjectMeta: metadata,
@@ -43,14 +43,13 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 			APIVersion: "garden.sapcloud.io/v1beta1",
 		},
 	}
-
-	log.Printf("[INFO] Creating new shoot: %#v", shootCRD)
 	shootsClient := client.GardenerClientSet.Shoots(metadata.Namespace)
 	shoot, err := shootsClient.Create(&shootCRD)
 	if err != nil {
+		d.SetId("")
 		return err
 	}
-	d.SetId(helper.BuildID(shoot.ObjectMeta))
+	d.SetId(flatters.BuildID(shoot.ObjectMeta))
 	resource.Retry(d.Timeout(schema.TimeoutCreate),
 		waitForShootFunc(shootsClient, metadata.Name))
 	if err != nil {
@@ -62,12 +61,11 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
-	namespace, name, err := helper.IdParts(d.Id())
+	namespace, name, err := flatters.IdParts(d.Id())
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[INFO] Reading Shoot %s", name)
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
 	if err != nil {
@@ -75,12 +73,12 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	shoot.ObjectMeta.Annotations["confirmation.garden.sapcloud.io/deletion"] = "true"
-	err = d.Set("metadata", helper.FlattenMetadata(shoot.ObjectMeta, d))
+	err = d.Set("metadata", flatters.FlattenMetadata(shoot.ObjectMeta, d))
 	if err != nil {
 		return err
 	}
 
-	spec, err := helper.FlattenShoot(shoot.Spec, d)
+	spec, err := flatters.FlattenShoot(shoot.Spec, d)
 	if err != nil {
 		return err
 	}
@@ -94,7 +92,7 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
-	namespace, name, err := helper.IdParts(d.Id())
+	namespace, name, err := flatters.IdParts(d.Id())
 	if err != nil {
 		return err
 	}
@@ -105,28 +103,26 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Failed to get shoot: %s", err)
 	}
 	if d.HasChange("metadata") {
-		new_shoot.ObjectMeta = helper.ExpandMetadata(d.Get("metadata").([]interface{}))
+		new_shoot.ObjectMeta = expand.ExpandMetadata(d.Get("metadata").([]interface{}))
 	}
 	if d.HasChange("spec") {
-		new_shoot.Spec = helper.ExpandShoot(d.Get("spec").([]interface{}))
-		helper.AddMissingDataForUpdate(shoot, &new_shoot)
+		new_shoot.Spec = expand.ExpandShoot(d.Get("spec").([]interface{}))
+		expand.AddMissingDataForUpdate(shoot, &new_shoot)
 	}
 	_, err = shootsClient.Update(&new_shoot)
 
 	if err != nil {
-		log.Printf("[INFO] Error while updating shoot cluster: %#v", err)
 		d.SetId("")
 		return err
 	}
 	resource.Retry(d.Timeout(schema.TimeoutCreate),
 		waitForShootFunc(shootsClient, name))
-	log.Printf("[INFO] Submitted updated Shoot: %#v", d.Id())
 	return resourceServerRead(d, m)
 }
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
-	namespace, name, err := helper.IdParts(d.Id())
+	namespace, name, err := flatters.IdParts(d.Id())
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	err = shootsClient.Delete(name, &meta_v1.DeleteOptions{})
 	if err != nil {
@@ -140,18 +136,16 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 
 func resourceServerExists(d *schema.ResourceData, m interface{}) (bool, error) {
 	client := m.(*client.Client)
-	namespace, name, err := helper.IdParts(d.Id())
+	namespace, name, err := flatters.IdParts(d.Id())
 	if err != nil {
 		return false, err
 	}
-	log.Printf("[INFO] Checking Shoot %s", name)
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	_, err = shootsClient.Get(name, meta_v1.GetOptions{})
 	if err != nil {
 		if statusErr, ok := err.(*errors.StatusError); ok && statusErr.ErrStatus.Code == 404 {
 			return false, err
 		}
-		log.Printf("[DEBUG] Received error: %#v", err)
 	}
 	return true, err
 }
