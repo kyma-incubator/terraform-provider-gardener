@@ -14,7 +14,7 @@ Currently, values for the following CIDRs are obtained from the similar clusters
 You can define multiple workers using the following configuration:
 
 ```bash
-workers {
+worker {
     name           = "cpu-worker1"
     machinetype    = "Standard_D2_v3"
     autoscalermin  = 2
@@ -24,7 +24,7 @@ workers {
     volumesize     = "35Gi"
     volumetype     = "standard"
   }
- workers {
+ worker {
     name           = "cpu-worker2"
     machinetype    = "Standard_D2_v3"
     autoscalermin  = 2

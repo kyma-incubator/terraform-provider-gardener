@@ -71,7 +71,7 @@ Perform the following steps to use the provider:
                         workers = "10.250.0.0/19"
                     }
 
-                    workers {
+                    worker {
                         name            = "cpu-worker"
                         machine_type    = "Standard_D2_v3"
                         auto_scaler_min = 3

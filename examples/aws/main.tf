@@ -30,7 +30,7 @@ resource "gardener_shoot" "test_cluster" {
           workers  = ["10.250.0.0/19"]
         }
 
-        workers {
+        worker {
           name            = "cpu-worker"
           machine_type    = "m5.large"
           auto_scaler_min = 3
