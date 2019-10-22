@@ -1,4 +1,4 @@
-package flatters
+package flatten
 
 import (
 	v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
@@ -129,7 +129,7 @@ func flattenCloudAWS(in *v1beta1.AWSCloud) []interface{} {
 			}
 			workers[i] = m
 		}
-		att["workers"] = workers
+		att["worker"] = workers
 		if in.Zones != nil {
 			att["zones"] = newStringSet(schema.HashString, in.Zones)
 		}
@@ -223,7 +223,7 @@ func flattenCloudGCP(in *v1beta1.GCPCloud) []interface{} {
 			}
 			workers[i] = m
 		}
-		att["workers"] = workers
+		att["worker"] = workers
 		if in.Zones != nil {
 			att["zones"] = newStringSet(schema.HashString, in.Zones)
 		}
@@ -325,7 +325,7 @@ func flattenCloudAzure(in *v1beta1.AzureCloud) []interface{} {
 			}
 			workers[i] = m
 		}
-		att["workers"] = workers
+		att["worker"] = workers
 	}
 
 	return []interface{}{att}

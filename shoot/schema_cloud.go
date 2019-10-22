@@ -96,7 +96,7 @@ func cloudResourceAWS() *schema.Resource {
 					},
 				},
 			},
-			"workers": {
+			"worker": {
 				Type:        schema.TypeList,
 				Description: "Workers is a list of worker groups.",
 				Required:    true,
@@ -248,7 +248,7 @@ func cloudResourceGCP() *schema.Resource {
 					},
 				},
 			},
-			"workers": {
+			"worker": {
 				Type:        schema.TypeList,
 				Description: "Workers is a list of worker groups.",
 				Required:    true,
@@ -418,7 +418,7 @@ func cloudResourceAzure() *schema.Resource {
 					},
 				},
 			},
-			"workers": {
+			"worker": {
 				Type:        schema.TypeList,
 				Description: "Workers is a list of worker groups.",
 				Required:    true,

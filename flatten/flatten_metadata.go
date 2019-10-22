@@ -1,4 +1,4 @@
-package flatters
+package flatten
 
 import (
 	"fmt"

@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/kyma-incubator/terraform-provider-gardener/client"
 	"github.com/kyma-incubator/terraform-provider-gardener/expand"
-	"github.com/kyma-incubator/terraform-provider-gardener/flatters"
+	"github.com/kyma-incubator/terraform-provider-gardener/flatten"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -49,7 +49,7 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return err
 	}
-	d.SetId(flatters.BuildID(shoot.ObjectMeta))
+	d.SetId(flatten.BuildID(shoot.ObjectMeta))
 	resource.Retry(d.Timeout(schema.TimeoutCreate),
 		waitForShootFunc(shootsClient, metadata.Name))
 	if err != nil {
@@ -61,7 +61,7 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
-	namespace, name, err := flatters.IdParts(d.Id())
+	namespace, name, err := flatten.IdParts(d.Id())
 	if err != nil {
 		return err
 	}
@@ -73,12 +73,12 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	shoot.ObjectMeta.Annotations["confirmation.garden.sapcloud.io/deletion"] = "true"
-	err = d.Set("metadata", flatters.FlattenMetadata(shoot.ObjectMeta, d))
+	err = d.Set("metadata", flatten.FlattenMetadata(shoot.ObjectMeta, d))
 	if err != nil {
 		return err
 	}
 
-	spec, err := flatters.FlattenShoot(shoot.Spec, d)
+	spec, err := flatten.FlattenShoot(shoot.Spec, d)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
-	namespace, name, err := flatters.IdParts(d.Id())
+	namespace, name, err := flatten.IdParts(d.Id())
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
-	namespace, name, err := flatters.IdParts(d.Id())
+	namespace, name, err := flatten.IdParts(d.Id())
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	err = shootsClient.Delete(name, &meta_v1.DeleteOptions{})
 	if err != nil {
@@ -136,7 +136,7 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 
 func resourceServerExists(d *schema.ResourceData, m interface{}) (bool, error) {
 	client := m.(*client.Client)
-	namespace, name, err := flatters.IdParts(d.Id())
+	namespace, name, err := flatten.IdParts(d.Id())
 	if err != nil {
 		return false, err
 	}

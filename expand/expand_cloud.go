@@ -97,7 +97,7 @@ func expandCloudAWS(aws []interface{}) *v1beta1.AWSCloud {
 			}
 		}
 	}
-	if workers, ok := in["workers"].([]interface{}); ok && len(workers) > 0 {
+	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
 		for _, w := range workers {
 			if w, ok := w.(map[string]interface{}); ok {
 				workerObj := v1beta1.AWSWorker{}
@@ -205,7 +205,7 @@ func expandCloudGCP(aws []interface{}) *v1beta1.GCPCloud {
 			}
 		}
 	}
-	if workers, ok := in["workers"].([]interface{}); ok && len(workers) > 0 {
+	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
 		for _, w := range workers {
 			if w, ok := w.(map[string]interface{}); ok {
 				workerObj := v1beta1.GCPWorker{}
@@ -320,7 +320,7 @@ func expandCloudAzure(aws []interface{}) *v1beta1.AzureCloud {
 
 		}
 	}
-	if workers, ok := in["workers"].([]interface{}); ok && len(workers) > 0 {
+	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
 		for _, w := range workers {
 			if w, ok := w.(map[string]interface{}); ok {
 				workerObj := v1beta1.AzureWorker{}
