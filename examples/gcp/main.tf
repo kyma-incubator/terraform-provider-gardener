@@ -1,23 +1,45 @@
 provider "gardener" {
-  profile            = "<my-gardener-project>"
-  gcp_secret_binding = "<my-gardener-gcp-secret>"
-  kube_path          = "<my-gardener-service-account-kubeconfig>"
+  kube_path = "<my-gardener-service-account-kubeconfig>"
 }
 
-resource "gardener_gcp_shoot" "my-server" {
-  name              = "tf-gardener-gcp"
-  region            = "europe-west3"
-  zones             = ["europe-west3-b"]
-  workerscidr       = ["10.250.0.0/19"]
-  kubernetesversion = "1.15.4"
-  worker {
-    name           = "cpu-worker"
-    machinetype    = "n1-standard-4"
-    autoscalermin  = 2
-    autoscalermax  = 2
-    maxsurge       = 1
-    maxunavailable = 0
-    volumesize     = "20Gi"
-    volumetype     = "pd-standard"
+resource "gardener_shoot" "test_cluster" {
+  metadata {
+    name      = "test-cluster"
+    namespace = "garden-<profile>"
+
+  }
+
+  spec {
+    cloud {
+      profile = "gcp"
+      region  = "europe-west3"
+      seed    = "azure-eu2"
+      secret_binding_ref {
+        name = "<secret_binding>"
+      }
+
+      gcp {
+        networks {
+          workers = ["10.250.0.0/19"]
+        }
+
+        worker {
+          name            = "cpu-worker"
+          machine_type    = "n1-standard-4"
+          auto_scaler_min = 3
+          auto_scaler_max = 3
+          max_surge       = 1
+          max_unavailable = 0
+          volume_type     = "pd-standard"
+          volume_size     = "50Gi"
+        }
+
+        zones = ["europe-west3-b"]
+      }
+    }
+
+    kubernetes {
+      version = "1.15.4"
+    }
   }
 }

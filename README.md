@@ -10,7 +10,7 @@ The Terraform Provider for Gardener enables [Terraform](https://www.terraform.io
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.10+
 - [Go](https://golang.org/doc/install) 1.12 or higher
--  Gardener project with kubeconfig access and configured cloud provider secrets
+- Gardener project with kubeconfig access and configured cloud provider secrets
 
 ## Development
 
@@ -39,19 +39,57 @@ Perform the following steps to use the provider:
     ```
 2. Edit the `main.tf` file to provide the following parameters:
 
-    * Gardener project name
-    * Gardener secret for the choosen cloud provider(s)
-    * Path to the Gardener kubeconfig
+    - Path to the Gardener kubeconfig
+    - Shoot specification
 
-     ```bash
-     provider "gardener" {
-        profile            = "<my-gardener-project>"
-        gcp_secret_binding = "<my-gardener-gcp-secret>"
+    > **NOTE:** To obtain the gardener secret and kubeconfig go to the [Gardener dashboard](https://dashboard.garden.canary.k8s.ondemand.com/login).
+    ```bash
+    provider "gardener" {
         kube_path          = "<my-gardener-service-account-kubeconfig>"
-     }
-     ```
-      >**NOTE:** To obtain the gardener secret and kubeconfig go to the [Gardener dashboard](https://dashboard.garden.canary.k8s.ondemand.com/login).
-      
+    }
+    resource "gardener_shoot" "<Name>" {
+        metadata {
+            name      = "<name-to-be-shown-in-gardener>"
+            namespace = "<gardener-profile-namespace>"
+
+        }
+        spec {
+            cloud {
+            profile = "az"
+            region  = "westeurope"
+            seed    = "az-eu1"
+
+            secret_binding_ref {
+                name = "<secret_binding>"
+            }
+
+            azure {
+                    networks {
+                        vnet {
+                            cidr = "10.250.0.0/16"
+                        }
+                        workers = "10.250.0.0/19"
+                    }
+
+                    worker {
+                        name            = "cpu-worker"
+                        machine_type    = "Standard_D2_v3"
+                        auto_scaler_min = 3
+                        auto_scaler_max = 3
+                        max_surge       = 1
+                        max_unavailable = 0
+                        volume_type     = "standard"
+                        volume_size     = "50Gi"
+                    }
+                }
+            }
+
+            kubernetes {
+                version = "1.15.4"
+            }
+        }
+    }
+    ```
 3. Initialize Terraform:
     ```bash
     terraform init
