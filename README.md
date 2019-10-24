@@ -45,7 +45,7 @@ Perform the following steps to use the provider:
     > **NOTE:** To obtain the gardener secret and kubeconfig go to the [Gardener dashboard](https://dashboard.garden.canary.k8s.ondemand.com/login).
     ```bash
     provider "gardener" {
-        kube_path          = "<my-gardener-service-account-kubeconfig>"
+        kube_file          = "${file("<my-gardener-service-account-kubeconfig>")}"
     }
     resource "gardener_shoot" "<Name>" {
         metadata {
