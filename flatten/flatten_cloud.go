@@ -3,6 +3,7 @@ package flatten
 import (
 	v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/kyma-incubator/terraform-provider-gardener/types"
 )
 
 func flattenCloud(in v1beta1.Cloud) []interface{} {
@@ -19,13 +20,13 @@ func flattenCloud(in v1beta1.Cloud) []interface{} {
 		att["seed"] = in.Seed
 	}
 	if in.AWS != nil {
-		att["aws"] = flattenCloudAWS(in.AWS)
+		att[string(types.AWSProvider)] = flattenCloudAWS(in.AWS)
 	}
 	if in.GCP != nil {
-		att["gcp"] = flattenCloudGCP(in.GCP)
+		att[string(types.GCPProvider)] = flattenCloudGCP(in.GCP)
 	}
 	if in.Azure != nil {
-		att["azure"] = flattenCloudAzure(in.Azure)
+		att[string(types.AzureProvider)] = flattenCloudAzure(in.Azure)
 	}
 	return []interface{}{att}
 }

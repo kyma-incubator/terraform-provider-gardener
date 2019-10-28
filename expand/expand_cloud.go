@@ -3,6 +3,7 @@ package expand
 import (
 	v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/kyma-incubator/terraform-provider-gardener/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -27,11 +28,11 @@ func expandCloud(cloud []interface{}) v1beta1.Cloud {
 	if v, ok := in["seed"].(string); ok {
 		obj.Seed = &v
 	}
-	if v, ok := in["aws"].([]interface{}); ok && len(v) > 0 {
+	if v, ok := in[string(types.AWSProvider)].([]interface{}); ok && len(v) > 0 {
 		obj.AWS = expandCloudAWS(v)
-	} else if v, ok := in["gcp"].([]interface{}); ok && len(v) > 0 {
+	} else if v, ok := in[string(types.GCPProvider)].([]interface{}); ok && len(v) > 0 {
 		obj.GCP = expandCloudGCP(v)
-	} else if v, ok := in["azure"].([]interface{}); ok && len(v) > 0 {
+	} else if v, ok := in[string(types.AzureProvider)].([]interface{}); ok && len(v) > 0 {
 		obj.Azure = expandCloudAzure(v)
 	}
 
