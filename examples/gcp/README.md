@@ -1,7 +1,7 @@
 # Deploy a cluster on GCP
 
 ## Overview
-Use this configuration example to deploy a GCP cluster using Gardener.
+Use the configuration example located in [main.tf](main.tf) to deploy a GCP cluster using Gardener.
 
 Currently, values for the following CIDRs are obtained from the similar clusters deployed on Gardener. See the example:
 
