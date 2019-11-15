@@ -38,7 +38,7 @@ At the moment the resource type [`gardener_shoot`](shoot/schema_shoot.go) is sup
 |Goocle Cloud Platform|[schema.go](shoot/schema_gcp.go)|[main.tf](examples/gcp/main.tf)|
 |Azure|[schema.go](shoot/schema_azure.go)|[main.tf](examples/azure/main.tf)|
 
--Perform the following steps to use the provider:
+Perform the following steps to use the provider:
  
 1. Navigate to one of the `main.tf` files as listed above
 
