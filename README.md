@@ -40,9 +40,9 @@ At the moment the resource type [`gardener_shoot`](shoot/schema_shoot.go) is sup
 
 Perform the following steps to use the provider:
  
-1. Navigate to one of the `main.tf` files as listed above
+1. Go to one of the `main.tf` files listed above.
 
-2. Edit the `main.tf` file to provide the missing parameters
+2. Edit the `main.tf` file to provide the missing parameters.
 
 3. Initialize Terraform:
     ```bash
