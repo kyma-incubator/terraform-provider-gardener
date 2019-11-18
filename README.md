@@ -30,7 +30,7 @@ Perform the following steps to build the providers:
 
 ## Usage
 
-At the moment the resource type [`gardener_shoot`](shoot/schema_shoot.go) is supported corresponding to the [`shoot`](https://github.com/gardener/gardener/blob/master/pkg/apis/core/v1alpha1/types_shoot.go) resource of gardener. The cloud provider specific configuration and a related example is listed in the table below:
+At the moment, the Terraform Provider for Gardener defines a resource type [`gardener_shoot`](shoot/schema_shoot.go) which is linked to the corresponding [`shoot`](https://github.com/gardener/gardener/blob/master/pkg/apis/core/v1alpha1/types_shoot.go) Gardener resource. The table shows the cloud provider-specific configuration and related examples:
 
 |Cloud Provider|Specification|Example|
 |---|---|---|
