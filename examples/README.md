@@ -2,7 +2,7 @@
 
 ## Overview
 
-This folder contains a set of examples which use Gardener services to deploy [AWS](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples/aws), [GCP](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples/gcp) and [Azure](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples/azure) clusters. All provided examples have the following section in common:
+This folder contains a set of examples which use Gardener services to deploy [AWS](examples/aws), [GCP](examples/gcp) and [Azure](examples/azure) clusters. All provided examples have the following section in common:
 
 ```bash
 provider "gardener" {
@@ -36,6 +36,8 @@ kube_file          =<<-EOT
 ```
 This section includes the following parameters:
 * **kube_file** - the raw string of the kube config file.
+
+>**NOTE:** To obtain the Gardener secret and the `kubeconfig` file go to the [Gardener dashboard](https://dashboard.garden.canary.k8s.ondemand.com/login).
 
 ## Installation
 

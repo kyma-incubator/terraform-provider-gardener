@@ -8,7 +8,7 @@ The Terraform Provider for Gardener enables [Terraform](https://www.terraform.io
 
 ## Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.10+
+- [Terraform](https://www.terraform.io/downloads.html) 0.12+
 - [Go](https://golang.org/doc/install) 1.12 or higher
 - Gardener project with kubeconfig access and configured cloud provider secrets
 
@@ -30,66 +30,20 @@ Perform the following steps to build the providers:
 
 ## Usage
 
+At the moment, the Terraform Provider for Gardener defines a resource type [`gardener_shoot`](shoot/schema_shoot.go) which is linked to the corresponding [`shoot`](https://github.com/gardener/gardener/blob/master/pkg/apis/core/v1alpha1/types_shoot.go) Gardener resource. The table shows the cloud provider-specific configuration and related examples:
+
+|Cloud Provider|Specification|Example|
+|---|---|---|
+|Amazon Web Services|[schema.go](shoot/schema_aws.go)|[main.tf](examples/aws/main.tf)|
+|Goocle Cloud Platform|[schema.go](shoot/schema_gcp.go)|[main.tf](examples/gcp/main.tf)|
+|Azure|[schema.go](shoot/schema_azure.go)|[main.tf](examples/azure/main.tf)|
+
 Perform the following steps to use the provider:
+ 
+1. Go to one of the `main.tf` files listed above.
 
-1. Go to the provider [example](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples) folder:
+2. Edit the `main.tf` file to provide the missing parameters.
 
-    ```bash
-    cd examples/<provider>
-    ```
-2. Edit the `main.tf` file to provide the following parameters:
-
-    - Path to the Gardener kubeconfig
-    - Shoot specification
-
-    > **NOTE:** To obtain the gardener secret and kubeconfig go to the [Gardener dashboard](https://dashboard.garden.canary.k8s.ondemand.com/login).
-    ```bash
-    provider "gardener" {
-        kube_file          = "${file("<my-gardener-service-account-kubeconfig>")}"
-    }
-    resource "gardener_shoot" "<Name>" {
-        metadata {
-            name      = "<name-to-be-shown-in-gardener>"
-            namespace = "<gardener-profile-namespace>"
-
-        }
-        spec {
-            cloud {
-            profile = "az"
-            region  = "westeurope"
-            seed    = "az-eu1"
-
-            secret_binding_ref {
-                name = "<secret_binding>"
-            }
-
-            azure {
-                    networks {
-                        vnet {
-                            cidr = "10.250.0.0/16"
-                        }
-                        workers = "10.250.0.0/19"
-                    }
-
-                    worker {
-                        name            = "cpu-worker"
-                        machine_type    = "Standard_D2_v3"
-                        auto_scaler_min = 3
-                        auto_scaler_max = 3
-                        max_surge       = 1
-                        max_unavailable = 0
-                        volume_type     = "standard"
-                        volume_size     = "50Gi"
-                    }
-                }
-            }
-
-            kubernetes {
-                version = "1.15.4"
-            }
-        }
-    }
-    ```
 3. Initialize Terraform:
     ```bash
     terraform init
@@ -101,7 +55,3 @@ Perform the following steps to use the provider:
 5. Deploy the cluster:
     ```bash
     terraform apply
-    ```
-## Examples
-
-See the [examples](https://github.com/kyma-incubator/terraform-provider-gardener/tree/master/examples) to learn how to use Gardener to deploy clusters on AWS, GCP, and Azure.
