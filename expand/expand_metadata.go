@@ -98,7 +98,7 @@ func expandBoolMap(m map[string]interface{}) map[string]bool {
 	return result
 }
 
-func ParseMap(aMap map[string]string, bMap map[string]interface{}) map[string]string {
+func RemoveInternalKeysMapMeta(aMap map[string]string, bMap map[string]interface{}) map[string]string {
 	for key, _ := range aMap {
 		if _, ok := bMap[key]; !ok {
 			delete(aMap, key)

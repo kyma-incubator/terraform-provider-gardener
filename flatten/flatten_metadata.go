@@ -19,12 +19,12 @@ func FlattenMetadata(meta metav1.ObjectMeta, d *schema.ResourceData, metaPrefix 
 		prefix = metaPrefix[0]
 	}
 	configAnnotations := d.Get(prefix + "metadata.0.annotations").(map[string]interface{})
-	m["annotations"] = expand.ParseMap(meta.Annotations, configAnnotations)
+	m["annotations"] = expand.RemoveInternalKeysMapMeta(meta.Annotations, configAnnotations)
 	if meta.GenerateName != "" {
 		m["generate_name"] = meta.GenerateName
 	}
 	configLabels := d.Get(prefix + "metadata.0.labels").(map[string]interface{})
-	m["labels"] = expand.ParseMap(meta.Labels, configLabels)
+	m["labels"] = expand.RemoveInternalKeysMapMeta(meta.Labels, configLabels)
 	m["name"] = meta.Name
 	m["resource_version"] = meta.ResourceVersion
 	m["self_link"] = meta.SelfLink

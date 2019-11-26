@@ -16,26 +16,26 @@ func FlattenShoot(in v1beta1.ShootSpec, d *schema.ResourceData, specPrefix ...st
 	if in.Addons != nil {
 		configAddons := d.Get(prefix + "spec.0.addons").([]interface{})
 		flattenedAddons := flattenAddons(in.Addons)
-		att["addons"] = expand.ParseArraySpec([]interface{}{flattenedAddons}, configAddons) //expand.RemoveInternalKeysMetadata(flattenedAddons, configAddons)
+		att["addons"] = expand.RemoveInternalKeysArraySpec([]interface{}{flattenedAddons}, configAddons) //expand.RemoveInternalKeysMetadata(flattenedAddons, configAddons)
 	}
 	configCloud := d.Get(prefix + "spec.0.cloud").([]interface{})
 	flattenedCloud := flattenCloud(in.Cloud)
-	att["cloud"] = expand.ParseArraySpec(flattenedCloud, configCloud)
+	att["cloud"] = expand.RemoveInternalKeysArraySpec(flattenedCloud, configCloud)
 	configDNS := d.Get(prefix + "spec.0.dns").([]interface{})
 	flattenedDNS := flattenDNS(in.DNS)
-	att["dns"] = expand.ParseArraySpec(flattenedDNS, configDNS)
+	att["dns"] = expand.RemoveInternalKeysArraySpec(flattenedDNS, configDNS)
 	if in.Hibernation != nil {
 		configHibernation := d.Get(prefix + "spec.0.hibernation").([]interface{})
 		flattenedHibernation := flattenHibernation(in.Hibernation)
-		att["hibernation"] = expand.ParseArraySpec(flattenedHibernation, configHibernation)
+		att["hibernation"] = expand.RemoveInternalKeysArraySpec(flattenedHibernation, configHibernation)
 	}
 	configKubernetes := d.Get(prefix + "spec.0.kubernetes").([]interface{})
 	flattenedKubernetes := flattenKubernetes(in.Kubernetes)
-	att["kubernetes"] = expand.ParseArraySpec(flattenedKubernetes, configKubernetes)
+	att["kubernetes"] = expand.RemoveInternalKeysArraySpec(flattenedKubernetes, configKubernetes)
 	if in.Maintenance != nil {
 		configMaintenance := d.Get(prefix + "spec.0.maintenance").([]interface{})
 		flattenedMaintenance := flattenMaintenance(in.Maintenance)
-		att["maintenance"] = expand.ParseArraySpec(flattenedMaintenance, configMaintenance)
+		att["maintenance"] = expand.RemoveInternalKeysArraySpec(flattenedMaintenance, configMaintenance)
 	}
 
 	return []interface{}{att}, nil
