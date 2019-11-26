@@ -1,8 +1,6 @@
 package expand
 
 import (
-	"net/url"
-	"strings"
 	"time"
 
 	v1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
@@ -80,29 +78,6 @@ func expandSet(set *schema.Set) []string {
 	return result
 }
 
-func RemoveInternalKeys(m map[string]string, d map[string]interface{}) map[string]string {
-	for k := range m {
-		if isInternalKey(k) && !isKeyInMap(k, d) {
-			delete(m, k)
-		}
-	}
-	return m
-}
-
-func isInternalKey(annotationKey string) bool {
-	u, err := url.Parse("//" + annotationKey)
-	if err == nil && strings.HasSuffix(u.Hostname(), "kubernetes.io") {
-		return true
-	}
-
-	// Specific to DaemonSet annotations, generated & controlled by the server.
-	if strings.Contains(annotationKey, "deprecated.daemonset.template.generation") {
-		return true
-	}
-
-	return false
-}
-
 func expandStringMap(m map[string]interface{}) map[string]string {
 	result := make(map[string]string)
 	for k, v := range m {
@@ -123,14 +98,11 @@ func expandBoolMap(m map[string]interface{}) map[string]bool {
 	return result
 }
 
-func isKeyInMap(key string, d map[string]interface{}) bool {
-	if d == nil {
-		return false
-	}
-	for k := range d {
-		if k == key {
-			return true
+func RemoveInternalKeysMapMeta(aMap map[string]string, bMap map[string]interface{}) map[string]string {
+	for key, _ := range aMap {
+		if _, ok := bMap[key]; !ok {
+			delete(aMap, key)
 		}
 	}
-	return false
+	return aMap
 }

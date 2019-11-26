@@ -421,3 +421,52 @@ func AddMissingDataForUpdate(old *v1beta1.Shoot, new *v1beta1.Shoot) {
 	new.ObjectMeta.ResourceVersion = old.ObjectMeta.ResourceVersion
 	new.ObjectMeta.Finalizers = old.ObjectMeta.Finalizers
 }
+func RemoveInternalKeysMapSpec(aMap map[string]interface{}, bMap map[string]interface{}) map[string]interface{} {
+	for key, val := range aMap {
+		switch val.(type) {
+		case map[string]interface{}:
+			if val2, ok := bMap[key]; !ok {
+				delete(aMap, key)
+			} else {
+				aMap[key] = RemoveInternalKeysMapSpec(val.(map[string]interface{}), val2.(map[string]interface{}))
+			}
+		case []interface{}:
+			if val2, ok := bMap[key]; !ok {
+				delete(aMap, key)
+			} else {
+				aMap[key] = RemoveInternalKeysArraySpec(val.([]interface{}), val2.([]interface{}))
+			}
+		default:
+			if val2, ok := bMap[key]; !ok || val2 == "" {
+				delete(aMap, key)
+			}
+		}
+	}
+	return aMap
+}
+func RemoveInternalKeysArraySpec(ArrayA, ArrayB []interface{}) []interface{} {
+	for i, val := range ArrayA {
+		switch val.(type) {
+		case map[string]interface{}:
+			if i >= len(ArrayB) || ArrayB[i] == nil {
+				ArrayA = remove(ArrayA, i)
+			} else {
+				ArrayA[i] = RemoveInternalKeysMapSpec(val.(map[string]interface{}), ArrayB[i].(map[string]interface{}))
+			}
+		case []interface{}:
+			if i >= len(ArrayB) || ArrayB[i] == nil {
+				ArrayA = remove(ArrayA, i)
+			} else {
+				ArrayA[i] = RemoveInternalKeysArraySpec(val.([]interface{}), ArrayB[i].([]interface{}))
+			}
+		default:
+			if i >= len(ArrayB) || ArrayB[i] == nil || ArrayB[i] == "" {
+				ArrayA = remove(ArrayA, i)
+			}
+		}
+	}
+	return ArrayA
+}
+func remove(slice []interface{}, s int) []interface{} {
+	return append(slice[:s], slice[s+1:]...)
+}

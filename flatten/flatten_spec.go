@@ -3,29 +3,45 @@ package flatten
 import (
 	v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/kyma-incubator/terraform-provider-gardener/expand"
 )
 
 // Flatteners
-func FlattenShoot(in v1beta1.ShootSpec, d *schema.ResourceData) ([]interface{}, error) {
+func FlattenShoot(in v1beta1.ShootSpec, d *schema.ResourceData, specPrefix ...string) ([]interface{}, error) {
 	att := make(map[string]interface{})
-
+	prefix := ""
+	if len(specPrefix) > 0 {
+		prefix = specPrefix[0]
+	}
 	if in.Addons != nil {
-		att["addons"] = flattenAddons(in.Addons)
+		configAddons := d.Get(prefix + "spec.0.addons").([]interface{})
+		flattenedAddons := flattenAddons(in.Addons)
+		att["addons"] = expand.RemoveInternalKeysArraySpec([]interface{}{flattenedAddons}, configAddons) //expand.RemoveInternalKeysMetadata(flattenedAddons, configAddons)
 	}
-	att["cloud"] = flattenCloud(in.Cloud)
-	att["dns"] = flattenDNS(in.DNS)
+	configCloud := d.Get(prefix + "spec.0.cloud").([]interface{})
+	flattenedCloud := flattenCloud(in.Cloud)
+	att["cloud"] = expand.RemoveInternalKeysArraySpec(flattenedCloud, configCloud)
+	configDNS := d.Get(prefix + "spec.0.dns").([]interface{})
+	flattenedDNS := flattenDNS(in.DNS)
+	att["dns"] = expand.RemoveInternalKeysArraySpec(flattenedDNS, configDNS)
 	if in.Hibernation != nil {
-		att["hibernation"] = flattenHibernation(in.Hibernation)
+		configHibernation := d.Get(prefix + "spec.0.hibernation").([]interface{})
+		flattenedHibernation := flattenHibernation(in.Hibernation)
+		att["hibernation"] = expand.RemoveInternalKeysArraySpec(flattenedHibernation, configHibernation)
 	}
-	att["kubernetes"] = flattenKubernetes(in.Kubernetes)
+	configKubernetes := d.Get(prefix + "spec.0.kubernetes").([]interface{})
+	flattenedKubernetes := flattenKubernetes(in.Kubernetes)
+	att["kubernetes"] = expand.RemoveInternalKeysArraySpec(flattenedKubernetes, configKubernetes)
 	if in.Maintenance != nil {
-		att["maintenance"] = flattenMaintenance(in.Maintenance)
+		configMaintenance := d.Get(prefix + "spec.0.maintenance").([]interface{})
+		flattenedMaintenance := flattenMaintenance(in.Maintenance)
+		att["maintenance"] = expand.RemoveInternalKeysArraySpec(flattenedMaintenance, configMaintenance)
 	}
 
 	return []interface{}{att}, nil
 }
 
-func flattenAddons(in *v1beta1.Addons) []interface{} {
+func flattenAddons(in *v1beta1.Addons) map[string]interface{} {
 	att := make(map[string]interface{})
 
 	if in.KubernetesDashboard != nil {
@@ -47,7 +63,7 @@ func flattenAddons(in *v1beta1.Addons) []interface{} {
 		att["cluster_autoscaler"] = []interface{}{autoscaler}
 	}
 
-	return []interface{}{att}
+	return att
 }
 
 func flattenDNS(in v1beta1.DNS) []interface{} {
