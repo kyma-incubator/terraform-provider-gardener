@@ -106,7 +106,7 @@ func kubernetesResource() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"allow_privileged_containers": {
 				Type:        schema.TypeBool,
-				Description: "AllowPrivilegedContainers indicates whether privileged containers are allowed in the Shoot (default: true).",
+				Description: "AllowPrivilegedContainers indicates whether privileged containers are allowed in the Shoot.",
 				Optional:    true,
 			},
 			"kube_api_server": {
