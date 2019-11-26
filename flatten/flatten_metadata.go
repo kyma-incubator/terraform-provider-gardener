@@ -6,6 +6,7 @@ import (
 
 	v1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	"github.com/hashicorp/terraform/helper/schema"
+
 	"github.com/kyma-incubator/terraform-provider-gardener/expand"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,12 +19,12 @@ func FlattenMetadata(meta metav1.ObjectMeta, d *schema.ResourceData, metaPrefix 
 		prefix = metaPrefix[0]
 	}
 	configAnnotations := d.Get(prefix + "metadata.0.annotations").(map[string]interface{})
-	m["annotations"] = expand.RemoveInternalKeys(meta.Annotations, configAnnotations)
+	m["annotations"] = expand.ParseMap(meta.Annotations, configAnnotations)
 	if meta.GenerateName != "" {
 		m["generate_name"] = meta.GenerateName
 	}
 	configLabels := d.Get(prefix + "metadata.0.labels").(map[string]interface{})
-	m["labels"] = expand.RemoveInternalKeys(meta.Labels, configLabels)
+	m["labels"] = expand.ParseMap(meta.Labels, configLabels)
 	m["name"] = meta.Name
 	m["resource_version"] = meta.ResourceVersion
 	m["self_link"] = meta.SelfLink
