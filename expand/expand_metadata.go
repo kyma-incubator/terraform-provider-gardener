@@ -3,7 +3,6 @@ package expand
 import (
 	"time"
 
-	v1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
 	v1 "k8s.io/api/core/v1"
@@ -52,7 +51,17 @@ func expandLocalObjectReference(l []interface{}) *v1.LocalObjectReference {
 	}
 	return obj
 }
-
+func expandObjectReference(l []interface{}) *v1.ObjectReference {
+	if len(l) == 0 || l[0] == nil {
+		return &v1.ObjectReference{}
+	}
+	in := l[0].(map[string]interface{})
+	obj := &v1.ObjectReference{}
+	if v, ok := in["name"].(string); ok {
+		obj.Name = v
+	}
+	return obj
+}
 func expandDuration(v string) *v1beta1.GardenerDuration {
 	d, err := time.ParseDuration(v)
 	if err != nil {
@@ -62,11 +71,6 @@ func expandDuration(v string) *v1beta1.GardenerDuration {
 	}
 
 	return nil
-}
-
-func expandCIDR(v string) *v1alpha1.CIDR {
-	cidr := v1alpha1.CIDR(v)
-	return &cidr
 }
 
 func expandSet(set *schema.Set) []string {

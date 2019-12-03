@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	v1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/kyma-incubator/terraform-provider-gardener/expand"
@@ -71,7 +70,7 @@ func newStringSet(f schema.SchemaSetFunc, in []string) *schema.Set {
 func newCIDRSet(f schema.SchemaSetFunc, in []v1alpha1.CIDR) *schema.Set {
 	var out = make([]interface{}, len(in))
 	for i, v := range in {
-		out[i] = string(v)
+		out[i] = v
 	}
 	return schema.NewSet(f, out)
 }

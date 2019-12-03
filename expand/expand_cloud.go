@@ -22,7 +22,7 @@ func expandCloud(cloud []interface{}) v1beta1.Cloud {
 		obj.Region = v
 	}
 	if v, ok := in["secret_binding_ref"].([]interface{}); ok && len(v) > 0 {
-		obj.SecretBindingRef = *expandLocalObjectReference(v)
+		obj.SecretBindingRef = *(expandLocalObjectReference(v))
 	}
 	if v, ok := in["seed"].(string); ok {
 		obj.Seed = &v
@@ -61,15 +61,6 @@ func expandCloudAWS(aws []interface{}) *v1beta1.AWSCloud {
 		v := v[0].(map[string]interface{})
 		obj.Networks = v1beta1.AWSNetworks{}
 
-		if v, ok := v["nodes"].(string); ok && len(v) > 0 {
-			obj.Networks.Nodes = expandCIDR(v)
-		}
-		if v, ok := v["pods"].(string); ok && len(v) > 0 {
-			obj.Networks.Pods = expandCIDR(v)
-		}
-		if v, ok := v["services"].(string); ok && len(v) > 0 {
-			obj.Networks.Services = expandCIDR(v)
-		}
 		if v, ok := v["vpc"].([]interface{}); ok && len(v) > 0 {
 			v := v[0].(map[string]interface{})
 			obj.Networks.VPC = v1beta1.AWSVPC{}
@@ -78,22 +69,22 @@ func expandCloudAWS(aws []interface{}) *v1beta1.AWSCloud {
 				obj.Networks.VPC.ID = &v
 			}
 			if v, ok := v["cidr"].(string); ok && len(v) > 0 {
-				obj.Networks.VPC.CIDR = expandCIDR(v)
+				obj.Networks.VPC.CIDR = &v
 			}
 		}
 		if internal, ok := v["internal"].(*schema.Set); ok {
 			for _, i := range internal.List() {
-				obj.Networks.Internal = append(obj.Networks.Internal, *expandCIDR(i.(string)))
+				obj.Networks.Internal = append(obj.Networks.Internal, i.(string))
 			}
 		}
 		if public, ok := v["public"].(*schema.Set); ok {
 			for _, p := range public.List() {
-				obj.Networks.Public = append(obj.Networks.Public, *expandCIDR(p.(string)))
+				obj.Networks.Public = append(obj.Networks.Public, p.(string))
 			}
 		}
 		if workers, ok := v["workers"].(*schema.Set); ok {
 			for _, w := range workers.List() {
-				obj.Networks.Workers = append(obj.Networks.Workers, *expandCIDR(w.(string)))
+				obj.Networks.Workers = append(obj.Networks.Workers, w.(string))
 			}
 		}
 	}
@@ -190,19 +181,14 @@ func expandCloudGCP(aws []interface{}) *v1beta1.GCPCloud {
 		v := v[0].(map[string]interface{})
 		obj.Networks = v1beta1.GCPNetworks{}
 
-		if v, ok := v["nodes"].(string); ok && len(v) > 0 {
-			obj.Networks.Nodes = expandCIDR(v)
-		}
-		if v, ok := v["pods"].(string); ok && len(v) > 0 {
-			obj.Networks.Pods = expandCIDR(v)
-		}
-		if v, ok := v["services"].(string); ok && len(v) > 0 {
-			obj.Networks.Services = expandCIDR(v)
-		}
 		if workers, ok := v["workers"].(*schema.Set); ok {
 			for _, w := range workers.List() {
-				obj.Networks.Workers = append(obj.Networks.Workers, *expandCIDR(w.(string)))
+				obj.Networks.Workers = append(obj.Networks.Workers, w.(string))
 			}
+		}
+
+		if v, ok := v["internal"].(string); ok && len(v) > 0 {
+			obj.Networks.Internal = &v
 		}
 	}
 	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
@@ -295,15 +281,6 @@ func expandCloudAzure(aws []interface{}) *v1beta1.AzureCloud {
 		v := v[0].(map[string]interface{})
 		obj.Networks = v1beta1.AzureNetworks{}
 
-		if v, ok := v["nodes"].(string); ok && len(v) > 0 {
-			obj.Networks.Nodes = expandCIDR(v)
-		}
-		if v, ok := v["pods"].(string); ok && len(v) > 0 {
-			obj.Networks.Pods = expandCIDR(v)
-		}
-		if v, ok := v["services"].(string); ok && len(v) > 0 {
-			obj.Networks.Services = expandCIDR(v)
-		}
 		if v, ok := v["vnet"].([]interface{}); ok && len(v) > 0 {
 			v := v[0].(map[string]interface{})
 			obj.Networks.VNet = v1beta1.AzureVNet{}
@@ -312,11 +289,11 @@ func expandCloudAzure(aws []interface{}) *v1beta1.AzureCloud {
 				obj.Networks.VNet.Name = &v
 			}
 			if v, ok := v["cidr"].(string); ok && len(v) > 0 {
-				obj.Networks.VNet.CIDR = expandCIDR(v)
+				obj.Networks.VNet.CIDR = &v
 			}
 		}
 		if workers, ok := v["workers"].(string); ok {
-			obj.Networks.Workers = *expandCIDR(workers)
+			obj.Networks.Workers = workers
 
 		}
 	}
