@@ -61,7 +61,7 @@ func BuildID(meta metav1.ObjectMeta) string {
 }
 
 func newStringSet(f schema.SchemaSetFunc, in []string) *schema.Set {
-	var out = make([]interface{}, len(in), len(in))
+	var out = make([]interface{}, len(in))
 	for i, v := range in {
 		out[i] = v
 	}
@@ -69,7 +69,7 @@ func newStringSet(f schema.SchemaSetFunc, in []string) *schema.Set {
 }
 
 func newCIDRSet(f schema.SchemaSetFunc, in []v1alpha1.CIDR) *schema.Set {
-	var out = make([]interface{}, len(in), len(in))
+	var out = make([]interface{}, len(in))
 	for i, v := range in {
 		out[i] = string(v)
 	}

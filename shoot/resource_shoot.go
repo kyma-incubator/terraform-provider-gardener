@@ -50,8 +50,8 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	d.SetId(flatten.BuildID(shoot.ObjectMeta))
-	resource.Retry(d.Timeout(schema.TimeoutCreate),
-		waitForShootFunc(shootsClient, metadata.Name))
+
+	err = resource.Retry(d.Timeout(schema.TimeoutCreate), waitForShootFunc(shootsClient, metadata.Name))
 	if err != nil {
 		d.SetId("")
 		return err
@@ -115,21 +115,30 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return err
 	}
-	resource.Retry(d.Timeout(schema.TimeoutCreate),
-		waitForShootFunc(shootsClient, name))
+	err = resource.Retry(d.Timeout(schema.TimeoutCreate), waitForShootFunc(shootsClient, name))
+	if err != nil {
+		return err
+	}
 	return resourceServerRead(d, m)
 }
 
 func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.Client)
 	namespace, name, err := flatten.IdParts(d.Id())
+	if err != nil {
+		return err
+	}
+
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	err = shootsClient.Delete(name, &meta_v1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
-	resource.Retry(d.Timeout(schema.TimeoutDelete),
-		waitForShootDeleteFunc(shootsClient, name))
+
+	err = resource.Retry(d.Timeout(schema.TimeoutDelete), waitForShootDeleteFunc(shootsClient, name))
+	if err != nil {
+		return err
+	}
 	d.SetId("")
 	return nil
 }
@@ -177,7 +186,6 @@ func waitForShootFunc(shootsClient gardener_apis.ShootInterface, name string) re
 		} else {
 			return resource.RetryableError(fmt.Errorf("Waiting for rollout to start"))
 		}
-
 		return nil
 	}
 }
