@@ -99,7 +99,7 @@ func expandBoolMap(m map[string]interface{}) map[string]bool {
 }
 
 func RemoveInternalKeysMapMeta(aMap map[string]string, bMap map[string]interface{}) map[string]string {
-	for key, _ := range aMap {
+	for key := range aMap {
 		if _, ok := bMap[key]; !ok {
 			delete(aMap, key)
 		}
