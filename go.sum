@@ -186,8 +186,6 @@ github.com/gardener/external-dns-management v0.0.0-20190220100540-b4bbb5832a03/g
 github.com/gardener/external-dns-management v0.0.0-20190722114702-f6b12f6e4b43/go.mod h1:Y3om11E865x4aQ7cmcHjknb8RMgCO153huRb/SvP+9o=
 github.com/gardener/gardener v0.0.0-20190812144748-dec8f3c7f288/go.mod h1:ioI69PbfNBUp10k2OtIED7u0l6u1NePBw/wgox9uayQ=
 github.com/gardener/gardener v0.0.0-20190830053951-194cf8abb797/go.mod h1:UjyQiGrjIRJQ82t2PTqtdMXzJxqH/ftQ36jbpFxAWXw=
-github.com/gardener/gardener v0.0.0-20190906111529-f9ad04069615 h1:P31O/FLxDGEv3SrMCgrYE5wo028niSt5TLpJS3Q3uqc=
-github.com/gardener/gardener v0.0.0-20190906111529-f9ad04069615/go.mod h1:tBy3a9lhxSUxriPUlfKn3rgn3Wrc2DJKafBTY2/zlwk=
 github.com/gardener/gardener v0.0.0-20190913144920-5b4adb9f114d/go.mod h1:8LOLWzproKzfww5LdDo0/7FyVQR7gR1QA5LQc5buDzQ=
 github.com/gardener/gardener v0.0.0-20191004085047-5707d498b40c/go.mod h1:zvajWsteDY43oECil7ADr4NNp88CMltFEutUp1jX+zA=
 github.com/gardener/gardener v0.0.0-20191028054636-32cb0027c126/go.mod h1:Ow7vOXQYgQeHTRFn2HdbEIptelrSB5NLmVFIt2rgNeY=
@@ -388,8 +386,6 @@ github.com/hashicorp/logutils v1.0.0 h1:dLEQVugN8vlakKOUE3ihGLTZJRB4j+M2cdTm/ORI
 github.com/hashicorp/logutils v1.0.0/go.mod h1:QIAnNjmIWmVIIkWDTG1z5v++HQmx9WQRO+LraFDTW64=
 github.com/hashicorp/memberlist v0.1.0/go.mod h1:ncdBp14cuox2iFOq3kDiquKU6fqsTBc3W6JvZwjxxsE=
 github.com/hashicorp/serf v0.0.0-20160124182025-e4ec8cc423bb/go.mod h1:h/Ru6tmZazX7WO/GDmwdpS975F019L4t5ng5IgwbNrE=
-github.com/hashicorp/terraform v0.12.12 h1:c71+dDT8TbiVDCaQPvkEhdvTqyrP55s7POa6D5aUBSM=
-github.com/hashicorp/terraform v0.12.12/go.mod h1:BBG6fbrnZ9UVmdrm9VQ2cJ/R9G3IQ1eQ7Ru3nC0yt3s=
 github.com/hashicorp/terraform v0.12.13 h1:LACXUTZvAGf8W/6wehHjOgi6YEMN7ejDUpnpll2qbJ0=
 github.com/hashicorp/terraform v0.12.13/go.mod h1:Sq/J8KhhxpxT+XsE4YRfEAq5X87YUrVhsaIOo0P00wA=
 github.com/hashicorp/terraform-config-inspect v0.0.0-20190821133035-82a99dc22ef4 h1:fTkL0YwjohGyN7AqsDhz6bwcGBpT+xBqi3Qhpw58Juw=
@@ -867,8 +863,6 @@ gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWD
 gopkg.in/yaml.v2 v2.0.0-20170812160011-eb3733d160e7/go.mod h1:JAlM8MvJe8wmxCU4Bli9HhUf9+ttbYbLASfIpnQbh74=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
-gopkg.in/yaml.v2 v2.2.3 h1:fvjTMHxHEw/mxHbtzPi3JCcKXQRAnQTBRo6YCJSVHKI=
-gopkg.in/yaml.v2 v2.2.3/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.4 h1:/eiJrUcujPVeJ3xlSWaiNi3uSVmDGBK1pDHUHAnao1I=
 gopkg.in/yaml.v2 v2.2.4/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gotest.tools v2.2.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=

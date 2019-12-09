@@ -2,10 +2,10 @@ package shoot
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/mutexkv"
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	gardener_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
+	"github.com/hashicorp/terraform/helper/mutexkv"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
 // Global MutexKV
 var gardenerMutexKV = mutexkv.NewMutexKV()
 
