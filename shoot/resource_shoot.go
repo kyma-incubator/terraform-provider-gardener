@@ -2,7 +2,7 @@ package shoot
 
 import (
 	"fmt"
-
+	"github.com/hashicorp/terraform/helper/mutexkv"
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	gardener_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
@@ -15,6 +15,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+// Global MutexKV
+var gardenerMutexKV = mutexkv.NewMutexKV()
 
 func ResourceShoot() *schema.Resource {
 	return &schema.Resource{
@@ -35,6 +37,9 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 	metadata := expand.ExpandMetadata(d.Get("metadata").([]interface{}))
 	spec := expand.ExpandShoot(d.Get("spec").([]interface{}))
 
+	mutex_key := fmt.Sprintf(`namespace-%s`, metadata.Namespace)
+	gardenerMutexKV.Lock(mutex_key)
+	defer gardenerMutexKV.Unlock(mutex_key)
 	shootCRD := gardener_types.Shoot{
 		ObjectMeta: metadata,
 		Spec:       spec,
@@ -96,6 +101,9 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	mutex_key := fmt.Sprintf(`namespace-%s`, namespace)
+	gardenerMutexKV.Lock(mutex_key)
+	defer gardenerMutexKV.Unlock(mutex_key)
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
 	new_shoot := gardener_types.Shoot{}
@@ -128,7 +136,9 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-
+	mutex_key := fmt.Sprintf(`namespace-%s`, namespace)
+	gardenerMutexKV.Lock(mutex_key)
+	defer gardenerMutexKV.Unlock(mutex_key)
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	err = shootsClient.Delete(name, &meta_v1.DeleteOptions{})
 	if err != nil {

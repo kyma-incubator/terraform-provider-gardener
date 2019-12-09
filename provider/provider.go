@@ -1,15 +1,11 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform/helper/mutexkv"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/kyma-incubator/terraform-provider-gardener/client"
 	"github.com/kyma-incubator/terraform-provider-gardener/shoot"
 )
-
-// Global MutexKV
-var mutexKV = mutexkv.NewMutexKV()
 
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
