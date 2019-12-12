@@ -2,6 +2,7 @@ package shoot
 
 import (
 	"fmt"
+	"time"
 
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
@@ -16,6 +17,12 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	defaultCreateTimeout = time.Minute * 30
+	defaultUpdateTimeout = time.Minute * 30
+	defaultDeleteTimeout = time.Minute * 20
+)
+
 func ResourceShoot() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServerCreate,
@@ -23,6 +30,11 @@ func ResourceShoot() *schema.Resource {
 		Exists: resourceServerExists,
 		Update: resourceServerUpdate,
 		Delete: resourceServerDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(defaultCreateTimeout),
+			Update: schema.DefaultTimeout(defaultUpdateTimeout),
+			Delete: schema.DefaultTimeout(defaultDeleteTimeout),
+		},
 		Schema: map[string]*schema.Schema{
 			"metadata": namespacedMetadataSchema("shoot", false),
 			"spec":     shootSpecSchema(),
@@ -173,7 +185,7 @@ func waitForShootFunc(shootsClient gardener_apis.ShootInterface, name string) re
 					return resource.RetryableError(fmt.Errorf("Waiting for shoot condition to finish: %s", condition.Type))
 				}
 				if condition.Status == gardencorev1alpha1.ConditionFalse {
-					return resource.NonRetryableError(fmt.Errorf("Shoot condition failed: %s", condition.Message))
+					return resource.RetryableError(fmt.Errorf("Shoot condition failed: %s", condition.Message))
 				}
 			}
 
