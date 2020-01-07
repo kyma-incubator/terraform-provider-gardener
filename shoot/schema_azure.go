@@ -164,6 +164,11 @@ func cloudResourceAzure() *schema.Resource {
 					},
 				},
 			},
+			"caBundle": {
+				Type:        schema.TypeString,
+				Description: "caBundle configuration",
+				Required:    false,
+			},
 		},
 	}
 }

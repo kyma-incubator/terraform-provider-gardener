@@ -153,6 +153,11 @@ func cloudResourceGCP() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Set:         schema.HashString,
 			},
+			"caBundle": {
+				Type:        schema.TypeString,
+				Description: "caBundle configuration",
+				Required:    false,
+			},
 		},
 	}
 }
