@@ -303,6 +303,30 @@ func maintenanceResource() *schema.Resource {
 	}
 }
 
+func monitoringResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"alerting": {
+				Type:             schema.TypeList,
+				Description:      "Alert configuration to send notification to email lists.",
+				Optional:         true,
+				MaxItems:         1,
+				DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"emailReceivers": {
+							Type:             schema.TypeList,
+							Description:      "List of people who receiving alerts for this shoots",
+							Optional:         true,
+							DiffSuppressFunc: suppressEmptyNewValue,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func shootSpecSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
@@ -352,6 +376,14 @@ func shootSpecSchema() *schema.Schema {
 					Optional:         true,
 					MaxItems:         1,
 					Elem:             maintenanceResource(),
+					DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
+				},
+				"monitoring": {
+					Type:             schema.TypeList,
+					Description:      "Alert configuration to send notification to email lists.",
+					Optional:         true,
+					MaxItems:         1,
+					Elem:             monitoringResource(),
 					DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
 				},
 			},
