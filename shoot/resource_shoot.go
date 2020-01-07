@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	gardener_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
