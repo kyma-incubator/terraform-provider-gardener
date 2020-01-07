@@ -27,13 +27,9 @@ fi
 ##
 # GO BUILD
 ##
-buildEnv=""
-if [ "$1" == "$CI_FLAG" ]; then
-	# build binary statically
-	buildEnv="env CGO_ENABLED=0"
-fi
-
-${buildEnv} go build -o bin/terraform-provider-gardener
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-gardener-windows-amd64
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-gardener-linux-amd64
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-gardener-darwin-amd64
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then

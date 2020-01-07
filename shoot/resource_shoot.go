@@ -2,6 +2,9 @@ package shoot
 
 import (
 	"fmt"
+	"time"
+
+
 	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	gardener_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
@@ -16,8 +19,14 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Global MutexKV
-var gardenerMutexKV = mutexkv.NewMutexKV()
+const (
+	defaultCreateTimeout = time.Minute * 30
+	defaultUpdateTimeout = time.Minute * 30
+	defaultDeleteTimeout = time.Minute * 20
+)
+
+// Shoot mutex prevents concurrent writes to the CRD
+var shootMutex = mutexkv.NewMutexKV()
 
 func ResourceShoot() *schema.Resource {
 	return &schema.Resource{
@@ -26,6 +35,11 @@ func ResourceShoot() *schema.Resource {
 		Exists: resourceServerExists,
 		Update: resourceServerUpdate,
 		Delete: resourceServerDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(defaultCreateTimeout),
+			Update: schema.DefaultTimeout(defaultUpdateTimeout),
+			Delete: schema.DefaultTimeout(defaultDeleteTimeout),
+		},
 		Schema: map[string]*schema.Schema{
 			"metadata": namespacedMetadataSchema("shoot", false),
 			"spec":     shootSpecSchema(),
@@ -39,8 +53,8 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 	spec := expand.ExpandShoot(d.Get("spec").([]interface{}))
 
 	mutex_key := fmt.Sprintf(`namespace-%s`, metadata.Namespace)
-	gardenerMutexKV.Lock(mutex_key)
-	defer gardenerMutexKV.Unlock(mutex_key)
+	shootMutex.Lock(mutex_key)
+	defer shootMutex.Unlock(mutex_key)
 	shootCRD := gardener_types.Shoot{
 		ObjectMeta: metadata,
 		Spec:       spec,
@@ -103,8 +117,8 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	mutex_key := fmt.Sprintf(`namespace-%s`, namespace)
-	gardenerMutexKV.Lock(mutex_key)
-	defer gardenerMutexKV.Unlock(mutex_key)
+	shootMutex.Lock(mutex_key)
+	defer shootMutex.Unlock(mutex_key)
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
 	new_shoot := gardener_types.Shoot{}
@@ -138,8 +152,8 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	mutex_key := fmt.Sprintf(`namespace-%s`, namespace)
-	gardenerMutexKV.Lock(mutex_key)
-	defer gardenerMutexKV.Unlock(mutex_key)
+	shootMutex.Lock(mutex_key)
+	defer shootMutex.Unlock(mutex_key)
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	err = shootsClient.Delete(name, &meta_v1.DeleteOptions{})
 	if err != nil {
@@ -184,7 +198,7 @@ func waitForShootFunc(shootsClient gardener_apis.ShootInterface, name string) re
 					return resource.RetryableError(fmt.Errorf("Waiting for shoot condition to finish: %s", condition.Type))
 				}
 				if condition.Status == gardencorev1alpha1.ConditionFalse {
-					return resource.NonRetryableError(fmt.Errorf("Shoot condition failed: %s", condition.Message))
+					return resource.RetryableError(fmt.Errorf("Shoot condition failed: %s", condition.Message))
 				}
 			}
 
