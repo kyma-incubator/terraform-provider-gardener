@@ -37,19 +37,9 @@ func cloudResourceGCP() *schema.Resource {
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"nodes": {
+						"internal": {
 							Type:        schema.TypeString,
-							Description: "Nodes is the CIDR of the node network.",
-							Optional:    true,
-						},
-						"pods": {
-							Type:        schema.TypeString,
-							Description: "Pods is the CIDR of the pod network.",
-							Optional:    true,
-						},
-						"services": {
-							Type:        schema.TypeString,
-							Description: "Services is the CIDR of the service network.",
+							Description: "Internal is a private subnet (used for internal load balancers).",
 							Optional:    true,
 						},
 						"workers": {

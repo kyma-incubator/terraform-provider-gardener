@@ -351,22 +351,6 @@ func expandKubernetesAPIServer(server []interface{}) *v1beta1.KubeAPIServerConfi
 			obj.OIDCConfig.UsernamePrefix = &v
 		}
 	}
-	if plugins, ok := in["admission_plugins"].([]interface{}); ok && len(plugins) > 0 {
-		for _, p := range plugins {
-			if p, ok := p.(map[string]interface{}); ok {
-				pluginObj := v1beta1.AdmissionPlugin{}
-
-				if v, ok := p["name"].(string); ok && len(v) > 0 {
-					pluginObj.Name = v
-				}
-				if v, ok := p["config"].(string); ok && len(v) > 0 {
-					pluginObj.Config = &v
-				}
-
-				obj.AdmissionPlugins = append(obj.AdmissionPlugins, pluginObj)
-			}
-		}
-	}
 	if v, ok := in["audit_config"].([]interface{}); ok && len(v) > 0 {
 		v := v[0].(map[string]interface{})
 		obj.AuditConfig = &v1beta1.AuditConfig{}
@@ -376,7 +360,7 @@ func expandKubernetesAPIServer(server []interface{}) *v1beta1.KubeAPIServerConfi
 			obj.AuditConfig.AuditPolicy = &v1beta1.AuditPolicy{}
 
 			if v, ok := v["config_map_ref"].([]interface{}); ok {
-				obj.AuditConfig.AuditPolicy.ConfigMapRef = expandLocalObjectReference(v)
+				obj.AuditConfig.AuditPolicy.ConfigMapRef = expandObjectReference(v)
 			}
 		}
 	}

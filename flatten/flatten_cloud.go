@@ -62,13 +62,13 @@ func flattenCloudAWS(in *v1beta1.AWSCloud) []interface{} {
 	}
 	networks["vpc"] = []interface{}{vpc}
 	if in.Networks.Internal != nil {
-		networks["internal"] = newCIDRSet(schema.HashString, in.Networks.Internal)
+		networks["internal"] = newStringSet(schema.HashString, in.Networks.Internal)
 	}
 	if in.Networks.Public != nil {
-		networks["public"] = newCIDRSet(schema.HashString, in.Networks.Public)
+		networks["public"] = newStringSet(schema.HashString, in.Networks.Public)
 	}
 	if in.Networks.Workers != nil {
-		networks["workers"] = newCIDRSet(schema.HashString, in.Networks.Workers)
+		networks["workers"] = newStringSet(schema.HashString, in.Networks.Workers)
 	}
 	att["networks"] = []interface{}{networks}
 	if len(in.Workers) > 0 {
@@ -152,17 +152,11 @@ func flattenCloudGCP(in *v1beta1.GCPCloud) []interface{} {
 		att["machine_image"] = []interface{}{image}
 	}
 	networks := make(map[string]interface{})
-	if in.Networks.Nodes != nil {
-		networks["nodes"] = in.Networks.Nodes
-	}
-	if in.Networks.Pods != nil {
-		networks["pods"] = in.Networks.Pods
-	}
-	if in.Networks.Services != nil {
-		networks["services"] = in.Networks.Services
-	}
 	if in.Networks.Workers != nil {
-		networks["workers"] = newCIDRSet(schema.HashString, in.Networks.Workers)
+		networks["workers"] = newStringSet(schema.HashString, in.Networks.Workers)
+	}
+	if in.Networks.Internal != nil {
+		networks["internal"] = *in.Networks.Internal
 	}
 	att["networks"] = []interface{}{networks}
 	if len(in.Workers) > 0 {
@@ -246,15 +240,7 @@ func flattenCloudAzure(in *v1beta1.AzureCloud) []interface{} {
 		att["machine_image"] = []interface{}{image}
 	}
 	networks := make(map[string]interface{})
-	if in.Networks.Nodes != nil {
-		networks["nodes"] = in.Networks.Nodes
-	}
-	if in.Networks.Pods != nil {
-		networks["pods"] = in.Networks.Pods
-	}
-	if in.Networks.Services != nil {
-		networks["services"] = in.Networks.Services
-	}
+
 	vnet := make(map[string]interface{})
 	if in.Networks.VNet.Name != nil {
 		vnet["id"] = in.Networks.VNet.Name
