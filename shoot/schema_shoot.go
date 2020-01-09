@@ -314,10 +314,13 @@ func monitoringResource() *schema.Resource {
 				DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"emailReceivers": {
-							Type:             schema.TypeList,
-							Description:      "List of people who receiving alerts for this shoots",
-							Optional:         true,
+						"emailreceivers": {
+							Type:        schema.TypeList,
+							Description: "List of people who receiving alerts for this shoots",
+							Optional:    true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 							DiffSuppressFunc: suppressEmptyNewValue,
 						},
 					},
