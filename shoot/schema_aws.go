@@ -187,6 +187,11 @@ func cloudResourceAWS() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Set:         schema.HashString,
 			},
+			"cabundle": {
+				Type:        schema.TypeString,
+				Description: "caBundle configuration",
+				Optional:    true,
+			},
 		},
 	}
 }
