@@ -34,6 +34,9 @@ func ResourceShoot() *schema.Resource {
 		Exists: resourceServerExists,
 		Update: resourceServerUpdate,
 		Delete: resourceServerDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceServerImport,
+		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(defaultCreateTimeout),
 			Update: schema.DefaultTimeout(defaultUpdateTimeout),
@@ -165,6 +168,33 @@ func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId("")
 	return nil
+}
+
+func resourceServerImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	client := m.(*client.Client)
+	namespace, name, err := flatten.IdParts(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	mutex_key := fmt.Sprintf(`namespace-%s`, namespace)
+	shootMutex.Lock(mutex_key)
+	defer shootMutex.Unlock(mutex_key)
+	shootsClient := client.GardenerClientSet.Shoots(namespace)
+
+	// Wait for cluster if it is still not ready
+	err = resource.Retry(d.Timeout(schema.TimeoutCreate), waitForShootFunc(shootsClient, name))
+	if err != nil {
+		d.SetId("")
+		return nil, err
+	}
+	// Set ID
+	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	d.SetId(flatten.BuildID(shoot.ObjectMeta))
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceServerExists(d *schema.ResourceData, m interface{}) (bool, error) {
