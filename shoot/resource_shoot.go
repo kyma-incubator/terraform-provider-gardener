@@ -52,7 +52,7 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 		Spec:       spec,
 		TypeMeta: meta_v1.TypeMeta{
 			Kind:       "Shoot",
-			APIVersion: "garden.sapcloud.io/v1beta1",
+			APIVersion: "core.gardener.cloud/v1beta1",
 		},
 	}
 	shootsClient := client.GardenerClientSet.Shoots(metadata.Namespace)
@@ -84,7 +84,7 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return err
 	}
-	shoot.ObjectMeta.Annotations["confirmation.garden.sapcloud.io/deletion"] = "true"
+	shoot.ObjectMeta.Annotations["confirmation.core.gardener.cloud/deletion"] = "true"
 	err = d.Set("metadata", flatten.FlattenMetadata(shoot.ObjectMeta, d))
 	if err != nil {
 		return err
