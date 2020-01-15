@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Terraform Provider for Gardener enables [Terraform](https://www.terraform.io) to provision [Kubernetes](https://kubernetes.io) clusters on chosen cloud providers using [Gardener](https://gardener.cloud/). Currently, it supports AWS, Azure, and GCP.
+The Terraform Provider for Gardener enables [Terraform](https://www.terraform.io) to provision [Kubernetes](https://kubernetes.io) clusters on chosen cloud providers using [Gardener](https://gardener.cloud/). Currently, the Terraform Provider for Gardener supports AWS, Azure, and GCP.
 
 ## Prerequisites
 
@@ -35,11 +35,11 @@ At the moment, the Terraform Provider for Gardener defines a resource type [`gar
 |Cloud Provider|Specification|Example|
 |---|---|---|
 |Amazon Web Services|[schema.go](shoot/schema_aws.go)|[main.tf](examples/aws/main.tf)|
-|Goocle Cloud Platform|[schema.go](shoot/schema_gcp.go)|[main.tf](examples/gcp/main.tf)|
+|Google Cloud Platform|[schema.go](shoot/schema_gcp.go)|[main.tf](examples/gcp/main.tf)|
 |Azure|[schema.go](shoot/schema_azure.go)|[main.tf](examples/azure/main.tf)|
 
 Perform the following steps to use the provider:
- 
+
 1. Go to one of the `main.tf` files listed above.
 
 2. Edit the `main.tf` file to provide the missing parameters.
@@ -55,3 +55,4 @@ Perform the following steps to use the provider:
 5. Deploy the cluster:
     ```bash
     terraform apply
+    ```
