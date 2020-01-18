@@ -121,6 +121,62 @@ func kubernetesResource() *schema.Resource {
 							Description: "enable basic authentication flag.",
 							Optional:    true,
 						},
+						"oidc_config": {
+							Type:             schema.TypeList,
+							Description:      "interface for adding oidc_config in kube api server section",
+							MaxItems:         1,
+							Optional:         true,
+							DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ca_bundle": {
+										Type:        schema.TypeString,
+										Description: "ca_bundle for oidc config in kube api server section",
+										Optional:    true,
+									},
+									"client_id": {
+										Type:        schema.TypeString,
+										Description: "client_id for oidc config in kube api server section",
+										Optional:    true,
+									},
+									"groups_claim": {
+										Type:        schema.TypeString,
+										Description: "groups_claim for oidc config in kube api server section",
+										Optional:    true,
+									},
+									"groups_prefix": {
+										Type:        schema.TypeString,
+										Description: "groups_prefix for oidc config in kube api server section",
+										Optional:    true,
+									},
+									"issuer_url": {
+										Type:        schema.TypeString,
+										Description: "issuer_url for oidc config in kube api server section",
+										Optional:    true,
+									},
+									"required_claims": {
+										Type:        schema.TypeString,
+										Description: "required_claims for oidc config in kube api server section",
+										Optional:    true,
+									},
+									"signing_algs": {
+										Type:        schema.TypeString,
+										Description: "signing_algs for oidc config in kube api server section",
+										Optional:    true,
+									},
+									"username_claim": {
+										Type:        schema.TypeString,
+										Description: "username_claim for oidc config in kube api server section",
+										Optional:    true,
+									},
+									"username_prefix": {
+										Type:        schema.TypeString,
+										Description: "username_prefix for oidc config in kube api server section",
+										Optional:    true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
