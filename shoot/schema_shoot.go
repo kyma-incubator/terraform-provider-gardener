@@ -478,11 +478,6 @@ func cloudResource() *schema.Resource {
 					},
 				},
 			},
-			"seed": {
-				Type:        schema.TypeString,
-				Description: "Seed is the name of a Seed object.",
-				Required:    true,
-			},
 			"aws": {
 				Type:        schema.TypeList,
 				Description: "AWS contains the Shoot specification for the Amazon Web Services cloud.",

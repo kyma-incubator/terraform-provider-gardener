@@ -1,5 +1,5 @@
 provider "gardener" {
-  kube_file          = "${file("<my-gardener-service-account-kubeconfig>")}"
+  kube_file = "${file("<my-gardener-service-account-kubeconfig>")}"
   /*kube_file          =<<-EOT
     kind: Config
     clusters:
@@ -35,7 +35,6 @@ resource "gardener_shoot" "test_cluster" {
     cloud {
       profile = "az"
       region  = "westeurope"
-      seed    = "az-eu1"
 
       secret_binding_ref {
         name = "<secret_binding>"

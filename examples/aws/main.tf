@@ -35,7 +35,6 @@ resource "gardener_shoot" "test_cluster" {
     cloud {
       profile = "aws"
       region  = "eu-central-1"
-      seed    = "aws-eu1"
 
       secret_binding_ref {
         name = "<secret_binding>"
