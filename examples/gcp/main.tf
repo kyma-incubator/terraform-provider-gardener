@@ -35,7 +35,6 @@ resource "gardener_shoot" "test_cluster" {
     cloud {
       profile = "gcp"
       region  = "europe-west3"
-      seed    = "gcp-eu1"
       secret_binding_ref {
         name = "<secret_binding>"
       }
