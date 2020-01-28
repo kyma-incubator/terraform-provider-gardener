@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	gardencorev1alpha1 "github.com/gardener/gardener/pkg/apis/core/v1alpha1"
-	gardener_types "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
-	gardener_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
+	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
+	gardener_types "github.com/gardener/gardener/pkg/apis/core/v1beta1"
+	gardener_apis "github.com/gardener/gardener/pkg/client/core/clientset/versioned/typed/core/v1beta1"
 	"github.com/hashicorp/terraform/helper/mutexkv"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -57,12 +57,12 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 	mutex_key := fmt.Sprintf(`namespace-%s`, metadata.Namespace)
 	shootMutex.Lock(mutex_key)
 	defer shootMutex.Unlock(mutex_key)
-	shootCRD := gardener_types.Shoot{
+	shootCRD := gardencorev1beta1.Shoot{
 		ObjectMeta: metadata,
 		Spec:       spec,
 		TypeMeta: meta_v1.TypeMeta{
 			Kind:       "Shoot",
-			APIVersion: "garden.sapcloud.io/v1beta1",
+			APIVersion: "core.gardener.cloud/v1beta1",
 		},
 	}
 	shootsClient := client.GardenerClientSet.Shoots(metadata.Namespace)
@@ -223,18 +223,18 @@ func waitForShootFunc(shootsClient gardener_apis.ShootInterface, name string) re
 
 		if shoot.Generation <= shoot.Status.ObservedGeneration {
 			for _, condition := range shoot.Status.Conditions {
-				if condition.Status == gardencorev1alpha1.ConditionProgressing {
+				if condition.Status == gardencorev1beta1.ConditionProgressing {
 					return resource.RetryableError(fmt.Errorf("Waiting for shoot condition to finish: %s", condition.Type))
 				}
-				if condition.Status == gardencorev1alpha1.ConditionFalse {
+				if condition.Status == gardencorev1beta1.ConditionFalse {
 					return resource.RetryableError(fmt.Errorf("Shoot condition failed: %s", condition.Message))
 				}
 			}
 
-			if shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStatePending || shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStateProcessing {
+			if shoot.Status.LastOperation.State == gardencorev1beta1.LastOperationStatePending || shoot.Status.LastOperation.State == gardencorev1beta1.LastOperationStateProcessing {
 				return resource.RetryableError(fmt.Errorf("Waiting for last operation to finish: %s", shoot.Status.LastOperation.Description))
 			}
-			if shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStateAborted || shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStateError || shoot.Status.LastOperation.State == gardencorev1alpha1.LastOperationStateFailed {
+			if shoot.Status.LastOperation.State == gardencorev1beta1.LastOperationStateAborted || shoot.Status.LastOperation.State == gardencorev1beta1.LastOperationStateError || shoot.Status.LastOperation.State == gardencorev1beta1.LastOperationStateFailed {
 				return resource.NonRetryableError(fmt.Errorf("Shoot operation failed: %s", shoot.Status.LastOperation.Description))
 			}
 		} else {
