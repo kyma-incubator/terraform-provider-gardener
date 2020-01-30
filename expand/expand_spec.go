@@ -2,12 +2,12 @@ package expand
 
 import (
 	"encoding/json"
+	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
+	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	//v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
-	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
 )
 
 // Expanders
@@ -49,7 +49,50 @@ func ExpandShoot(shoot []interface{}) corev1beta1.ShootSpec {
 		obj.Maintenance = expandMaintenance(v)
 	}
 
+	if v, ok := in["networking"].([]interface{}); ok && len(v) > 0 {
+		obj.Networking = expandNetwokring(v)
+	}
+
+	if v, ok := in["region"].(string); ok && len(v) > 0 {
+		obj.Region = v
+	}
+
+	if v, ok := in["secret_binding_name"].(string); ok && len(v) > 0 {
+		obj.SecretBindingName = v
+	}
+
+	if v, ok := in["seed_name"].(string); ok && len(v) > 0 {
+		obj.SeedName = &v
+	}
+
 	return obj
+}
+
+func expandNetwokring(networking []interface{}) corev1beta1.Networking {
+	obj := corev1beta1.Networking{}
+	if len(networking) == 0 || networking[0] == nil {
+		return obj
+	}
+
+	in := networking[0].(map[string]interface{})
+	if v, ok := in["type"].(string); ok && len(v) > 0 {
+		obj.Type = v
+	}
+
+	if v, ok := in["pods"].(string); ok && len(v) > 0 {
+		obj.Pods = &v
+	}
+
+	if v, ok := in["nodes"].(string); ok && len(v) > 0 {
+		obj.Nodes = &v
+	}
+
+	if v, ok := in["services"].(string); ok && len(v) > 0 {
+		obj.Services = &v
+	}
+
+	return  obj
+
 }
 
 func expandProvider(provider []interface{}) corev1beta1.Provider{
@@ -64,22 +107,20 @@ func expandProvider(provider []interface{}) corev1beta1.Provider{
 		obj.Type = v
 	}
 
-	if obj.Type != "" {
-		switch obj.Type {
-
-		case"azure":
-			obj.ControlPlaneConfig = getAzControlPlaneConfig()
-			obj.InfrastructureConfig  = getAzureConfig()
+	if v, ok := in["infrastructure_config"].([]interface{}); ok && len(v) > 0 {
+		cloud := v[0].(map[string]interface{})
+		if az, ok := cloud["azure"].([]interface{}); ok && len(az) > 0 {
+			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
+			obj.InfrastructureConfig  = getAzureConfig(az)
 		}
 	}
-
-	if v, ok := in["workers"].([]interface{}); ok && len(v) > 0 {
-		var workers []corev1beta1.Worker
-		for _, w := range v {
-			worker := expandWorker(w)
-			workers = append(workers, worker)
+	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
+		for _, w := range workers {
+			if w, ok := w.(map[string]interface{}); ok {
+				workerObj := expandWorker(w)
+				obj.Workers = append(obj.Workers, workerObj)
+			}
 		}
-		obj.Workers = workers
 	}
 
 	return  obj
@@ -96,23 +137,63 @@ func getAzControlPlaneConfig() *corev1beta1.ProviderConfig {
 
 
 
-func getAzureConfig() *corev1beta1.ProviderConfig {
+func getAzureConfig(az []interface{}) *corev1beta1.ProviderConfig {
 	azConfigObj := azAlpha1.InfrastructureConfig{}
-	cidr := "10.250.0.0/16"
-	azConfigObj.Networks.VNet.CIDR = &cidr
-	azConfigObj.Networks.Workers = "10.250.0.0/19"
-
-	//azConfig := `
-    //  apiVersion: azure.provider.extensions.gardener.cloud/v1alpha1
-    //  kind: InfrastructureConfig
-    //  networks:
-    //    vnet:
-    //      cidr: 10.250.0.0/16
-    //    workers: 10.250.0.0/19
-    //   `
 	obj := corev1beta1.ProviderConfig{}
+	if len(az) == 0 && az[0] == nil {
+		return &obj
+	}
+	in := az[0].(map[string]interface{})
+
+	azConfigObj.APIVersion  = "azure.provider.extensions.gardener.cloud/v1alpha1"
+	azConfigObj.Kind = "InfrastructureConfig"
+	if v, ok := in["networks"].([]interface{}); ok && len(v) > 0 {
+		azConfigObj.Networks = getNetworks(v)
+	}
 	obj.Raw, _ = json.Marshal(azConfigObj)
 	return  &obj
+}
+
+func getNetworks(networks []interface{}) azAlpha1.NetworkConfig {
+	obj := azAlpha1.NetworkConfig{}
+	if networks == nil {
+		return  obj
+	}
+	in := networks[0].(map[string]interface{})
+
+	if v, ok := in["vnet"].([]interface{}); ok {
+		obj.VNet = getVNET(v)
+	}
+	if v, ok := in["workers"].(string); ok {
+		obj.Workers = v
+	}
+
+	return obj
+}
+
+func getVNET(vnet []interface{}) azAlpha1.VNet {
+	obj := azAlpha1.VNet{}
+
+
+	if vnet == nil {
+		return  obj
+	}
+
+	in := vnet[0].(map[string]interface{})
+	return obj
+	if v, ok := in["cidr"].(string); ok && len(v) >0 {
+		obj.CIDR = &v
+	}
+
+	if v, ok := in["name"].(string); ok && len(v) >0 {
+		obj.Name = &v
+	}
+
+	if v, ok := in["resource_group"].(string); ok && len(v) >0 {
+		obj.ResourceGroup = &v
+	}
+
+return obj
 }
 
 func expandWorker(w interface{}) corev1beta1.Worker {
@@ -146,12 +227,12 @@ if  w == nil {
 		obj.Machine = expandMachine(v)
 	}
 
-	if v, ok := in["maximum"].(int32); ok   {
-		obj.Maximum = v
+	if v, ok := in["maximum"].(int); ok   {
+		obj.Maximum = int32(v)
 	}
 
-	if v, ok := in["minimum"].(int32); ok   {
-		obj.Minimum = v
+	if v, ok := in["minimum"].(int); ok   {
+		obj.Minimum = int32(v)
 	}
 
 	if v, ok := in["max_surge"].(string); ok && len(v) > 0  {
@@ -184,22 +265,32 @@ if  w == nil {
 		}
 	}
 
-	if volumes, ok := in["volumes"].([]interface{}); ok && len(volumes) > 0 {
-		for _, v := range volumes {
-			if v,ok := v.(string); ok && len(v) > 0 {
-				obj.Volume.Type = &v
-			}
-
-			if v, ok := v.(string); ok && len(v) > 0 {
-				obj.Volume.Size = v
-			}
-		}
+	if v, ok := in["volume"].([]interface{}); ok {
+		obj.Volume = expandVolume(v)
 	}
 
 	if zones, ok := in["zones"].([]string); ok && len(zones) > 0 {
 		obj.Zones = zones
 	}
 return obj
+}
+
+func expandVolume(v []interface{}) *corev1beta1.Volume {
+	obj  := &corev1beta1.Volume{}
+
+	if len(v) == 0 && v[0] == nil {
+		return obj
+	}
+	in := v[0].(map[string]interface{})
+
+	if c, ok := in["type"].(string); ok && len(c) > 0 {
+		obj.Type = &c
+	}
+
+	if c, ok := in["size"].(string); ok && len(c) > 0 {
+		obj.Size = c
+	}
+	return  obj
 }
 
 func expandMachine(m []interface{}) corev1beta1.Machine {

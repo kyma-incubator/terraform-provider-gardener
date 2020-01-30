@@ -3,6 +3,7 @@ package shoot
 import (
 	"fmt"
 	"time"
+	//"encoding/json"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	gardener_types "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -65,8 +66,12 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 			APIVersion: "core.gardener.cloud/v1beta1",
 		},
 	}
+	//foo, _:= json.Marshal(&shootCRD)
+	//return fmt.Errorf("fffff: %v", string(foo))
+
 	shootsClient := client.GardenerClientSet.Shoots(metadata.Namespace)
 	shoot, err := shootsClient.Create(&shootCRD)
+
 	if err != nil {
 		d.SetId("")
 		return err
