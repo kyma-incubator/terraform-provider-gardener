@@ -252,7 +252,7 @@ func azureResource() *schema.Resource {
 									"name": {
 										Type: schema.TypeString,
 										Description: "Name is the VNet name.",
-										Required: true,
+										Optional: true,
 									},
 									"cidr": {
 										Type: schema.TypeString,
