@@ -237,7 +237,7 @@ func azureResource() *schema.Resource {
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"workers" : {
+						"workers": {
 						Type: schema.TypeString,
 						Description: "Workers is the worker subnet range to create (used for the VMs).",
 						Required: true,
@@ -246,6 +246,7 @@ func azureResource() *schema.Resource {
 							Type: schema.TypeList,
 							Description: "VNet indicates whether to use an existing VNet or create a new one.",
 							Required: true,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
@@ -264,7 +265,6 @@ func azureResource() *schema.Resource {
 										Optional: true,
 									},
 								},
-
 							},
 						},
 					},

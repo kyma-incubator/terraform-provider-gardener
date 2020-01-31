@@ -174,25 +174,18 @@ func getNetworks(networks []interface{}) azAlpha1.NetworkConfig {
 func getVNET(vnet []interface{}) azAlpha1.VNet {
 	obj := azAlpha1.VNet{}
 
-
-	if vnet == nil {
-		return  obj
+	if len(vnet) == 0 && vnet[0] == nil {
+		return obj
 	}
-
 	in := vnet[0].(map[string]interface{})
-	return obj
-	if v, ok := in["cidr"].(string); ok && len(v) >0 {
-		obj.CIDR = &v
-	}
 
-	if v, ok := in["name"].(string); ok && len(v) >0 {
+	if v, ok := in["name"].(string); ok && len(v) > 0 {
 		obj.Name = &v
 	}
 
-	if v, ok := in["resource_group"].(string); ok && len(v) >0 {
-		obj.ResourceGroup = &v
+	if v, ok := in["cidr"].(string); ok && len(v) > 0 {
+		obj.CIDR = &v
 	}
-
 return obj
 }
 
