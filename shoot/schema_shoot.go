@@ -753,13 +753,6 @@ func shootSpecSchema() *schema.Schema {
 					Description: "Seed name is the name of the seed cluster that runs the control plane of the Shoot.",
 					Optional: true,
 				},
-				//"cloud": {
-				//	Type:        schema.TypeList,
-				//	Description: "Cloud contains information about the cloud environment and their specific settings.",
-				//	Required:    true,
-				//	MaxItems:    1,
-				//	Elem:        cloudResource(),
-				//},
 			},
 		},
 	}
@@ -791,56 +784,3 @@ func networkingResource() *schema.Resource  {
 		},
 	}
 }
-
-//func cloudResource() *schema.Resource {
-//	return &schema.Resource{
-//		Schema: map[string]*schema.Schema{
-//			//"profile": {
-//			//	Type:        schema.TypeString,
-//			//	Description: "Profile is a name of a CloudProfile object.",
-//			//	Required:    true,
-//			//},
-//			//"region": {
-//			//	Type:        schema.TypeString,
-//			//	Description: "Region is a name of a cloud provider region.",
-//			//	Required:    true,
-//			//},
-//			"secret_binding_ref": {
-//				Type:        schema.TypeList,
-//				Description: "SecretBindingRef is a reference to a SecretBinding object.",
-//				Required:    true,
-//				MaxItems:    1,
-//				Elem: &schema.Resource{
-//					Schema: map[string]*schema.Schema{
-//						"name": {
-//							Type:        schema.TypeString,
-//							Description: "Name of the secret.",
-//							Required:    true,
-//						},
-//					},
-//				},
-//			},
-//			"aws": {
-//				Type:        schema.TypeList,
-//				Description: "AWS contains the Shoot specification for the Amazon Web Services cloud.",
-//				Optional:    true,
-//				MaxItems:    1,
-//				Elem:        cloudResourceAWS(),
-//			},
-//			"gcp": {
-//				Type:        schema.TypeList,
-//				Description: "GCP contains the Shoot specification for the Google Cloud Platform.",
-//				Optional:    true,
-//				MaxItems:    1,
-//				Elem:        cloudResourceGCP(),
-//			},
-//			"azure": {
-//				Type:        schema.TypeList,
-//				Description: "Azure contains the Shoot specification for the Azure Cloud Platform.",
-//				Optional:    true,
-//				MaxItems:    1,
-//				Elem:        cloudResourceAzure(),
-//			},
-//		},
-//	}
-//}
