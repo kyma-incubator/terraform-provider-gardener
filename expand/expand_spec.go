@@ -91,17 +91,16 @@ func expandNetwokring(networking []interface{}) corev1beta1.Networking {
 		obj.Services = &v
 	}
 
-	return  obj
+	return obj
 
 }
 
-func expandProvider(provider []interface{}) corev1beta1.Provider{
+func expandProvider(provider []interface{}) corev1beta1.Provider {
 	obj := corev1beta1.Provider{}
-	if  len(provider) ==  0 || provider[0]== nil {
+	if len(provider) == 0 || provider[0] == nil {
 		return obj
 	}
 	in := provider[0].(map[string]interface{})
-
 
 	if v, ok := in["type"].(string); ok && len(v) > 0 {
 		obj.Type = v
@@ -111,7 +110,7 @@ func expandProvider(provider []interface{}) corev1beta1.Provider{
 		cloud := v[0].(map[string]interface{})
 		if az, ok := cloud["azure"].([]interface{}); ok && len(az) > 0 {
 			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
-			obj.InfrastructureConfig  = getAzureConfig(az)
+			obj.InfrastructureConfig = getAzureConfig(az)
 		}
 	}
 	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
@@ -123,7 +122,7 @@ func expandProvider(provider []interface{}) corev1beta1.Provider{
 		}
 	}
 
-	return  obj
+	return obj
 }
 
 func getAzControlPlaneConfig() *corev1beta1.ProviderConfig {
@@ -132,10 +131,8 @@ func getAzControlPlaneConfig() *corev1beta1.ProviderConfig {
       kind: ControlPlaneConfig`
 	obj := corev1beta1.ProviderConfig{}
 	obj.Raw = []byte(azConfig)
-	return  &obj
+	return &obj
 }
-
-
 
 func getAzureConfig(az []interface{}) *corev1beta1.ProviderConfig {
 	azConfigObj := azAlpha1.InfrastructureConfig{}
@@ -145,19 +142,19 @@ func getAzureConfig(az []interface{}) *corev1beta1.ProviderConfig {
 	}
 	in := az[0].(map[string]interface{})
 
-	azConfigObj.APIVersion  = "azure.provider.extensions.gardener.cloud/v1alpha1"
+	azConfigObj.APIVersion = "azure.provider.extensions.gardener.cloud/v1alpha1"
 	azConfigObj.Kind = "InfrastructureConfig"
 	if v, ok := in["networks"].([]interface{}); ok && len(v) > 0 {
 		azConfigObj.Networks = getNetworks(v)
 	}
 	obj.Raw, _ = json.Marshal(azConfigObj)
-	return  &obj
+	return &obj
 }
 
 func getNetworks(networks []interface{}) azAlpha1.NetworkConfig {
 	obj := azAlpha1.NetworkConfig{}
 	if networks == nil {
-		return  obj
+		return obj
 	}
 	in := networks[0].(map[string]interface{})
 
@@ -186,14 +183,14 @@ func getVNET(vnet []interface{}) azAlpha1.VNet {
 	if v, ok := in["cidr"].(string); ok && len(v) > 0 {
 		obj.CIDR = &v
 	}
-return obj
+	return obj
 }
 
 func expandWorker(w interface{}) corev1beta1.Worker {
-obj := corev1beta1.Worker{}
-if  w == nil {
-	return obj
-}
+	obj := corev1beta1.Worker{}
+	if w == nil {
+		return obj
+	}
 	in := w.(map[string]interface{})
 
 	if v, ok := in["annotations"].(map[string]interface{}); ok {
@@ -220,20 +217,20 @@ if  w == nil {
 		obj.Machine = expandMachine(v)
 	}
 
-	if v, ok := in["maximum"].(int); ok   {
+	if v, ok := in["maximum"].(int); ok {
 		obj.Maximum = int32(v)
 	}
 
-	if v, ok := in["minimum"].(int); ok   {
+	if v, ok := in["minimum"].(int); ok {
 		obj.Minimum = int32(v)
 	}
 
-	if v, ok := in["max_surge"].(string); ok && len(v) > 0  {
+	if v, ok := in["max_surge"].(string); ok && len(v) > 0 {
 		surge := intstr.FromString(v)
 		obj.MaxSurge = &surge
 	}
 
-	if v, ok := in["max_unavailable"].(string); ok && len(v) > 0  {
+	if v, ok := in["max_unavailable"].(string); ok && len(v) > 0 {
 		unavailable := intstr.FromString(v)
 		obj.MaxUnavailable = &unavailable
 	}
@@ -265,11 +262,11 @@ if  w == nil {
 	if zones, ok := in["zones"].([]string); ok && len(zones) > 0 {
 		obj.Zones = zones
 	}
-return obj
+	return obj
 }
 
 func expandVolume(v []interface{}) *corev1beta1.Volume {
-	obj  := &corev1beta1.Volume{}
+	obj := &corev1beta1.Volume{}
 
 	if len(v) == 0 && v[0] == nil {
 		return obj
@@ -283,11 +280,11 @@ func expandVolume(v []interface{}) *corev1beta1.Volume {
 	if c, ok := in["size"].(string); ok && len(c) > 0 {
 		obj.Size = c
 	}
-	return  obj
+	return obj
 }
 
 func expandMachine(m []interface{}) corev1beta1.Machine {
-	obj  := corev1beta1.Machine{}
+	obj := corev1beta1.Machine{}
 
 	if len(m) == 0 && m[0] == nil {
 		return obj
@@ -302,11 +299,11 @@ func expandMachine(m []interface{}) corev1beta1.Machine {
 		obj.Image = expandShootImage(v)
 	}
 
-return obj
+	return obj
 }
 
 func expandShootImage(si []interface{}) *corev1beta1.ShootMachineImage {
-	obj  := &corev1beta1.ShootMachineImage{}
+	obj := &corev1beta1.ShootMachineImage{}
 
 	if len(si) == 0 && si[0] == nil {
 		return obj
@@ -324,7 +321,7 @@ func expandShootImage(si []interface{}) *corev1beta1.ShootMachineImage {
 }
 
 func expand_worker_kubernetes(wk []interface{}) *corev1beta1.WorkerKubernetes {
-	obj  := &corev1beta1.WorkerKubernetes{}
+	obj := &corev1beta1.WorkerKubernetes{}
 	if len(wk) == 0 && wk[0] == nil {
 		return obj
 	}

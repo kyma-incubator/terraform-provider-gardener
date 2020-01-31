@@ -74,7 +74,7 @@ func flattenDNS(in *corev1beta1.DNS) []interface{} {
 
 	if len(in.Providers) > 0 {
 		providers := make([]interface{}, len(in.Providers))
-		for i, v := range  in.Providers {
+		for i, v := range in.Providers {
 			m := map[string]interface{}{}
 			if v.Domains != nil {
 				m["domains"] = v.Domains
@@ -107,9 +107,9 @@ func flattenProvider(in corev1beta1.Provider) []interface{} {
 		att["type"] = in.Type
 	}
 
-	if len(in.Workers) > 0  {
+	if len(in.Workers) > 0 {
 		workers := make([]interface{}, len(in.Workers))
-		for i,v := range in.Workers {
+		for i, v := range in.Workers {
 			m := map[string]interface{}{}
 
 			if len(v.Name) > 0 {
@@ -150,11 +150,11 @@ func flattenProvider(in corev1beta1.Provider) []interface{} {
 			}
 
 			if v.Minimum != 0 {
-				m["minimum"]= v.Minimum
+				m["minimum"] = v.Minimum
 			}
 
 			if v.Maximum != 0 {
-				m["maximum"]= v.Maximum
+				m["maximum"] = v.Maximum
 			}
 
 			if v.Kubernetes != nil {
@@ -170,7 +170,6 @@ func flattenProvider(in corev1beta1.Provider) []interface{} {
 			workers[i] = m
 		}
 		att["workers"] = workers
-
 
 	}
 	return []interface{}{att}

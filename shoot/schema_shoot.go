@@ -4,44 +4,44 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func workerKubernetes() *schema.Resource{
- return  &schema.Resource{
- 	Schema: map[string]*schema.Schema{
-		"kubelet": {
-			Type:        schema.TypeList,
-			Description: "Kubelet contains configuration settings for the kubelet.",
-			Optional:    true,
-			MaxItems:    1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"feature_gates": {
-						Type:        schema.TypeMap,
-						Description: "FeatureGates contains information about enabled feature gates.",
-						Optional:    true,
-					},
-					"pod_pids_limit": {
-						Type:        schema.TypeInt,
-						Description: "PodPIDsLimit is the maximum number of process IDs per pod allowed by the kubelet.",
-						Optional:    true,
-					},
-					"cpu_cfs_quota": {
-						Type:        schema.TypeBool,
-						Description: "CPUCFSQuota allows you to disable/enable CPU throttling for Pods.",
-						Optional:    true,
-					},
-					"cpu_manager_policy": {
-						Type:        schema.TypeString,
-						Description: "CPUManagerPolicy allows to set alternative CPU management policies (default: none).",
-						Optional:    true,
+func workerKubernetes() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"kubelet": {
+				Type:        schema.TypeList,
+				Description: "Kubelet contains configuration settings for the kubelet.",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"feature_gates": {
+							Type:        schema.TypeMap,
+							Description: "FeatureGates contains information about enabled feature gates.",
+							Optional:    true,
+						},
+						"pod_pids_limit": {
+							Type:        schema.TypeInt,
+							Description: "PodPIDsLimit is the maximum number of process IDs per pod allowed by the kubelet.",
+							Optional:    true,
+						},
+						"cpu_cfs_quota": {
+							Type:        schema.TypeBool,
+							Description: "CPUCFSQuota allows you to disable/enable CPU throttling for Pods.",
+							Optional:    true,
+						},
+						"cpu_manager_policy": {
+							Type:        schema.TypeString,
+							Description: "CPUManagerPolicy allows to set alternative CPU management policies (default: none).",
+							Optional:    true,
+						},
 					},
 				},
 			},
 		},
-	},
- }
+	}
 }
 
-func workerConfig()  *schema.Resource{
+func workerConfig() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"annotations": {
@@ -55,10 +55,10 @@ func workerConfig()  *schema.Resource{
 				Optional:    true,
 			},
 			"kubernetes": {
-				Type: schema.TypeList,
+				Type:        schema.TypeList,
 				Description: "Kubernetes contains configuration for Kubernetes components related to this worker pool.",
-				Optional: true,
-				Elem: workerKubernetes(),
+				Optional:    true,
+				Elem:        workerKubernetes(),
 			},
 			"labels": {
 				Type:        schema.TypeMap,
@@ -81,10 +81,10 @@ func workerConfig()  *schema.Resource{
 							Description: "Type is the machine type of the worker group.",
 							Required:    true,
 						},
-						"image":{
-							Type: schema.TypeList,
+						"image": {
+							Type:        schema.TypeList,
 							Description: "Image holds information about the machine image to use for all nodes of this pool. It will default to the latest version of the first image stated in the referenced CloudProfile if no value has been provided.",
-							Optional: true,
+							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
@@ -104,14 +104,14 @@ func workerConfig()  *schema.Resource{
 				},
 			},
 			"minimum": {
-				Type: schema.TypeInt,
+				Type:        schema.TypeInt,
 				Description: "Minimum is the minimum number of VMs to create.",
-				Required:true,
+				Required:    true,
 			},
 			"maximum": {
-				Type: schema.TypeInt,
+				Type:        schema.TypeInt,
 				Description: "Maximum is the maximum number of VMs to create.",
-				Required: true,
+				Required:    true,
 			},
 			"max_surge": {
 				Type:        schema.TypeInt,
@@ -149,9 +149,9 @@ func workerConfig()  *schema.Resource{
 				},
 			},
 			"volume": {
-				Type: schema.TypeList,
+				Type:        schema.TypeList,
 				Description: "Volume contains information about the volume type and size.",
-				Required: true,
+				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -164,9 +164,8 @@ func workerConfig()  *schema.Resource{
 							Description: "VolumeSize is the size of the root volume.",
 							Required:    true,
 						},
+					},
 				},
-				},
-
 			},
 			"zones": {
 				Type:        schema.TypeSet,
@@ -218,10 +217,10 @@ func providerResource() *schema.Resource {
 				},
 			},
 			"worker": {
-				Type: schema.TypeList,
-				Description: "Workers is a list of worker groups.",
-				Required: true,
-				Elem: workerConfig(),
+				Type:             schema.TypeList,
+				Description:      "Workers is a list of worker groups.",
+				Required:         true,
+				Elem:             workerConfig(),
 				DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
 			},
 		},
@@ -232,47 +231,45 @@ func azureResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"networks": {
-				Type: schema.TypeList,
+				Type:        schema.TypeList,
 				Description: "NetworkConfig holds information about the Kubernetes and infrastructure networks.",
-				Required: true,
+				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"workers": {
-						Type: schema.TypeString,
-						Description: "Workers is the worker subnet range to create (used for the VMs).",
-						Required: true,
+							Type:        schema.TypeString,
+							Description: "Workers is the worker subnet range to create (used for the VMs).",
+							Required:    true,
 						},
 						"vnet": {
-							Type: schema.TypeList,
+							Type:        schema.TypeList,
 							Description: "VNet indicates whether to use an existing VNet or create a new one.",
-							Required: true,
-							MaxItems: 1,
+							Required:    true,
+							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
-										Type: schema.TypeString,
+										Type:        schema.TypeString,
 										Description: "Name is the VNet name.",
-										Optional: true,
+										Optional:    true,
 									},
 									"cidr": {
-										Type: schema.TypeString,
+										Type:        schema.TypeString,
 										Description: "CIDR is the VNet CIDR.",
-										Required: true,
+										Required:    true,
 									},
 									"resource_group": {
-										Type: schema.TypeString,
+										Type:        schema.TypeString,
 										Description: "ResourceGroup is the resource group where the existing vNet belongs to.",
-										Optional: true,
+										Optional:    true,
 									},
 								},
 							},
 						},
 					},
-
 				},
 			},
 		},
-
 	}
 }
 
@@ -705,10 +702,10 @@ func shootSpecSchema() *schema.Schema {
 					Elem:        kubernetesResource(),
 				},
 				"networking": {
-					Type: schema.TypeList,
+					Type:        schema.TypeList,
 					Description: "Networking contains information about cluster networking such as CNI Plugin type, CIDRs, ...etc.",
-					Required: true,
-					Elem: networkingResource(),
+					Required:    true,
+					Elem:        networkingResource(),
 				},
 				"maintenance": {
 					Type:             schema.TypeList,
@@ -727,16 +724,16 @@ func shootSpecSchema() *schema.Schema {
 					DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
 				},
 				"provider": {
-					Type: schema.TypeList,
-					Description: "Provider contains all provider-specific and provider-relevant information.",
-					Required: true,
-					Elem: providerResource(),
+					Type:             schema.TypeList,
+					Description:      "Provider contains all provider-specific and provider-relevant information.",
+					Required:         true,
+					Elem:             providerResource(),
 					DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
 				},
 				"purpose": {
-					Type: schema.TypeString,
+					Type:        schema.TypeString,
 					Description: "Purpose is the purpose class for this cluster.",
-					Optional: true,
+					Optional:    true,
 				},
 				"region": {
 					Type:        schema.TypeString,
@@ -744,42 +741,42 @@ func shootSpecSchema() *schema.Schema {
 					Required:    true,
 				},
 				"secret_binding_name": {
-					Type: schema.TypeString,
+					Type:        schema.TypeString,
 					Description: "Secret binding name is the name of the a SecretBinding that has a reference to the provider secret. The credentials inside the provider secret will be used to create the shoot in the respective account",
-					Required: true,
+					Required:    true,
 				},
 				"seed_name": {
-					Type: schema.TypeString,
+					Type:        schema.TypeString,
 					Description: "Seed name is the name of the seed cluster that runs the control plane of the Shoot.",
-					Optional: true,
+					Optional:    true,
 				},
 			},
 		},
 	}
 }
 
-func networkingResource() *schema.Resource  {
+func networkingResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"type": {
-				Type: schema.TypeString,
+				Type:        schema.TypeString,
 				Description: "Type identifies the type of the networking plugin.",
-				Required: true,
+				Required:    true,
 			},
 			"pods": {
-				Type: schema.TypeString,
+				Type:        schema.TypeString,
 				Description: "Pods is the CIDR of the pod network.",
-				Optional: true,
+				Optional:    true,
 			},
 			"nodes": {
-				Type: schema.TypeString,
+				Type:        schema.TypeString,
 				Description: "Nodes is the CIDR of the entire node network.",
-				Optional: true,
+				Optional:    true,
 			},
 			"services": {
-				Type: schema.TypeString,
+				Type:        schema.TypeString,
 				Description: "Services is the CIDR of the service network.",
-				Optional: true,
+				Optional:    true,
 			},
 		},
 	}
