@@ -50,7 +50,7 @@ func ExpandShoot(shoot []interface{}) corev1beta1.ShootSpec {
 	}
 
 	if v, ok := in["networking"].([]interface{}); ok && len(v) > 0 {
-		obj.Networking = expandNetwokring(v)
+		obj.Networking = expandNetworking(v)
 	}
 
 	if v, ok := in["region"].(string); ok && len(v) > 0 {
@@ -68,7 +68,7 @@ func ExpandShoot(shoot []interface{}) corev1beta1.ShootSpec {
 	return obj
 }
 
-func expandNetwokring(networking []interface{}) corev1beta1.Networking {
+func expandNetworking(networking []interface{}) corev1beta1.Networking {
 	obj := corev1beta1.Networking{}
 	if len(networking) == 0 || networking[0] == nil {
 		return obj
