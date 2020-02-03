@@ -1,12 +1,12 @@
 package client
 
 import (
-	gardener_apis "github.com/gardener/gardener/pkg/client/garden/clientset/versioned/typed/garden/v1beta1"
+	gardener_apis "github.com/gardener/gardener/pkg/client/core/clientset/versioned/typed/core/v1beta1"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 type Client struct {
-	GardenerClientSet *gardener_apis.GardenV1beta1Client
+	GardenerClientSet *gardener_apis.CoreV1beta1Client
 }
 
 // Client configures and returns a fully initialized GardenerClient

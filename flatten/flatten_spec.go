@@ -1,13 +1,16 @@
 package flatten
 
 import (
-	v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
-	"github.com/hashicorp/terraform/helper/schema"
+	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/kyma-incubator/terraform-provider-gardener/expand"
+
+	//"github.com/gardener/gardener/pkg/apis/garden/v1beta1"
+	"github.com/hashicorp/terraform/helper/schema"
+	//"github.com/kyma-incubator/terraform-provider-gardener/expand"
 )
 
 // Flatteners
-func FlattenShoot(in v1beta1.ShootSpec, d *schema.ResourceData, specPrefix ...string) ([]interface{}, error) {
+func FlattenShoot(in corev1beta1.ShootSpec, d *schema.ResourceData, specPrefix ...string) ([]interface{}, error) {
 	att := make(map[string]interface{})
 	prefix := ""
 	if len(specPrefix) > 0 {
@@ -18,9 +21,9 @@ func FlattenShoot(in v1beta1.ShootSpec, d *schema.ResourceData, specPrefix ...st
 		flattenedAddons := flattenAddons(in.Addons)
 		att["addons"] = expand.RemoveInternalKeysArraySpec([]interface{}{flattenedAddons}, configAddons) //expand.RemoveInternalKeysMetadata(flattenedAddons, configAddons)
 	}
-	configCloud := d.Get(prefix + "spec.0.cloud").([]interface{})
-	flattenedCloud := flattenCloud(in.Cloud)
-	att["cloud"] = expand.RemoveInternalKeysArraySpec(flattenedCloud, configCloud)
+	configProvider := d.Get(prefix + "spec.0.provider").([]interface{})
+	flattenedProvider := flattenProvider(in.Provider)
+	att["cloud"] = expand.RemoveInternalKeysArraySpec(flattenedProvider, configProvider)
 	configDNS := d.Get(prefix + "spec.0.dns").([]interface{})
 	flattenedDNS := flattenDNS(in.DNS)
 	att["dns"] = expand.RemoveInternalKeysArraySpec(flattenedDNS, configDNS)
@@ -41,7 +44,7 @@ func FlattenShoot(in v1beta1.ShootSpec, d *schema.ResourceData, specPrefix ...st
 	return []interface{}{att}, nil
 }
 
-func flattenAddons(in *v1beta1.Addons) map[string]interface{} {
+func flattenAddons(in *corev1beta1.Addons) map[string]interface{} {
 	att := make(map[string]interface{})
 
 	if in.KubernetesDashboard != nil {
@@ -57,32 +60,123 @@ func flattenAddons(in *v1beta1.Addons) map[string]interface{} {
 		ingress["enabled"] = in.NginxIngress.Enabled
 		att["nginx_ingress"] = []interface{}{ingress}
 	}
-	if in.ClusterAutoscaler != nil {
-		autoscaler := make(map[string]interface{})
-		autoscaler["enabled"] = in.ClusterAutoscaler.Enabled
-		att["cluster_autoscaler"] = []interface{}{autoscaler}
-	}
+	//if in.ClusterAutoscaler != nil {
+	//	autoscaler := make(map[string]interface{})
+	//	autoscaler["enabled"] = in.ClusterAutoscaler.Enabled
+	//	att["cluster_autoscaler"] = []interface{}{autoscaler}
+	//}
 
 	return att
 }
 
-func flattenDNS(in v1beta1.DNS) []interface{} {
+func flattenDNS(in *corev1beta1.DNS) []interface{} {
 	att := make(map[string]interface{})
 
-	if in.Provider != nil {
-		att["provider"] = in.Provider
+	if len(in.Providers) > 0 {
+		providers := make([]interface{}, len(in.Providers))
+		for i, v := range in.Providers {
+			m := map[string]interface{}{}
+			if v.Domains != nil {
+				m["domains"] = v.Domains
+			}
+			if v.SecretName != nil {
+				m["secret_name"] = v.SecretName
+			}
+			if v.Type != nil {
+				m["type"] = v.Type
+			}
+
+			if v.Zones != nil {
+				m["zones"] = v.Zones
+			}
+			providers[i] = m
+		}
+		att["providers"] = providers
 	}
 	if in.Domain != nil {
 		att["domain"] = in.Domain
-	}
-	if in.SecretName != nil {
-		att["secret_name"] = in.SecretName
 	}
 
 	return []interface{}{att}
 }
 
-func flattenHibernation(in *v1beta1.Hibernation) []interface{} {
+func flattenProvider(in corev1beta1.Provider) []interface{} {
+	att := make(map[string]interface{})
+
+	if len(in.Type) > 0 {
+		att["type"] = in.Type
+	}
+
+	if len(in.Workers) > 0 {
+		workers := make([]interface{}, len(in.Workers))
+		for i, v := range in.Workers {
+			m := map[string]interface{}{}
+
+			if len(v.Name) > 0 {
+				m["name"] = v.Name
+			}
+			if v.Zones != nil {
+				att["zones"] = newStringSet(schema.HashString, v.Zones)
+			}
+			if len(v.Taints) > 0 {
+				taints := make([]interface{}, len(v.Taints))
+				for i, v := range v.Taints {
+					m := map[string]interface{}{}
+
+					if v.Key != "" {
+						m["key"] = v.Key
+					}
+					// if v.Operator != "" {
+					// 	m["operator"] = v.Operator
+					// }
+					if v.Value != "" {
+						m["value"] = v.Value
+					}
+					if v.Effect != "" {
+						m["effect"] = v.Effect
+					}
+					taints[i] = m
+				}
+				m["taints"] = taints
+			}
+			if v.MaxSurge != nil {
+				m["max_surge"] = v.MaxSurge.IntValue()
+			}
+			if v.MaxUnavailable != nil {
+				m["max_unavailable"] = v.MaxUnavailable.IntValue()
+			}
+			if v.CABundle != nil {
+				m["ca_bundle"] = v.CABundle
+			}
+
+			if v.Minimum != 0 {
+				m["minimum"] = v.Minimum
+			}
+
+			if v.Maximum != 0 {
+				m["maximum"] = v.Maximum
+			}
+
+			if v.Kubernetes != nil {
+				m["kubernetes"] = v.Kubernetes
+			}
+
+			if len(v.Annotations) > 0 {
+				m["annotations"] = v.Annotations
+			}
+			if len(v.Labels) > 0 {
+				m["labels"] = v.Labels
+			}
+			workers[i] = m
+		}
+		att["workers"] = workers
+
+	}
+	return []interface{}{att}
+
+}
+
+func flattenHibernation(in *corev1beta1.Hibernation) []interface{} {
 	att := make(map[string]interface{})
 
 	att["enabled"] = in.Enabled
@@ -108,7 +202,7 @@ func flattenHibernation(in *v1beta1.Hibernation) []interface{} {
 	return []interface{}{att}
 }
 
-func flattenKubernetes(in v1beta1.Kubernetes) []interface{} {
+func flattenKubernetes(in corev1beta1.Kubernetes) []interface{} {
 	att := make(map[string]interface{})
 
 	if in.AllowPrivilegedContainers != nil {
@@ -137,13 +231,13 @@ func flattenKubernetes(in v1beta1.Kubernetes) []interface{} {
 	if len(in.Version) > 0 {
 		att["version"] = in.Version
 	}
-	if in.CloudControllerManager != nil {
-		manager := make(map[string]interface{})
-		if in.CloudControllerManager.FeatureGates != nil {
-			manager["feature_gates"] = in.CloudControllerManager.FeatureGates
-		}
-		att["cloud_controller_manager"] = []interface{}{manager}
-	}
+	//if in.CloudControllerManager != nil {
+	//	manager := make(map[string]interface{})
+	//	if in.CloudControllerManager.FeatureGates != nil {
+	//		manager["feature_gates"] = in.CloudControllerManager.FeatureGates
+	//	}
+	//	att["cloud_controller_manager"] = []interface{}{manager}
+	//}
 	if in.KubeControllerManager != nil {
 		manager := make(map[string]interface{})
 		if in.KubeControllerManager.FeatureGates != nil {
@@ -188,7 +282,7 @@ func flattenKubernetes(in v1beta1.Kubernetes) []interface{} {
 	return []interface{}{att}
 }
 
-func flattenMaintenance(in *v1beta1.Maintenance) []interface{} {
+func flattenMaintenance(in *corev1beta1.Maintenance) []interface{} {
 	att := make(map[string]interface{})
 
 	if in.AutoUpdate != nil {
