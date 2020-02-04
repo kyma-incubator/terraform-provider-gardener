@@ -179,6 +179,9 @@ func getVNET(vnet []interface{}) azAlpha1.VNet {
 	if v, ok := in["name"].(string); ok && len(v) > 0 {
 		obj.Name = &v
 	}
+	if v, ok := in["resource_group"].(string); ok && len(v) > 0 {
+		obj.ResourceGroup = &v
+	}
 
 	if v, ok := in["cidr"].(string); ok && len(v) > 0 {
 		obj.CIDR = &v
