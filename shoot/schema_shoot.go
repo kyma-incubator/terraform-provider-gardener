@@ -241,6 +241,13 @@ func azureResource() *schema.Resource {
 							Description: "Workers is the worker subnet range to create (used for the VMs).",
 							Required:    true,
 						},
+						"service_endpoints": {
+							Type:        schema.TypeSet,
+							Description: "List of Azure service endpoints connect to the created VNet.",
+							Optional:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Set:         schema.HashString,
+						},
 						"vnet": {
 							Type:        schema.TypeList,
 							Description: "VNet indicates whether to use an existing VNet or create a new one.",
