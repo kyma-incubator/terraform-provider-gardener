@@ -164,6 +164,9 @@ func getNetworks(networks []interface{}) azAlpha1.NetworkConfig {
 	if v, ok := in["workers"].(string); ok {
 		obj.Workers = v
 	}
+	if v, ok := in["service_endpoints"].(*schema.Set); ok {
+		obj.ServiceEndpoints = expandSet(v)
+	}
 
 	return obj
 }
