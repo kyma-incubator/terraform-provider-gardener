@@ -23,7 +23,7 @@ func FlattenShoot(in corev1beta1.ShootSpec, d *schema.ResourceData, specPrefix .
 	}
 	configProvider := d.Get(prefix + "spec.0.provider").([]interface{})
 	flattenedProvider := flattenProvider(in.Provider)
-	att["cloud"] = expand.RemoveInternalKeysArraySpec(flattenedProvider, configProvider)
+	att["provider"] = expand.RemoveInternalKeysArraySpec(flattenedProvider, configProvider)
 	configDNS := d.Get(prefix + "spec.0.dns").([]interface{})
 	flattenedDNS := flattenDNS(in.DNS)
 	att["dns"] = expand.RemoveInternalKeysArraySpec(flattenedDNS, configDNS)
