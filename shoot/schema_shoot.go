@@ -263,7 +263,7 @@ func azureResource() *schema.Resource {
 									"cidr": {
 										Type:        schema.TypeString,
 										Description: "CIDR is the VNet CIDR.",
-										Required:    true,
+										Optional:    true,
 									},
 									"resource_group": {
 										Type:        schema.TypeString,
