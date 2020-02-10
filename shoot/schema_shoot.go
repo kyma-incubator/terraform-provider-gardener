@@ -213,6 +213,13 @@ func providerResource() *schema.Resource {
 							MaxItems:    1,
 							Elem:        azureResource(),
 						},
+						"aws": {
+							Type:        schema.TypeList,
+							Description: "AWS contains the Shoot specification for the AWS Cloud Platform.",
+							Optional:    true,
+							MaxItems:    1,
+							Elem:        awsResource(),
+						},
 					},
 				},
 			},
@@ -268,6 +275,75 @@ func azureResource() *schema.Resource {
 									"resource_group": {
 										Type:        schema.TypeString,
 										Description: "ResourceGroup is the resource group where the existing vNet belongs to.",
+										Optional:    true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func awsResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"enableecraccess": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"networks": {
+				Type:        schema.TypeList,
+				Description: "NetworkConfig holds information about the Kubernetes and infrastructure networks.",
+				Required:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"vpc": {
+							Type:        schema.TypeList,
+							Description: "VPC ID or CIDR for aws",
+							Required:    true,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:        schema.TypeString,
+										Description: "ID of the VPC.",
+										Optional:    true,
+									},
+									"cidr": {
+										Type:        schema.TypeString,
+										Description: "CIDR is the VPC CIDR.",
+										Optional:    true,
+									},
+								},
+							},
+						},
+						"zones": {
+							Type:        schema.TypeSet,
+							Description: "List of zones.",
+							Optional:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Description: "Name is the zone name.",
+										Optional:    true,
+									},
+									"internal": {
+										Type:        schema.TypeString,
+										Description: "internal CIDR",
+										Optional:    true,
+									},
+									"public": {
+										Type:        schema.TypeString,
+										Description: "public cidr",
+										Optional:    true,
+									},
+									"workers": {
+										Type:        schema.TypeString,
+										Description: "worker cidr",
 										Optional:    true,
 									},
 								},
