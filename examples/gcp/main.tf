@@ -28,39 +28,43 @@ resource "gardener_shoot" "test_cluster" {
   metadata {
     name      = "test-cluster"
     namespace = "garden-<profile>"
-
   }
 
   spec {
-    cloud {
-      profile = "gcp"
-      region  = "europe-west3"
-      secret_binding_ref {
-        name = "<secret_binding>"
-      }
+    cloud_profile_name  = "gcp"
+    region              = "europe-west3"
+    secret_binding_name = "<secret_binding>"
 
-      gcp {
-        networks {
-          workers = ["10.250.0.0/19"]
-        }
-
-        worker {
-          name            = "cpu-worker"
-          machine_type    = "n1-standard-4"
-          auto_scaler_min = 3
-          auto_scaler_max = 3
-          max_surge       = 1
-          max_unavailable = 0
-          volume_type     = "pd-standard"
-          volume_size     = "50Gi"
-        }
-
-        zones = ["europe-west3-b"]
-      }
+    networking {
+      nodes    = "10.250.0.0/19"
+      pods     = "100.96.0.0/11"
+      services = "100.64.0.0/13"
+      type     = "calico"
     }
-
     kubernetes {
       version = "1.15.4"
+    }
+
+    provider {
+      type = "gcp"
+      worker {
+        max_surge       = 1
+        max_unavailable = 0
+        maximum         = 2
+        minimum         = 2
+        volume {
+          size = "50Gi"
+          type = "Standard_LRS"
+        }
+        name = "cpu-worker"
+        machine {
+          image {
+            name    = "coreos"
+            version = "2303.3.0"
+          }
+          type = "Standard_A4_v2"
+        }
+      }
     }
   }
 }
