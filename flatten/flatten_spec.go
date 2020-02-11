@@ -1,6 +1,9 @@
 package flatten
 
 import (
+	"encoding/json"
+
+	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/kyma-incubator/terraform-provider-gardener/expand"
 
@@ -16,6 +19,19 @@ func FlattenShoot(in corev1beta1.ShootSpec, d *schema.ResourceData, specPrefix .
 	if len(specPrefix) > 0 {
 		prefix = specPrefix[0]
 	}
+
+	if len(in.CloudProfileName) > 0 {
+		att["cloud_profile_name"] = in.CloudProfileName
+	}
+	if len(in.SecretBindingName) > 0 {
+		att["secret_binding_name"] = in.SecretBindingName
+	}
+	if len(in.Region) > 0 {
+		att["region"] = in.Region
+	}
+	if in.Purpose != nil {
+		att["purpose"] = *in.Purpose
+	}
 	if in.Addons != nil {
 		configAddons := d.Get(prefix + "spec.0.addons").([]interface{})
 		flattenedAddons := flattenAddons(in.Addons)
@@ -24,9 +40,11 @@ func FlattenShoot(in corev1beta1.ShootSpec, d *schema.ResourceData, specPrefix .
 	configProvider := d.Get(prefix + "spec.0.provider").([]interface{})
 	flattenedProvider := flattenProvider(in.Provider)
 	att["provider"] = expand.RemoveInternalKeysArraySpec(flattenedProvider, configProvider)
-	configDNS := d.Get(prefix + "spec.0.dns").([]interface{})
-	flattenedDNS := flattenDNS(in.DNS)
-	att["dns"] = expand.RemoveInternalKeysArraySpec(flattenedDNS, configDNS)
+	if in.DNS != nil {
+		configDNS := d.Get(prefix + "spec.0.dns").([]interface{})
+		flattenedDNS := flattenDNS(in.DNS)
+		att["dns"] = expand.RemoveInternalKeysArraySpec(flattenedDNS, configDNS)
+	}
 	if in.Hibernation != nil {
 		configHibernation := d.Get(prefix + "spec.0.hibernation").([]interface{})
 		flattenedHibernation := flattenHibernation(in.Hibernation)
@@ -40,6 +58,14 @@ func FlattenShoot(in corev1beta1.ShootSpec, d *schema.ResourceData, specPrefix .
 		flattenedMaintenance := flattenMaintenance(in.Maintenance)
 		att["maintenance"] = expand.RemoveInternalKeysArraySpec(flattenedMaintenance, configMaintenance)
 	}
+	configNetworking := d.Get(prefix + "spec.0.networking").([]interface{})
+	flattenedNetworking := flattenNetworking(in.Networking)
+	att["networking"] = expand.RemoveInternalKeysArraySpec(flattenedNetworking, configNetworking)
+	if in.Monitoring != nil {
+		configMonitoring := d.Get(prefix + "spec.0.monitoring").([]interface{})
+		flattenedMonitoring := flattenMonitoring(in.Monitoring)
+		att["monitoring"] = expand.RemoveInternalKeysArraySpec(flattenedMonitoring, configMonitoring)
+	}
 
 	return []interface{}{att}, nil
 }
@@ -51,7 +77,7 @@ func flattenAddons(in *corev1beta1.Addons) map[string]interface{} {
 		dashboard := make(map[string]interface{})
 		dashboard["enabled"] = in.KubernetesDashboard.Enabled
 		if in.KubernetesDashboard.AuthenticationMode != nil {
-			dashboard["authentication_mode"] = in.KubernetesDashboard.AuthenticationMode
+			dashboard["authentication_mode"] = *in.KubernetesDashboard.AuthenticationMode
 		}
 		att["kubernetes_dashboard"] = []interface{}{dashboard}
 	}
@@ -94,7 +120,7 @@ func flattenDNS(in *corev1beta1.DNS) []interface{} {
 		att["providers"] = providers
 	}
 	if in.Domain != nil {
-		att["domain"] = in.Domain
+		att["domain"] = *in.Domain
 	}
 
 	return []interface{}{att}
@@ -115,8 +141,8 @@ func flattenProvider(in corev1beta1.Provider) []interface{} {
 			if len(v.Name) > 0 {
 				m["name"] = v.Name
 			}
-			if v.Zones != nil {
-				att["zones"] = newStringSet(schema.HashString, v.Zones)
+			if len(v.Zones) > 0 {
+				m["zones"] = v.Zones
 			}
 			if len(v.Taints) > 0 {
 				taints := make([]interface{}, len(v.Taints))
@@ -146,7 +172,7 @@ func flattenProvider(in corev1beta1.Provider) []interface{} {
 				m["max_unavailable"] = v.MaxUnavailable.IntValue()
 			}
 			if v.CABundle != nil {
-				m["ca_bundle"] = v.CABundle
+				m["cabundle"] = *v.CABundle
 			}
 
 			if v.Minimum != 0 {
@@ -158,7 +184,7 @@ func flattenProvider(in corev1beta1.Provider) []interface{} {
 			}
 
 			if v.Kubernetes != nil {
-				m["kubernetes"] = v.Kubernetes
+				m["kubernetes"] = flattenWorkerKubernetes(v.Kubernetes)
 			}
 
 			if len(v.Annotations) > 0 {
@@ -167,32 +193,42 @@ func flattenProvider(in corev1beta1.Provider) []interface{} {
 			if len(v.Labels) > 0 {
 				m["labels"] = v.Labels
 			}
+			if v.Volume != nil {
+				m["volume"] = flattenVolume(v.Volume)
+			}
+			m["machine"] = flattenMachine(v.Machine)
+
 			workers[i] = m
 		}
-		att["workers"] = workers
-
+		att["worker"] = workers
 	}
-	return []interface{}{att}
 
+	if in.InfrastructureConfig != nil {
+		att["infrastructure_config"] = flattenInfrastructureConfig(in.Type, in.InfrastructureConfig)
+	}
+
+	return []interface{}{att}
 }
 
 func flattenHibernation(in *corev1beta1.Hibernation) []interface{} {
 	att := make(map[string]interface{})
 
-	att["enabled"] = in.Enabled
+	if in.Enabled != nil {
+		att["enabled"] = *in.Enabled
+	}
 	if len(in.Schedules) > 0 {
 		schedules := make([]interface{}, len(in.Schedules))
 		for i, v := range in.Schedules {
 			m := map[string]interface{}{}
 
 			if v.Start != nil {
-				m["start"] = v.Start
+				m["start"] = *v.Start
 			}
 			if v.End != nil {
-				m["end"] = v.End
+				m["end"] = *v.End
 			}
 			if v.Location != nil {
-				m["location"] = v.Location
+				m["location"] = *v.Location
 			}
 			schedules[i] = m
 		}
@@ -214,22 +250,6 @@ func flattenKubernetes(in corev1beta1.Kubernetes) []interface{} {
 			server["enable_basic_authentication"] = in.KubeAPIServer.EnableBasicAuthentication
 		}
 		att["kube_api_server"] = []interface{}{server}
-	}
-	if in.Kubelet != nil {
-		kubelet := make(map[string]interface{})
-		if in.Kubelet.FeatureGates != nil {
-			kubelet["feature_gates"] = in.Kubelet.FeatureGates
-		}
-		if in.Kubelet.PodPIDsLimit != nil {
-			kubelet["pod_pids_limit"] = in.Kubelet.PodPIDsLimit
-		}
-		if in.Kubelet.CPUCFSQuota != nil {
-			kubelet["cpu_cfs_quota"] = in.Kubelet.CPUCFSQuota
-		}
-		att["kubelet"] = []interface{}{kubelet}
-	}
-	if len(in.Version) > 0 {
-		att["version"] = in.Version
 	}
 	//if in.CloudControllerManager != nil {
 	//	manager := make(map[string]interface{})
@@ -282,12 +302,33 @@ func flattenKubernetes(in corev1beta1.Kubernetes) []interface{} {
 	return []interface{}{att}
 }
 
+func flattenWorkerKubernetes(in *corev1beta1.WorkerKubernetes) []interface{} {
+	att := make(map[string]interface{})
+
+	if in.Kubelet != nil {
+		kubelet := make(map[string]interface{})
+		if in.Kubelet.PodPIDsLimit != nil {
+			kubelet["pod_pids_limit"] = *in.Kubelet.PodPIDsLimit
+		}
+		if in.Kubelet.CPUManagerPolicy != nil {
+			kubelet["cpu_manager_policy"] = *in.Kubelet.CPUManagerPolicy
+		}
+		if in.Kubelet.CPUCFSQuota != nil {
+			kubelet["cpu_cfs_quota"] = *in.Kubelet.CPUCFSQuota
+		}
+		att["kubelet"] = []interface{}{kubelet}
+	}
+
+	return []interface{}{att}
+}
+
 func flattenMaintenance(in *corev1beta1.Maintenance) []interface{} {
 	att := make(map[string]interface{})
 
 	if in.AutoUpdate != nil {
 		update := make(map[string]interface{})
 		update["kubernetes_version"] = in.AutoUpdate.KubernetesVersion
+		update["machine_image_version"] = in.AutoUpdate.MachineImageVersion
 		att["auto_update"] = []interface{}{update}
 	}
 	if in.TimeWindow != nil {
@@ -300,6 +341,119 @@ func flattenMaintenance(in *corev1beta1.Maintenance) []interface{} {
 		}
 		att["time_window"] = []interface{}{window}
 	}
+
+	return []interface{}{att}
+}
+
+func flattenNetworking(in corev1beta1.Networking) []interface{} {
+	att := make(map[string]interface{})
+
+	if in.Nodes != nil {
+		att["nodes"] = *in.Nodes
+	}
+	if in.Pods != nil {
+		att["pods"] = *in.Pods
+	}
+	if in.Services != nil {
+		att["services"] = *in.Services
+	}
+	if len(in.Type) > 0 {
+		att["type"] = in.Type
+	}
+
+	return []interface{}{att}
+}
+
+func flattenMonitoring(in *corev1beta1.Monitoring) []interface{} {
+	att := make(map[string]interface{})
+
+	if in.Alerting != nil {
+		alerting := make(map[string]interface{})
+
+		if len(in.Alerting.EmailReceivers) > 0 {
+			alerting["emailreceivers"] = in.Alerting.EmailReceivers
+		}
+
+		att["alerting"] = []interface{}{alerting}
+	}
+
+	return []interface{}{att}
+}
+
+func flattenMachine(in corev1beta1.Machine) []interface{} {
+	att := map[string]interface{}{}
+
+	if len(in.Type) > 0 {
+		att["type"] = in.Type
+	}
+	if in.Image != nil {
+		att["image"] = flattenMachineImage(in.Image)
+	}
+
+	return []interface{}{att}
+}
+
+func flattenMachineImage(in *corev1beta1.ShootMachineImage) []interface{} {
+	att := map[string]interface{}{}
+
+	if len(in.Name) > 0 {
+		att["name"] = in.Name
+	}
+	if len(in.Version) > 0 {
+		att["version"] = in.Version
+	}
+
+	return []interface{}{att}
+}
+
+func flattenVolume(in *corev1beta1.Volume) []interface{} {
+	att := map[string]interface{}{}
+
+	if len(in.Size) > 0 {
+		att["size"] = in.Size
+	}
+	if in.Type != nil {
+		att["type"] = *in.Type
+	}
+
+	return []interface{}{att}
+}
+
+func flattenInfrastructureConfig(providerType string, in *corev1beta1.ProviderConfig) []interface{} {
+	att := map[string]interface{}{}
+
+	if providerType == "azure" {
+		azConfigObj := azAlpha1.InfrastructureConfig{}
+		if err := json.Unmarshal(in.RawExtension.Raw, &azConfigObj); err == nil {
+			att["azure"] = flattenAzure(azConfigObj)
+		}
+	}
+
+	return []interface{}{att}
+}
+
+func flattenAzure(in azAlpha1.InfrastructureConfig) []interface{} {
+	att := make(map[string]interface{})
+
+	net := make(map[string]interface{})
+	if len(in.Networks.Workers) > 0 {
+		net["workers"] = in.Networks.Workers
+	}
+	if len(in.Networks.ServiceEndpoints) > 0 {
+		net["service_endpoints"] = in.Networks.ServiceEndpoints
+	}
+	vnet := make(map[string]interface{})
+	if in.Networks.VNet.CIDR != nil {
+		vnet["cidr"] = *in.Networks.VNet.CIDR
+	}
+	if in.Networks.VNet.Name != nil {
+		vnet["name"] = *in.Networks.VNet.Name
+	}
+	if in.Networks.VNet.ResourceGroup != nil {
+		vnet["resource_group"] = *in.Networks.VNet.ResourceGroup
+	}
+	net["vnet"] = []interface{}{vnet}
+	att["networks"] = []interface{}{net}
 
 	return []interface{}{att}
 }
