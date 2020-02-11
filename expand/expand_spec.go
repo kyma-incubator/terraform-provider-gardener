@@ -2,8 +2,14 @@ package expand
 
 import (
 	"encoding/json"
+<<<<<<< HEAD
 	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
+=======
+	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
+	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
+
+>>>>>>> GCP support
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 
 	//v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
@@ -142,9 +148,16 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
 			obj.InfrastructureConfig = getAzureConfig(az)
 		}
+<<<<<<< HEAD
 		if aws, ok := cloud["aws"].([]interface{}); ok && len(aws) > 0 {
 			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
 			obj.InfrastructureConfig = getAwsConfig(aws)
+=======
+
+		if gcp, ok := cloud["gcp"].([]interface{}); ok && len(gcp) > 0 {
+			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
+			obj.InfrastructureConfig = getGCPConfig(gcp)
+>>>>>>> GCP support
 		}
 	}
 	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
@@ -157,6 +170,114 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 	}
 
 	return obj
+}
+
+func getGCPConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
+	gcpConfigObj := gcpAlpha1.InfrastructureConfig{}
+	obj := corev1beta1.ProviderConfig{}
+
+	if len(gcp) == 0 && gcp[0] == nil {
+		return &obj
+	}
+	in := gcp[0].(map[string]interface{})
+
+	gcpConfigObj.APIVersion = "gcp.provider.extensions.gardener.cloud/v1alpha1"
+	gcpConfigObj.Kind = "InfrastructureConfig"
+
+	if v,ok := in["networks"].([]interface{}); ok && len(v) > 0 {
+		gcpConfigObj.Networks = getGCPNetworks(v)
+	}
+	obj.Raw, _ = json.Marshal(gcpConfigObj)
+	return &obj
+}
+
+func getGCPNetworks(networks []interface{}) gcpAlpha1.NetworkConfig {
+	obj := gcpAlpha1.NetworkConfig{}
+	if networks == nil {
+		return obj
+	}
+	in := networks[0].(map[string]interface{})
+	if v, ok := in["vpc"].([]interface{}); ok {
+		obj.VPC = getGCPvpc(v)
+	}
+	if v, ok := in["workers"].(string); ok {
+		obj.Workers = v
+	}
+	if v, ok := in["internal"].(string); ok {
+		obj.Internal = &v
+	}
+	if v, ok := in["cloud_nat"].([]interface{}); ok {
+		obj.CloudNAT = getGCPCloudNat(v)
+	}
+	if v,ok := in["flow_logs"].([]interface{}); ok {
+		obj.FlowLogs = getGCPFlowLogs(v)
+	}
+
+	return obj
+}
+
+func getGCPFlowLogs(fl []interface{}) *gcpAlpha1.FlowLogs {
+	obj := gcpAlpha1.FlowLogs{}
+	if len(fl) == 0 && fl[0] == nil {
+		return &obj
+	}
+	in := fl[0].(map[string]interface{})
+
+	if v, ok := in["aggregation_interval"].(string); ok  && len(v) > 0 {
+		obj.AggregationInterval = &v
+	}
+	if v, ok := in["flow_sampling"].(float32); ok {
+		f := float32(v)
+		obj.FlowSampling = &f
+	}
+	if v, ok := in["metadata"].(string); ok {
+		obj.Metadata = &v
+	}
+	return &obj
+	
+}
+
+func getGCPCloudNat(cn[]interface{}) *gcpAlpha1.CloudNAT {
+	obj := gcpAlpha1.CloudNAT{}
+	if len(cn) == 0 && cn[0] == nil {
+		return &obj
+	}
+	in := cn[0].(map[string]interface{})
+
+	if v, ok := in["min_ports_per_vm"].(int32); ok {
+		obj.MinPortsPerVM = &v
+	}
+	return  &obj
+}
+
+func getGCPvpc(vpc []interface{}) *gcpAlpha1.VPC {
+	obj := gcpAlpha1.VPC{}
+	if len(vpc) == 0 && vpc[0] == nil {
+		return &obj
+	}
+	in := vpc[0].(map[string]interface{})
+
+	if v, ok := in["name"].(string); ok && len(v) > 0 {
+		obj.Name = v
+	}
+	if v, ok := in["cloud_router"].([]interface{}); ok  && len(v) > 0 {
+		obj.CloudRouter = getGCPCloudRouter(v)
+	}
+	return  &obj
+}
+
+func getGCPCloudRouter(cr []interface{}) *gcpAlpha1.CloudRouter {
+
+	obj := gcpAlpha1.CloudRouter{}
+	if len(cr) == 0 && cr[0] == nil {
+		return &obj
+	}
+	in := cr[0].(map[string]interface{})
+
+	if v,ok := in["name"].(string); ok && len(v) > 0 {
+		obj.Name = v
+	}
+	return &obj
 }
 
 func getAzControlPlaneConfig() *corev1beta1.ProviderConfig {
