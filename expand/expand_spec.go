@@ -2,7 +2,6 @@ package expand
 
 import (
 	"encoding/json"
-
 	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -29,6 +28,10 @@ func ExpandShoot(shoot []interface{}) corev1beta1.ShootSpec {
 	if v, ok := in["cloud_profile_name"].(string); ok && len(v) > 0 {
 		obj.CloudProfileName = v
 	}
+	if v, ok := in["purpose"].(string); ok && len(v) > 0 {
+		purpose := corev1beta1.ShootPurpose(v)
+		obj.Purpose = &purpose
+	}
 	//if v, ok := in["cloud"].([]interface{}); ok && len(v) > 0 {
 	//	obj.Cloud = expandCloud(v)
 	//}
@@ -52,6 +55,10 @@ func ExpandShoot(shoot []interface{}) corev1beta1.ShootSpec {
 		obj.Maintenance = expandMaintenance(v)
 	}
 
+	if v, ok := in["monitoring"].([]interface{}); ok && len(v) > 0 {
+		obj.Monitoring = expandMonitoring(v)
+	}
+
 	if v, ok := in["networking"].([]interface{}); ok && len(v) > 0 {
 		obj.Networking = expandNetworking(v)
 	}
@@ -69,6 +76,27 @@ func ExpandShoot(shoot []interface{}) corev1beta1.ShootSpec {
 	}
 
 	return obj
+}
+
+func expandMonitoring(monitoring []interface{}) *corev1beta1.Monitoring {
+	obj := corev1beta1.Monitoring{}
+	if len(monitoring) == 0 || monitoring[0] == nil {
+		return &obj
+	}
+
+	in := monitoring[0].(map[string]interface{})
+	if v, ok := in["alerting"].([]interface{}); ok && len(v) > 0 && v[0] != nil {
+		alert := corev1beta1.Alerting{}
+
+		in := v[0].(map[string]interface{})
+		if v, ok := in["emailreceivers"].(*schema.Set); ok {
+			alert.EmailReceivers = expandSet(v)
+		}
+
+		obj.Alerting = &alert
+	}
+
+	return &obj
 }
 
 func expandNetworking(networking []interface{}) corev1beta1.Networking {
@@ -95,7 +123,6 @@ func expandNetworking(networking []interface{}) corev1beta1.Networking {
 	}
 
 	return obj
-
 }
 
 func expandProvider(provider []interface{}) corev1beta1.Provider {
@@ -293,11 +320,11 @@ func expandWorker(w interface{}) corev1beta1.Worker {
 		obj.Annotations = expandStringMap(v)
 	}
 
-	if v, ok := in["ca_bundle"].(string); ok && len(v) > 0 {
+	if v, ok := in["cabundle"].(string); ok && len(v) > 0 {
 		obj.CABundle = &v
 	}
 
-	if v, ok := in["worker_kubernetes"].([]interface{}); ok && len(v) > 0 {
+	if v, ok := in["kubernetes"].([]interface{}); ok && len(v) > 0 {
 		obj.Kubernetes = expand_worker_kubernetes(v)
 	}
 
@@ -321,13 +348,13 @@ func expandWorker(w interface{}) corev1beta1.Worker {
 		obj.Minimum = int32(v)
 	}
 
-	if v, ok := in["max_surge"].(string); ok && len(v) > 0 {
-		surge := intstr.FromString(v)
+	if v, ok := in["max_surge"].(int); ok {
+		surge := intstr.FromInt(v)
 		obj.MaxSurge = &surge
 	}
 
-	if v, ok := in["max_unavailable"].(string); ok && len(v) > 0 {
-		unavailable := intstr.FromString(v)
+	if v, ok := in["max_unavailable"].(int); ok {
+		unavailable := intstr.FromInt(v)
 		obj.MaxUnavailable = &unavailable
 	}
 
@@ -355,9 +382,10 @@ func expandWorker(w interface{}) corev1beta1.Worker {
 		obj.Volume = expandVolume(v)
 	}
 
-	if zones, ok := in["zones"].([]string); ok && len(zones) > 0 {
-		obj.Zones = zones
+	if v, ok := in["zones"].(*schema.Set); ok {
+		obj.Zones = expandSet(v)
 	}
+
 	return obj
 }
 
@@ -423,27 +451,35 @@ func expand_worker_kubernetes(wk []interface{}) *corev1beta1.WorkerKubernetes {
 	}
 	in := wk[0].(map[string]interface{})
 
-	if v, ok := in["kubelet"].(corev1beta1.KubeletConfig); ok {
-		obj.Kubelet = &v
+	if v, ok := in["kubelet"].([]interface{}); ok {
+		obj.Kubelet = expandKubelet(v)
 	}
+
+	return obj
+}
+
+func expandKubelet(kubelet []interface{}) *corev1beta1.KubeletConfig {
+	obj := &corev1beta1.KubeletConfig{}
+
+	if len(kubelet) == 0 && kubelet[0] == nil {
+		return obj
+	}
+	in := kubelet[0].(map[string]interface{})
+
+	if v, ok := in["pod_pids_limit"].(int); ok && v > 0 {
+		limit := int64(v)
+		obj.PodPIDsLimit = &limit
+	}
+	if v, ok := in["cpu_cfs_quota"].(bool); ok {
+		obj.CPUCFSQuota = &v
+	}
+	if v, ok := in["cpu_manager_policy"].(string); ok && len(v) > 0 {
+		obj.CPUManagerPolicy = &v
+	}
+
 	return obj
 
 }
-
-//func expandKubelet(kubelet []interface{}) *corev1beta1.KubeletConfig {
-//	obj := &corev1beta1.KubeletConfig{}
-//	if len(kubelet) == 0 && kubelet[0] == nil {
-//		return  obj
-//	}
-//
-//	in := kubelet[0].(map[string]interface{})
-//	if v, ok := in["kubelet"].([]interface{}); ok && len(v) > 0{
-//		obj. = expandKubelet(v)
-//	}
-//
-//	return  obj
-//
-//}
 
 func expandAddons(addon []interface{}) *corev1beta1.Addons {
 	obj := &corev1beta1.Addons{}
@@ -549,9 +585,9 @@ func expandDNS(dns []interface{}) *corev1beta1.DNS {
 	}
 	in := dns[0].(map[string]interface{})
 
-	if v, ok := in["providers"].([]corev1beta1.DNSProvider); ok && len(v) > 0 {
-		obj.Providers = v
-	}
+	// if v, ok := in["providers"].([]corev1beta1.DNSProvider); ok && len(v) > 0 {
+	// 	obj.Providers = v
+	// }
 	if v, ok := in["domain"].(string); ok && len(v) > 0 {
 		obj.Domain = &v
 	}
@@ -789,6 +825,9 @@ func expandMaintenance(maintenance []interface{}) *corev1beta1.Maintenance {
 		if v, ok := v["kubernetes_version"].(bool); ok {
 			obj.AutoUpdate.KubernetesVersion = v
 		}
+		if v, ok := v["machine_image_version"].(bool); ok {
+			obj.AutoUpdate.MachineImageVersion = v
+		}
 	}
 	if v, ok := in["time_window"].([]interface{}); ok && len(v) > 0 {
 		v := v[0].(map[string]interface{})
@@ -805,9 +844,13 @@ func expandMaintenance(maintenance []interface{}) *corev1beta1.Maintenance {
 	return obj
 }
 func AddMissingDataForUpdate(old *corev1beta1.Shoot, new *corev1beta1.Shoot) {
+	if new.Spec.DNS == nil {
+		new.Spec.DNS = &corev1beta1.DNS{}
+	}
 	if new.Spec.DNS.Domain == nil || *new.Spec.DNS.Domain == "" {
 		new.Spec.DNS.Domain = old.Spec.DNS.Domain
 	}
+	new.Spec.SeedName = old.Spec.SeedName
 	new.ObjectMeta.ResourceVersion = old.ObjectMeta.ResourceVersion
 	new.ObjectMeta.Finalizers = old.ObjectMeta.Finalizers
 }

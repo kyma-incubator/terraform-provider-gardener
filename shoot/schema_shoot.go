@@ -14,11 +14,6 @@ func workerKubernetes() *schema.Resource {
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"feature_gates": {
-							Type:        schema.TypeMap,
-							Description: "FeatureGates contains information about enabled feature gates.",
-							Optional:    true,
-						},
 						"pod_pids_limit": {
 							Type:        schema.TypeInt,
 							Description: "PodPIDsLimit is the maximum number of process IDs per pod allowed by the kubelet.",
@@ -74,6 +69,7 @@ func workerConfig() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "MachineType is the machine type of the worker group.",
 				Required:    true,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -85,6 +81,7 @@ func workerConfig() *schema.Resource {
 							Type:        schema.TypeList,
 							Description: "Image holds information about the machine image to use for all nodes of this pool. It will default to the latest version of the first image stated in the referenced CloudProfile if no value has been provided.",
 							Optional:    true,
+							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
@@ -133,13 +130,9 @@ func workerConfig() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"operator": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
 						"value": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
 						"effect": {
 							Type:     schema.TypeString,
@@ -152,6 +145,7 @@ func workerConfig() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "Volume contains information about the volume type and size.",
 				Required:    true,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -398,21 +392,21 @@ func addonsResource() *schema.Resource {
 func dNSResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"provider": {
-				Type:        schema.TypeString,
-				Description: "Provider is the DNS provider type for the Shoot.",
-				Optional:    true,
-			},
+			// "provider": {
+			// 	Type:        schema.TypeString,
+			// 	Description: "Provider is the DNS provider type for the Shoot.",
+			// 	Optional:    true,
+			// },
 			"domain": {
 				Type:        schema.TypeString,
 				Description: "Domain is the external available domain of the Shoot cluster.",
 				Optional:    true,
 			},
-			"secret_name": {
-				Type:        schema.TypeString,
-				Description: "SecretName is a name of a secret containing credentials for the stated domain and the provider.",
-				Optional:    true,
-			},
+			// "secret_name": {
+			// 	Type:        schema.TypeString,
+			// 	Description: "SecretName is a name of a secret containing credentials for the stated domain and the provider.",
+			// 	Optional:    true,
+			// },
 		},
 	}
 }
@@ -723,12 +717,11 @@ func monitoringResource() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"emailreceivers": {
-							Type:        schema.TypeList,
-							Description: "List of people who receiving alerts for this shoots",
-							Optional:    true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
+							Type:             schema.TypeSet,
+							Description:      "List of people who receiving alerts for this shoots",
+							Optional:         true,
+							Elem:             &schema.Schema{Type: schema.TypeString},
+							Set:              schema.HashString,
 							DiffSuppressFunc: suppressEmptyNewValue,
 						},
 					},
