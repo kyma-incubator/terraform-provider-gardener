@@ -3,10 +3,10 @@ package shoot
 import (
 	"fmt"
 	"time"
+
 	//"encoding/json"
 
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
-	gardener_types "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	gardener_apis "github.com/gardener/gardener/pkg/client/core/clientset/versioned/typed/core/v1beta1"
 	"github.com/hashicorp/terraform/helper/mutexkv"
 
@@ -123,32 +123,38 @@ func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+
 	mutex_key := fmt.Sprintf(`namespace-%s`, namespace)
 	shootMutex.Lock(mutex_key)
 	defer shootMutex.Unlock(mutex_key)
+
 	shootsClient := client.GardenerClientSet.Shoots(namespace)
 	shoot, err := shootsClient.Get(name, meta_v1.GetOptions{})
-	new_shoot := gardener_types.Shoot{}
 	if err != nil {
 		return fmt.Errorf("Failed to get shoot: %s", err)
 	}
-	if d.HasChange("metadata") {
-		new_shoot.ObjectMeta = expand.ExpandMetadata(d.Get("metadata").([]interface{}))
-	}
-	if d.HasChange("spec") {
-		new_shoot.Spec = expand.ExpandShoot(d.Get("spec").([]interface{}))
-		expand.AddMissingDataForUpdate(shoot, &new_shoot)
-	}
-	_, err = shootsClient.Update(&new_shoot)
 
+	newShoot := gardencorev1beta1.Shoot{
+		ObjectMeta: expand.ExpandMetadata(d.Get("metadata").([]interface{})),
+		Spec:       expand.ExpandShoot(d.Get("spec").([]interface{})),
+		TypeMeta: meta_v1.TypeMeta{
+			Kind:       "Shoot",
+			APIVersion: "core.gardener.cloud/v1beta1",
+		},
+	}
+	expand.AddMissingDataForUpdate(shoot, &newShoot)
+
+	_, err = shootsClient.Update(&newShoot)
 	if err != nil {
 		d.SetId("")
 		return err
 	}
+
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), waitForShootFunc(shootsClient, name))
 	if err != nil {
 		return err
 	}
+
 	return resourceServerRead(d, m)
 }
 
