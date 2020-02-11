@@ -3,6 +3,7 @@ package flatten
 import (
 	"encoding/json"
 
+	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/kyma-incubator/terraform-provider-gardener/expand"
@@ -429,6 +430,13 @@ func flattenInfrastructureConfig(providerType string, in *corev1beta1.ProviderCo
 		}
 	}
 
+	if providerType == "aws" {
+		awsConfigObj := awsAlpha1.InfrastructureConfig{}
+		if err := json.Unmarshal(in.RawExtension.Raw, &awsConfigObj); err == nil {
+			att["aws"] = flattenAws(awsConfigObj)
+		}
+	}
+
 	return []interface{}{att}
 }
 
@@ -453,6 +461,30 @@ func flattenAzure(in azAlpha1.InfrastructureConfig) []interface{} {
 		vnet["resource_group"] = *in.Networks.VNet.ResourceGroup
 	}
 	net["vnet"] = []interface{}{vnet}
+	att["networks"] = []interface{}{net}
+
+	return []interface{}{att}
+}
+
+func flattenAws(in awsAlpha1.InfrastructureConfig) []interface{} {
+	att := make(map[string]interface{})
+	net := make(map[string]interface{})
+	vpc := make(map[string]interface{})
+
+	if in.EnableECRAccess != nil {
+		att["enableecraccess"] = in.EnableECRAccess
+	}
+	if in.Networks.VPC.ID != nil {
+		vpc["id"] = in.Networks.VPC.ID
+	}
+	if in.Networks.VPC.CIDR != nil {
+		vpc["cidr"] = in.Networks.VPC.CIDR
+	}
+	net["vpc"] = []interface{}{vpc}
+
+	if len(in.Networks.Zones) > 0 {
+		net["zones"] = in.Networks.Zones
+	}
 	att["networks"] = []interface{}{net}
 
 	return []interface{}{att}
