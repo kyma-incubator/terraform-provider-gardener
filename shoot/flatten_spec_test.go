@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
 	"github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -333,6 +334,85 @@ func TestFlattenShootAzure(t *testing.T) {
 											},
 											"workers":           "10.250.0.0/19",
 											"service_endpoints": []string{"microsoft.test"},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	d.Set("spec", expected)
+
+	out, _ := flatten.FlattenShoot(shoot, d, "")
+	if diff := cmp.Diff(expected, out); diff != "" {
+		t.Fatalf("Error matching output and expected: \n%s", diff)
+	}
+}
+
+func TestFlattenShootAws(t *testing.T) {
+	vpcCIDR := "10.250.0.0/16"
+	//EnableECRAccess := false
+	awsConfig, _ := json.Marshal(awsAlpha1.InfrastructureConfig{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "aws.provider.extensions.gardener.cloud/v1alpha1",
+			Kind:       "InfrastructureConfig",
+		},
+		//EnableECRAccess: &EnableECRAccess,
+		Networks: awsAlpha1.Networks{
+			VPC: awsAlpha1.VPC{
+				CIDR: &vpcCIDR,
+			},
+			Zones: []awsAlpha1.Zone{
+				awsAlpha1.Zone{
+					Name:     "eu-central-1a",
+					Internal: vpcCIDR,
+					Public:   vpcCIDR,
+					Workers:  vpcCIDR,
+				},
+			},
+		},
+	})
+
+	d := ResourceShoot().TestResourceData()
+	shoot := corev1beta1.ShootSpec{
+		Provider: corev1beta1.Provider{
+			Type: "aws",
+			InfrastructureConfig: &corev1beta1.ProviderConfig{
+				RawExtension: runtime.RawExtension{
+					Raw: awsConfig,
+				},
+			},
+		},
+	}
+	expected := []interface{}{
+		map[string]interface{}{
+			"kubernetes": []interface{}{},
+			"networking": []interface{}{},
+			"provider": []interface{}{
+				map[string]interface{}{
+					"type": "aws",
+					"infrastructure_config": []interface{}{
+						map[string]interface{}{
+							"aws": []interface{}{
+								map[string]interface{}{
+									"networks": []interface{}{
+										map[string]interface{}{
+											"vpc": []interface{}{
+												map[string]interface{}{
+													"cidr": "10.250.0.0/16",
+												},
+											},
+											"zones": []interface{}{
+												map[string]interface{}{
+													"name":     "eu-central-1a",
+													"internal": "10.250.0.0/16",
+													"public":   "10.250.0.0/16",
+													"workers":  "10.250.0.0/16",
+												},
+											},
 										},
 									},
 								},

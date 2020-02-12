@@ -471,9 +471,9 @@ func flattenAws(in awsAlpha1.InfrastructureConfig) []interface{} {
 	net := make(map[string]interface{})
 	vpc := make(map[string]interface{})
 
-	if in.EnableECRAccess != nil {
-		att["enableecraccess"] = in.EnableECRAccess
-	}
+	// if in.EnableECRAccess != nil {
+	// 	att["enableecraccess"] = in.EnableECRAccess
+	// }
 	if in.Networks.VPC.ID != nil {
 		vpc["id"] = in.Networks.VPC.ID
 	}
@@ -483,7 +483,24 @@ func flattenAws(in awsAlpha1.InfrastructureConfig) []interface{} {
 	net["vpc"] = []interface{}{vpc}
 
 	if len(in.Networks.Zones) > 0 {
-		net["zones"] = in.Networks.Zones
+		zones := make([]interface{}, len(in.Networks.Zones))
+		for i, v := range in.Networks.Zones {
+			zone := map[string]interface{}{}
+			if len(v.Name) > 0 {
+				zone["name"] = v.Name
+			}
+			if len(v.Internal) > 0 {
+				zone["internal"] = v.Internal
+			}
+			if len(v.Public) > 0 {
+				zone["public"] = v.Public
+			}
+			if len(v.Workers) > 0 {
+				zone["workers"] = v.Workers
+			}
+			zones[i] = zone
+		}
+		net["zones"] = zones
 	}
 	att["networks"] = []interface{}{net}
 
