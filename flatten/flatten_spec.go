@@ -483,7 +483,8 @@ func flattenAws(in awsAlpha1.InfrastructureConfig) []interface{} {
 	net["vpc"] = []interface{}{vpc}
 
 	if len(in.Networks.Zones) > 0 {
-		zones := make([]interface{}, len(in.Networks.Zones))
+		// zones := make([]interface{}, len(in.Networks.Zones))
+		zones := make([]map[string]interface{}, len(in.Networks.Zones))
 		for i, v := range in.Networks.Zones {
 			zone := map[string]interface{}{}
 			if len(v.Name) > 0 {

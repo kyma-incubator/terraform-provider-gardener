@@ -402,11 +402,11 @@ func TestFlattenShootAws(t *testing.T) {
 										map[string]interface{}{
 											"vpc": []interface{}{
 												map[string]interface{}{
-													"cidr": "10.250.0.0/16",
+													"cidr": &vpcCIDR,
 												},
 											},
-											"zones": []interface{}{
-												map[string]interface{}{
+											"zones": []map[string]interface{}{
+												{
 													"name":     "eu-central-1a",
 													"internal": "10.250.0.0/16",
 													"public":   "10.250.0.0/16",
