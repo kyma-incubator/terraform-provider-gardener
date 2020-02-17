@@ -3,6 +3,7 @@ package shoot
 
 import (
 	"encoding/json"
+	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
 	"testing"
 
 	awsAlpha1 "github.com/gardener/gardener-extension-provider-aws/pkg/apis/aws/v1alpha1"
@@ -426,6 +427,105 @@ func TestExpandShootAws(t *testing.T) {
 			InfrastructureConfig: &corev1beta1.ProviderConfig{
 				RawExtension: runtime.RawExtension{
 					Raw: awsConfig,
+				},
+			},
+		},
+	}
+
+	data := schema.TestResourceDataRaw(t, ResourceShoot().Schema, shoot)
+	out := expand.ExpandShoot(data.Get("spec").([]interface{}))
+	if diff := cmp.Diff(expected, out); diff != "" {
+		t.Fatalf("Error matching output and expected: \n%s", diff)
+	}
+}
+
+func TestExpandShootGCP(t *testing.T) {
+	internal := "test"
+	fooCloudNat := int32(2)
+	gcpControlPlaneConfig, _ := json.Marshal(gcpAlpha1.ControlPlaneConfig{
+		TypeMeta:               v1.TypeMeta{
+			APIVersion: "gcp.provider.extensions.gardener.cloud/v1alpha1",
+			Kind:       "ControlPlaneConfig",
+		},
+		Zone:                   "zone1",
+	})
+
+	gcpInfraConfig, _ := json.Marshal(gcpAlpha1.InfrastructureConfig{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "gcp.provider.extensions.gardener.cloud/v1alpha1",
+			Kind:       "InfrastructureConfig",
+		},
+		Networks: gcpAlpha1.NetworkConfig{
+			VPC:      &gcpAlpha1.VPC{Name: "foo", CloudRouter: &gcpAlpha1.CloudRouter{Name: "bar"}},
+			CloudNAT: &gcpAlpha1.CloudNAT{MinPortsPerVM: &fooCloudNat},
+			Internal: &internal,
+			Worker:   "",
+			Workers:  "10.250.0.0/19",
+			FlowLogs: nil,
+		},
+	})
+
+	shoot := map[string]interface{}{
+		"spec": []interface{}{
+			map[string]interface{}{
+				"provider": []interface{}{
+					map[string]interface{}{
+						"type": "gcp",
+						"control_plane_config": []interface{}{
+							map[string]interface{}{
+								"gcp": []interface{}{
+									map[string]interface{}{
+										"zone": "zone1",
+									},
+								},
+							},
+						},
+						"infrastructure_config": []interface{}{
+							map[string]interface{}{
+								"gcp": []interface{}{
+									map[string]interface{}{
+										"networks": []interface{}{
+											map[string]interface{}{
+												"vpc": []interface{}{
+													map[string]interface{}{
+														"name": "foo",
+														"cloud_router": []interface{}{
+															map[string]interface{}{
+																"name": "bar",
+															},
+														},
+													},
+												},
+												"workers": "10.250.0.0/19",
+												"worker":  "",
+												"cloud_nat": []interface{}{
+													map[string]interface{}{
+														"min_ports_per_vm": 2,
+													},
+												},
+												"internal": "test",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	expected := corev1beta1.ShootSpec{
+		Provider: corev1beta1.Provider{
+			Type: "gcp",
+			ControlPlaneConfig: &corev1beta1.ProviderConfig{
+				RawExtension: runtime.RawExtension{
+					Raw: gcpControlPlaneConfig,
+				},
+			},
+			InfrastructureConfig: &corev1beta1.ProviderConfig{
+				RawExtension: runtime.RawExtension{
+					Raw: gcpInfraConfig,
 				},
 			},
 		},

@@ -215,7 +215,7 @@ func providerResource() *schema.Resource {
 							Optional:    true,
 							MaxItems:    1,
 							Elem:        awsResource(),
-						}
+						},
 						"gcp": {
 							Type:        schema.TypeList,
 							Description: "GCP contains the Shoot specification for Google Cloud Platform.",

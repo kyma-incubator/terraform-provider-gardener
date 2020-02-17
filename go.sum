@@ -158,7 +158,6 @@ github.com/gardener/external-dns-management v0.7.3/go.mod h1:Y3om11E865x4aQ7cmcH
 github.com/gardener/gardener v0.35.1-0.20200128130120-5b69a02f511a/go.mod h1:cu4WkHhpM9JLvqx76qSViagsPO4UH9Qx5i0h3AEIdiE=
 github.com/gardener/gardener v1.0.2 h1:hGZRLzRPDpmUsHA0w/J+x9zE5JRMW9IOaZVcwjW2Nc0=
 github.com/gardener/gardener v1.0.2/go.mod h1:CP9I0tCDVXTLPkJv/jUtXVUh948kSNKEGUg0haLz9gk=
-github.com/gardener/gardener v1.0.4 h1:ChZgQ3NCraQ6WrMuSdawCAHQQ4eOpw5zNxO7u9utMsg=
 github.com/gardener/gardener-extension-networking-calico v0.0.0-20200129184310-ca90704ba78e/go.mod h1:IY4O46FVVDcmmlTwTP8keIiD5G+4HRm+oMhKQ64Mdv4=
 github.com/gardener/gardener-extension-provider-aws v1.3.3 h1:sJFsLmRH0ltr5N2cM57eiedTcwo9agfHXkQA31Oy5PY=
 github.com/gardener/gardener-extension-provider-aws v1.3.3/go.mod h1:jE6HrAYcSqyBenmPk4t/tjUXeIfCWkvECwas7Vff1Cs=

@@ -2,20 +2,17 @@ package expand
 
 import (
 	"encoding/json"
-<<<<<<< HEAD
-	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
-	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
-=======
+	awsAlpha1 "github.com/gardener/gardener-extension-provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
 	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
->>>>>>> GCP support
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 
 	//v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
+
 )
 
 // Expanders
@@ -158,15 +155,12 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 		if az, ok := cloud["azure"].([]interface{}); ok && len(az) > 0 {
 			obj.InfrastructureConfig = getAzureConfig(az)
 		}
-<<<<<<< HEAD
 		if aws, ok := cloud["aws"].([]interface{}); ok && len(aws) > 0 {
 			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
 			obj.InfrastructureConfig = getAwsConfig(aws)
-=======
-
+		}
 		if gcp, ok := cloud["gcp"].([]interface{}); ok && len(gcp) > 0 {
 			obj.InfrastructureConfig = getGCPConfig(gcp)
->>>>>>> GCP support
 		}
 	}
 	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
