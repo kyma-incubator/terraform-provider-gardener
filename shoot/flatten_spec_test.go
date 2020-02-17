@@ -354,13 +354,13 @@ func TestFlattenShootAzure(t *testing.T) {
 
 func TestFlattenShootAws(t *testing.T) {
 	vpcCIDR := "10.250.0.0/16"
-	//EnableECRAccess := false
+	EnableECRAccess := false
 	awsConfig, _ := json.Marshal(awsAlpha1.InfrastructureConfig{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "aws.provider.extensions.gardener.cloud/v1alpha1",
 			Kind:       "InfrastructureConfig",
 		},
-		//EnableECRAccess: &EnableECRAccess,
+		EnableECRAccess: &EnableECRAccess,
 		Networks: awsAlpha1.Networks{
 			VPC: awsAlpha1.VPC{
 				CIDR: &vpcCIDR,
@@ -398,6 +398,7 @@ func TestFlattenShootAws(t *testing.T) {
 						map[string]interface{}{
 							"aws": []interface{}{
 								map[string]interface{}{
+									"enableecraccess": &EnableECRAccess,
 									"networks": []interface{}{
 										map[string]interface{}{
 											"vpc": []interface{}{

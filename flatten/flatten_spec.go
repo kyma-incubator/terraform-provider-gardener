@@ -471,9 +471,9 @@ func flattenAws(in awsAlpha1.InfrastructureConfig) []interface{} {
 	net := make(map[string]interface{})
 	vpc := make(map[string]interface{})
 
-	// if in.EnableECRAccess != nil {
-	// 	att["enableecraccess"] = in.EnableECRAccess
-	// }
+	if in.EnableECRAccess != nil {
+		att["enableecraccess"] = in.EnableECRAccess
+	}
 	if in.Networks.VPC.ID != nil {
 		vpc["id"] = in.Networks.VPC.ID
 	}
