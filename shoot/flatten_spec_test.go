@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
-	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
+	awsAlpha1 "github.com/gardener/gardener-extension-provider--aws/pkg/apis/aws/v1alpha1"
+	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
 	"github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	cmp "github.com/google/go-cmp/cmp"
@@ -344,7 +344,10 @@ func TestFlattenShootAzure(t *testing.T) {
 			},
 		},
 	}
-	d.Set("spec", expected)
+	err := d.Set("spec", expected)
+	if err != nil {
+		t.Fatalf("Unable to set the spec: %v\n", err)
+	}
 
 	out, _ := flatten.FlattenShoot(shoot, d, "")
 	if diff := cmp.Diff(expected, out); diff != "" {

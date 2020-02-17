@@ -66,8 +66,6 @@ func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
 			APIVersion: "core.gardener.cloud/v1beta1",
 		},
 	}
-	//foo, _:= json.Marshal(&shootCRD)
-	//return fmt.Errorf("fffff: %v", string(foo))
 
 	shootsClient := client.GardenerClientSet.Shoots(metadata.Namespace)
 	shoot, err := shootsClient.Create(&shootCRD)

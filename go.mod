@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/gardener/gardener v1.0.2
-	github.com/gardener/gardener-extension-provider-aws v1.3.3 // indirect
+	github.com/gardener/gardener-extension-provider-aws v1.3.3
 	github.com/gardener/gardener-extension-provider-azure v1.3.0
 	github.com/gardener/gardener-extension-provider-gcp v1.3.0
 	github.com/gogo/protobuf v1.3.0 // indirect

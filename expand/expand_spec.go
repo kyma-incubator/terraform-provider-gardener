@@ -142,10 +142,20 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 		obj.Type = v
 	}
 
+	if v, ok := in["control_plane_config"].([]interface{}); ok && len(v) > 0 {
+		cloud := v[0].(map[string]interface{})
+		if az, ok := cloud["azure"].([]interface{}); ok && len(az) > 0 {
+			obj.ControlPlaneConfig = getAzControlPlaneConfig()
+		}
+
+		if gcp, ok := cloud["gcp"].([]interface{}); ok && len(gcp) > 0 {
+			obj.ControlPlaneConfig = getGCPControlPlaneConfig(gcp)
+		}
+	}
+
 	if v, ok := in["infrastructure_config"].([]interface{}); ok && len(v) > 0 {
 		cloud := v[0].(map[string]interface{})
 		if az, ok := cloud["azure"].([]interface{}); ok && len(az) > 0 {
-			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
 			obj.InfrastructureConfig = getAzureConfig(az)
 		}
 <<<<<<< HEAD
@@ -155,7 +165,6 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 =======
 
 		if gcp, ok := cloud["gcp"].([]interface{}); ok && len(gcp) > 0 {
-			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
 			obj.InfrastructureConfig = getGCPConfig(gcp)
 >>>>>>> GCP support
 		}
@@ -170,6 +179,25 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 	}
 
 	return obj
+}
+
+func getGCPControlPlaneConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
+	gcpConfigObj := gcpAlpha1.ControlPlaneConfig{}
+	obj := corev1beta1.ProviderConfig{}
+	if len(gcp) == 0 && gcp[0] == nil {
+		return &obj
+	}
+	in := gcp[0].(map[string]interface{})
+
+	gcpConfigObj.APIVersion = "gcp.provider.extensions.gardener.cloud/v1alpha1"
+	gcpConfigObj.Kind = "ControlPlaneConfig"
+
+	if v, ok := in["zone"].(string); ok && len(v) > 0 {
+		gcpConfigObj.Zone = v
+	}
+
+	obj.Raw, _ = json.Marshal(gcpConfigObj)
+	return &obj
 }
 
 func getGCPConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
@@ -197,19 +225,19 @@ func getGCPNetworks(networks []interface{}) gcpAlpha1.NetworkConfig {
 		return obj
 	}
 	in := networks[0].(map[string]interface{})
-	if v, ok := in["vpc"].([]interface{}); ok {
+	if v, ok := in["vpc"].([]interface{}); ok  && len(v) > 0{
 		obj.VPC = getGCPvpc(v)
 	}
-	if v, ok := in["workers"].(string); ok {
+	if v, ok := in["workers"].(string); ok  && len(v) > 0{
 		obj.Workers = v
 	}
-	if v, ok := in["internal"].(string); ok {
+	if v, ok := in["internal"].(string); ok  && len(v) > 0{
 		obj.Internal = &v
 	}
-	if v, ok := in["cloud_nat"].([]interface{}); ok {
+	if v, ok := in["cloud_nat"].([]interface{}); ok  && len(v) > 0{
 		obj.CloudNAT = getGCPCloudNat(v)
 	}
-	if v,ok := in["flow_logs"].([]interface{}); ok {
+	if v,ok := in["flow_logs"].([]interface{}); ok && len(v) > 0{
 		obj.FlowLogs = getGCPFlowLogs(v)
 	}
 
@@ -237,15 +265,17 @@ func getGCPFlowLogs(fl []interface{}) *gcpAlpha1.FlowLogs {
 	
 }
 
-func getGCPCloudNat(cn[]interface{}) *gcpAlpha1.CloudNAT {
+func getGCPCloudNat(cn []interface{}) *gcpAlpha1.CloudNAT {
 	obj := gcpAlpha1.CloudNAT{}
 	if len(cn) == 0 && cn[0] == nil {
 		return &obj
 	}
+
 	in := cn[0].(map[string]interface{})
 
-	if v, ok := in["min_ports_per_vm"].(int32); ok {
-		obj.MinPortsPerVM = &v
+	if v, ok := in["min_ports_per_vm"].(int); ok {
+		f := int32(v)
+		obj.MinPortsPerVM = &f
 	}
 	return  &obj
 }

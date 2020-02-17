@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
-	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
+	awsAlpha1 "github.com/gardener/gardener-extension-provider-aws/pkg/apis/aws/v1alpha1"
+	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
 	"github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	cmp "github.com/google/go-cmp/cmp"

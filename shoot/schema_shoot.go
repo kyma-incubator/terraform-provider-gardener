@@ -180,20 +180,22 @@ func providerResource() *schema.Resource {
 				Description: "Type is the type of the provider.",
 				Required:    true,
 			},
-			//"control_plane_config": {
-			//	Type:        schema.TypeList,
-			//	Description: "ControlPlaneConfig contains the provider-specific control plane config blob.",
-			//	Optional:    true,
-			//	Elem: &schema.Resource{
-			//		Schema: map[string]*schema.Schema{
-			//			"ProviderConfig": {
-			//				Type:     schema.TypeList,
-			//				Elem:runtime.RawExtension{},
-			//				Required: true,
-			//			},
-			//		},
-			//	},
-			//},
+			"control_plane_config": {
+				Type:        schema.TypeList,
+				Description: "ControlPlaneConfig contains the provider-specific control plane config blob.",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"gcp": {
+							Type:        schema.TypeList,
+							Description: "GCP contains the Shoot specification for Google Cloud Platform.",
+							Optional:    true,
+							MaxItems:    1,
+							Elem:        gcpControlPlaneResource(),
+						},
+					},
+				},
+			},
 			"infrastructure_config": {
 				Type:        schema.TypeList,
 				Description: "InfrastructureConfig contains the provider-specific infrastructure config blob.",
@@ -230,6 +232,18 @@ func providerResource() *schema.Resource {
 				Required:         true,
 				Elem:             workerConfig(),
 				DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
+			},
+		},
+	}
+}
+
+func gcpControlPlaneResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"zone": {
+				Type: schema.TypeString,
+				Description: "Zone is the GCP zone.",
+				Required: true,
 			},
 		},
 	}
@@ -278,7 +292,7 @@ func gcpResource() *schema.Resource {
 							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"min_port_per_vm": {
+									"min_ports_per_vm": {
 										Type:        schema.TypeInt,
 										Description: "MinPortsPerVM is the minimum number of ports allocated to a VM in the NAT config. The default value is 2048 ports.",
 										Optional:    true,

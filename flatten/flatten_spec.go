@@ -3,8 +3,10 @@ package flatten
 import (
 	"encoding/json"
 
-	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
-	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
+	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
+
+	awsAlpha1 "github.com/gardener/gardener-extension-provider-aws/pkg/apis/aws/v1alpha1"
+	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/kyma-incubator/terraform-provider-gardener/expand"
 
@@ -41,6 +43,7 @@ func FlattenShoot(in corev1beta1.ShootSpec, d *schema.ResourceData, specPrefix .
 	configProvider := d.Get(prefix + "spec.0.provider").([]interface{})
 	flattenedProvider := flattenProvider(in.Provider)
 	att["provider"] = expand.RemoveInternalKeysArraySpec(flattenedProvider, configProvider)
+
 	if in.DNS != nil {
 		configDNS := d.Get(prefix + "spec.0.dns").([]interface{})
 		flattenedDNS := flattenDNS(in.DNS)
@@ -206,6 +209,10 @@ func flattenProvider(in corev1beta1.Provider) []interface{} {
 
 	if in.InfrastructureConfig != nil {
 		att["infrastructure_config"] = flattenInfrastructureConfig(in.Type, in.InfrastructureConfig)
+	}
+
+	if in.ControlPlaneConfig != nil {
+		att["control_plane_config"] = flattenControlPlaneConfig(in.Type, in.ControlPlaneConfig)
 	}
 
 	return []interface{}{att}
@@ -437,6 +444,60 @@ func flattenInfrastructureConfig(providerType string, in *corev1beta1.ProviderCo
 		}
 	}
 
+	if providerType == "gcp" {
+		gcpConfigObj := gcpAlpha1.InfrastructureConfig{}
+		if err := json.Unmarshal(in.RawExtension.Raw, &gcpConfigObj); err == nil {
+			att["gcp"] = flattenGcpInfra(gcpConfigObj)
+		}
+	}
+
+	return []interface{}{att}
+}
+
+func flattenGcpInfra(in gcpAlpha1.InfrastructureConfig) []interface{} {
+	att := make(map[string]interface{})
+	net := make(map[string]interface{})
+
+	if len(in.Networks.Workers) > 0 {
+		net["workers"] = in.Networks.Workers
+	}
+
+	if in.Networks.Internal != nil {
+		net["internal"] = *in.Networks.Internal
+	}
+
+	vpc := make(map[string]interface{})
+
+	if in.Networks.VPC != nil && len(in.Networks.VPC.Name) > 0 {
+		vpc["name"] = in.Networks.VPC.Name
+	}
+	cr := make(map[string]interface{})
+	if in.Networks.VPC != nil && len(in.Networks.VPC.CloudRouter.Name) > 0 {
+		cr["name"] = in.Networks.VPC.CloudRouter.Name
+		vpc["cloud_router"] = []interface{}{cr}
+	}
+	net["vpc"] = []interface{}{vpc}
+
+	cn := make(map[string]interface{})
+	if in.Networks.CloudNAT != nil && in.Networks.CloudNAT.MinPortsPerVM != nil {
+		cn["min_ports_per_vm"] = *in.Networks.CloudNAT.MinPortsPerVM
+	}
+	net["cloud_nat"] = []interface{}{cn}
+
+	fl := make(map[string]interface{})
+	if in.Networks.FlowLogs != nil && in.Networks.FlowLogs.AggregationInterval != nil {
+		fl["aggregation_interval"] = *in.Networks.FlowLogs.AggregationInterval
+	}
+	if in.Networks.FlowLogs != nil && in.Networks.FlowLogs.Metadata != nil {
+		fl["metadata"] = *in.Networks.FlowLogs.Metadata
+	}
+	if in.Networks.FlowLogs != nil && in.Networks.FlowLogs.FlowSampling != nil {
+		fl["flow_sampling"] = *in.Networks.FlowLogs.FlowSampling
+	}
+
+	net["flow_logs"] = []interface{}{fl}
+	att["networks"] = []interface{}{net}
+
 	return []interface{}{att}
 }
 
@@ -504,6 +565,26 @@ func flattenAws(in awsAlpha1.InfrastructureConfig) []interface{} {
 		net["zones"] = zones
 	}
 	att["networks"] = []interface{}{net}
+
+	return []interface{}{att}
+}
+func flattenControlPlaneConfig(providerType string, in *corev1beta1.ProviderConfig) []interface{} {
+	att := map[string]interface{}{}
+	if providerType == "gcp" {
+		gcpConfigObj := gcpAlpha1.ControlPlaneConfig{}
+		if err := json.Unmarshal(in.RawExtension.Raw, &gcpConfigObj); err == nil {
+			att["gcp"] = flattenGcpControlPlane(gcpConfigObj)
+		}
+	}
+	return []interface{}{att}
+}
+
+func flattenGcpControlPlane(in gcpAlpha1.ControlPlaneConfig) []interface{} {
+	att := make(map[string]interface{})
+
+	if len(in.Zone) > 0 {
+		att["zone"] = in.Zone
+	}
 
 	return []interface{}{att}
 }
