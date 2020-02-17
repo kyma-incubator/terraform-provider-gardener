@@ -423,7 +423,11 @@ func TestFlattenShootAws(t *testing.T) {
 			},
 		},
 	}
-	d.Set("spec", expected)
+	err := d.Set("spec", expected)
+
+	if err != nil {
+		t.Fatalf("Error setting expected with spec: \n%s", err)
+	}
 
 	out, _ := flatten.FlattenShoot(shoot, d, "")
 	if diff := cmp.Diff(expected, out); diff != "" {

@@ -215,12 +215,6 @@ func getAwsNetworks(networks []interface{}) awsAlpha1.Networks {
 	if v, ok := in["vpc"].([]interface{}); ok {
 		obj.VPC = getVPC(v)
 	}
-	// if v, ok := in["workers"].(string); ok {
-	// 	obj.Workers = v
-	// }
-	// if v, ok := in["service_endpoints"].(*schema.Set); ok {
-	// 	obj.ServiceEndpoints = expandSet(v)
-	// }
 
 	if v, ok := in["zones"].(*schema.Set); ok {
 		obj.Zones = expandAwsZones(v)
