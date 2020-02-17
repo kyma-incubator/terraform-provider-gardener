@@ -2,7 +2,7 @@ package expand
 
 import (
 	"encoding/json"
-
+	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 
@@ -142,6 +142,10 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
 			obj.InfrastructureConfig = getAzureConfig(az)
 		}
+		if aws, ok := cloud["aws"].([]interface{}); ok && len(aws) > 0 {
+			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
+			obj.InfrastructureConfig = getAwsConfig(aws)
+		}
 	}
 	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
 		for _, w := range workers {
@@ -179,6 +183,83 @@ func getAzureConfig(az []interface{}) *corev1beta1.ProviderConfig {
 	}
 	obj.Raw, _ = json.Marshal(azConfigObj)
 	return &obj
+}
+
+func getAwsConfig(aws []interface{}) *corev1beta1.ProviderConfig {
+	awsConfigObj := awsAlpha1.InfrastructureConfig{}
+	obj := corev1beta1.ProviderConfig{}
+	if len(aws) == 0 && aws[0] == nil {
+		return &obj
+	}
+	in := aws[0].(map[string]interface{})
+
+	awsConfigObj.APIVersion = "aws.provider.extensions.gardener.cloud/v1alpha1"
+	awsConfigObj.Kind = "InfrastructureConfig"
+	if v, ok := in["enableecraccess"].(bool); ok {
+		awsConfigObj.EnableECRAccess = &v
+	}
+	if v, ok := in["networks"].([]interface{}); ok && len(v) > 0 {
+		awsConfigObj.Networks = getAwsNetworks(v)
+	}
+	obj.Raw, _ = json.Marshal(awsConfigObj)
+	return &obj
+}
+
+func getAwsNetworks(networks []interface{}) awsAlpha1.Networks {
+	obj := awsAlpha1.Networks{}
+	if networks == nil {
+		return obj
+	}
+	in := networks[0].(map[string]interface{})
+
+	if v, ok := in["vpc"].([]interface{}); ok {
+		obj.VPC = getVPC(v)
+	}
+
+	if v, ok := in["zones"].(*schema.Set); ok {
+		obj.Zones = expandAwsZones(v)
+	}
+
+	return obj
+}
+
+func expandAwsZones(set *schema.Set) []awsAlpha1.Zone {
+	result := make([]awsAlpha1.Zone, set.Len())
+	for i, k := range set.List() {
+		z := awsAlpha1.Zone{}
+		if v, ok := k.(map[string]interface{})["name"].(string); ok && len(v) > 0 {
+			z.Name = v
+		}
+		if v, ok := k.(map[string]interface{})["internal"].(string); ok && len(v) > 0 {
+			z.Internal = v
+		}
+		if v, ok := k.(map[string]interface{})["public"].(string); ok && len(v) > 0 {
+			z.Public = v
+		}
+		if v, ok := k.(map[string]interface{})["workers"].(string); ok && len(v) > 0 {
+			z.Workers = v
+		}
+
+		result[i] = z
+	}
+	return result
+}
+
+func getVPC(vpc []interface{}) awsAlpha1.VPC {
+	obj := awsAlpha1.VPC{}
+
+	if len(vpc) == 0 && vpc[0] == nil {
+		return obj
+	}
+	in := vpc[0].(map[string]interface{})
+
+	if v, ok := in["id"].(string); ok && len(v) > 0 {
+		obj.ID = &v
+	}
+	if v, ok := in["cidr"].(string); ok && len(v) > 0 {
+		obj.CIDR = &v
+	}
+	return obj
 }
 
 func getNetworks(networks []interface{}) azAlpha1.NetworkConfig {

@@ -3,6 +3,7 @@ package flatten
 import (
 	"encoding/json"
 
+	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/kyma-incubator/terraform-provider-gardener/expand"
@@ -429,6 +430,13 @@ func flattenInfrastructureConfig(providerType string, in *corev1beta1.ProviderCo
 		}
 	}
 
+	if providerType == "aws" {
+		awsConfigObj := awsAlpha1.InfrastructureConfig{}
+		if err := json.Unmarshal(in.RawExtension.Raw, &awsConfigObj); err == nil {
+			att["aws"] = flattenAws(awsConfigObj)
+		}
+	}
+
 	return []interface{}{att}
 }
 
@@ -453,6 +461,48 @@ func flattenAzure(in azAlpha1.InfrastructureConfig) []interface{} {
 		vnet["resource_group"] = *in.Networks.VNet.ResourceGroup
 	}
 	net["vnet"] = []interface{}{vnet}
+	att["networks"] = []interface{}{net}
+
+	return []interface{}{att}
+}
+
+func flattenAws(in awsAlpha1.InfrastructureConfig) []interface{} {
+	att := make(map[string]interface{})
+	net := make(map[string]interface{})
+	vpc := make(map[string]interface{})
+
+	if in.EnableECRAccess != nil {
+		att["enableecraccess"] = in.EnableECRAccess
+	}
+	if in.Networks.VPC.ID != nil {
+		vpc["id"] = in.Networks.VPC.ID
+	}
+	if in.Networks.VPC.CIDR != nil {
+		vpc["cidr"] = in.Networks.VPC.CIDR
+	}
+	net["vpc"] = []interface{}{vpc}
+
+	if len(in.Networks.Zones) > 0 {
+		// zones := make([]interface{}, len(in.Networks.Zones))
+		zones := make([]map[string]interface{}, len(in.Networks.Zones))
+		for i, v := range in.Networks.Zones {
+			zone := map[string]interface{}{}
+			if len(v.Name) > 0 {
+				zone["name"] = v.Name
+			}
+			if len(v.Internal) > 0 {
+				zone["internal"] = v.Internal
+			}
+			if len(v.Public) > 0 {
+				zone["public"] = v.Public
+			}
+			if len(v.Workers) > 0 {
+				zone["workers"] = v.Workers
+			}
+			zones[i] = zone
+		}
+		net["zones"] = zones
+	}
 	att["networks"] = []interface{}{net}
 
 	return []interface{}{att}

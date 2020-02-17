@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
 	"github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -342,6 +343,89 @@ func TestExpandShootAzure(t *testing.T) {
 			InfrastructureConfig: &corev1beta1.ProviderConfig{
 				RawExtension: runtime.RawExtension{
 					Raw: azConfig,
+				},
+			},
+		},
+	}
+
+	data := schema.TestResourceDataRaw(t, ResourceShoot().Schema, shoot)
+	out := expand.ExpandShoot(data.Get("spec").([]interface{}))
+	if diff := cmp.Diff(expected, out); diff != "" {
+		t.Fatalf("Error matching output and expected: \n%s", diff)
+	}
+}
+
+func TestExpandShootAws(t *testing.T) {
+	vpcCIDR := "10.250.0.0/16"
+	EnableECRAccess := false
+	awsConfig, _ := json.Marshal(awsAlpha1.InfrastructureConfig{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "aws.provider.extensions.gardener.cloud/v1alpha1",
+			Kind:       "InfrastructureConfig",
+		},
+		EnableECRAccess: &EnableECRAccess,
+		Networks: awsAlpha1.Networks{
+			VPC: awsAlpha1.VPC{
+				CIDR: &vpcCIDR,
+			},
+			Zones: []awsAlpha1.Zone{
+				awsAlpha1.Zone{
+					Name:     "eu-central-1a",
+					Internal: vpcCIDR,
+					Public:   vpcCIDR,
+					Workers:  vpcCIDR,
+				},
+			},
+		},
+	})
+
+	shoot := map[string]interface{}{
+		"spec": []interface{}{
+			map[string]interface{}{
+				"maintenance": "",
+				"monitoring":  "",
+				"purpose":     "",
+				"region":      "",
+				"provider": []interface{}{
+					map[string]interface{}{
+						"type":   "aws",
+						"worker": "",
+						"infrastructure_config": []interface{}{
+							map[string]interface{}{
+								"aws": []interface{}{
+									map[string]interface{}{
+										"networks": []interface{}{
+											map[string]interface{}{
+												"vpc": []interface{}{
+													map[string]interface{}{
+														"cidr": "10.250.0.0/16",
+													},
+												},
+												"zones": []interface{}{
+													map[string]interface{}{
+														"name":     "eu-central-1a",
+														"internal": "10.250.0.0/16",
+														"public":   "10.250.0.0/16",
+														"workers":  "10.250.0.0/16",
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	expected := corev1beta1.ShootSpec{
+		Provider: corev1beta1.Provider{
+			Type: "aws",
+			InfrastructureConfig: &corev1beta1.ProviderConfig{
+				RawExtension: runtime.RawExtension{
+					Raw: awsConfig,
 				},
 			},
 		},
