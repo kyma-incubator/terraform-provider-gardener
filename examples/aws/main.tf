@@ -27,7 +27,6 @@ resource "gardener_shoot" "test_cluster" {
   metadata {
     name      = "test-cluster"
     namespace = "garden-<profile>"
-
   }
 
   spec {
@@ -44,6 +43,22 @@ resource "gardener_shoot" "test_cluster" {
 
     provider {
       type = "aws"
+      infrastructure_config {
+        aws {
+          enableecraccess = true
+          networks {
+            vpc {
+              cidr = "10.50.0.0/16"
+            }
+            zones {
+              name     = "eu-central-1a"
+              internal = "10.50.112.0/22"
+              public   = "10.50.96.0/22"
+              workers  = "10.50.0.0/19"
+            }
+          }
+        }
+      }
       worker {
         name            = "cpu-worker"
         max_surge       = 1
@@ -51,14 +66,19 @@ resource "gardener_shoot" "test_cluster" {
         maximum         = 2
         minimum         = 2
         volume {
-          size = "50Gi"
-          type = "Standard_LRS"
+          type = "gp2"
+          size = "30Gi"
         }
         machine {
-          type    = "m5.large"
+          type = "t3.medium"
+          image {
+            name    = "coreos"
+            version = "ami-d0dcef3"
+          }
         }
-      }
 
+        zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+      }
     }
 
     kubernetes {
@@ -66,4 +86,3 @@ resource "gardener_shoot" "test_cluster" {
     }
   }
 }
-
