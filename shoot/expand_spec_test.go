@@ -443,11 +443,11 @@ func TestExpandShootGCP(t *testing.T) {
 	internal := "test"
 	fooCloudNat := int32(2)
 	gcpControlPlaneConfig, _ := json.Marshal(gcpAlpha1.ControlPlaneConfig{
-		TypeMeta:               v1.TypeMeta{
+		TypeMeta: v1.TypeMeta{
 			APIVersion: "gcp.provider.extensions.gardener.cloud/v1alpha1",
 			Kind:       "ControlPlaneConfig",
 		},
-		Zone:                   "zone1",
+		Zone: "zone1",
 	})
 
 	gcpInfraConfig, _ := json.Marshal(gcpAlpha1.InfrastructureConfig{

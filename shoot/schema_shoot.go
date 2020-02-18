@@ -241,9 +241,9 @@ func gcpControlPlaneResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"zone": {
-				Type: schema.TypeString,
+				Type:        schema.TypeString,
 				Description: "Zone is the GCP zone.",
-				Required: true,
+				Required:    true,
 			},
 		},
 	}

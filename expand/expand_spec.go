@@ -12,7 +12,6 @@ import (
 
 	//v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
-
 )
 
 // Expanders
@@ -206,7 +205,7 @@ func getGCPConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
 	gcpConfigObj.APIVersion = "gcp.provider.extensions.gardener.cloud/v1alpha1"
 	gcpConfigObj.Kind = "InfrastructureConfig"
 
-	if v,ok := in["networks"].([]interface{}); ok && len(v) > 0 {
+	if v, ok := in["networks"].([]interface{}); ok && len(v) > 0 {
 		gcpConfigObj.Networks = getGCPNetworks(v)
 	}
 	obj.Raw, _ = json.Marshal(gcpConfigObj)
@@ -219,19 +218,19 @@ func getGCPNetworks(networks []interface{}) gcpAlpha1.NetworkConfig {
 		return obj
 	}
 	in := networks[0].(map[string]interface{})
-	if v, ok := in["vpc"].([]interface{}); ok  && len(v) > 0{
+	if v, ok := in["vpc"].([]interface{}); ok && len(v) > 0 {
 		obj.VPC = getGCPvpc(v)
 	}
-	if v, ok := in["workers"].(string); ok  && len(v) > 0{
+	if v, ok := in["workers"].(string); ok && len(v) > 0 {
 		obj.Workers = v
 	}
-	if v, ok := in["internal"].(string); ok  && len(v) > 0{
+	if v, ok := in["internal"].(string); ok && len(v) > 0 {
 		obj.Internal = &v
 	}
-	if v, ok := in["cloud_nat"].([]interface{}); ok  && len(v) > 0{
+	if v, ok := in["cloud_nat"].([]interface{}); ok && len(v) > 0 {
 		obj.CloudNAT = getGCPCloudNat(v)
 	}
-	if v,ok := in["flow_logs"].([]interface{}); ok && len(v) > 0{
+	if v, ok := in["flow_logs"].([]interface{}); ok && len(v) > 0 {
 		obj.FlowLogs = getGCPFlowLogs(v)
 	}
 
@@ -245,7 +244,7 @@ func getGCPFlowLogs(fl []interface{}) *gcpAlpha1.FlowLogs {
 	}
 	in := fl[0].(map[string]interface{})
 
-	if v, ok := in["aggregation_interval"].(string); ok  && len(v) > 0 {
+	if v, ok := in["aggregation_interval"].(string); ok && len(v) > 0 {
 		obj.AggregationInterval = &v
 	}
 	if v, ok := in["flow_sampling"].(float32); ok {
@@ -256,7 +255,7 @@ func getGCPFlowLogs(fl []interface{}) *gcpAlpha1.FlowLogs {
 		obj.Metadata = &v
 	}
 	return &obj
-	
+
 }
 
 func getGCPCloudNat(cn []interface{}) *gcpAlpha1.CloudNAT {
@@ -271,7 +270,7 @@ func getGCPCloudNat(cn []interface{}) *gcpAlpha1.CloudNAT {
 		f := int32(v)
 		obj.MinPortsPerVM = &f
 	}
-	return  &obj
+	return &obj
 }
 
 func getGCPvpc(vpc []interface{}) *gcpAlpha1.VPC {
@@ -284,10 +283,10 @@ func getGCPvpc(vpc []interface{}) *gcpAlpha1.VPC {
 	if v, ok := in["name"].(string); ok && len(v) > 0 {
 		obj.Name = v
 	}
-	if v, ok := in["cloud_router"].([]interface{}); ok  && len(v) > 0 {
+	if v, ok := in["cloud_router"].([]interface{}); ok && len(v) > 0 {
 		obj.CloudRouter = getGCPCloudRouter(v)
 	}
-	return  &obj
+	return &obj
 }
 
 func getGCPCloudRouter(cr []interface{}) *gcpAlpha1.CloudRouter {
@@ -298,7 +297,7 @@ func getGCPCloudRouter(cr []interface{}) *gcpAlpha1.CloudRouter {
 	}
 	in := cr[0].(map[string]interface{})
 
-	if v,ok := in["name"].(string); ok && len(v) > 0 {
+	if v, ok := in["name"].(string); ok && len(v) > 0 {
 		obj.Name = v
 	}
 	return &obj

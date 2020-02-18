@@ -459,9 +459,9 @@ func TestFlattenShootGCP(t *testing.T) {
 				CloudRouter: &gcpAlpha1.CloudRouter{
 					Name: "bar",
 				},
-				Name:          "foo",
+				Name: "foo",
 			},
-			Workers:          "10.250.0.0/19",
+			Workers: "10.250.0.0/19",
 			CloudNAT: &gcpAlpha1.CloudNAT{
 				MinPortsPerVM: &minPorts,
 			},
@@ -471,7 +471,6 @@ func TestFlattenShootGCP(t *testing.T) {
 				FlowSampling:        &fs,
 				Metadata:            &metadata,
 			},
-
 		},
 	})
 
@@ -481,7 +480,7 @@ func TestFlattenShootGCP(t *testing.T) {
 			Type: "gcp",
 			ControlPlaneConfig: &corev1beta1.ProviderConfig{
 				RawExtension: runtime.RawExtension{
-					Raw:    gcpControlPlaneConfig,
+					Raw: gcpControlPlaneConfig,
 				},
 			},
 			InfrastructureConfig: &corev1beta1.ProviderConfig{
@@ -533,8 +532,8 @@ func TestFlattenShootGCP(t *testing.T) {
 											"flow_logs": []interface{}{
 												map[string]interface{}{
 													"aggregation_interval": "test",
-													"flow_sampling": float32(2),
-													"metadata": "test",
+													"flow_sampling":        float32(2),
+													"metadata":             "test",
 												},
 											},
 										},
