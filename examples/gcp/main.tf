@@ -41,12 +41,27 @@ resource "gardener_shoot" "test_cluster" {
       services = "100.64.0.0/13"
       type     = "calico"
     }
-    kubernetes {
-      version = "1.15.4"
-    }
 
     provider {
       type = "gcp"
+
+      infrastructure_config {
+        aws {
+          enableecraccess = true
+          networks {
+            vpc {
+              cidr = "10.50.0.0/16"
+            }
+            zones {
+              name     = "eu-central-1a"
+              internal = "10.50.112.0/22"
+              public   = "10.50.96.0/22"
+              workers  = "10.50.0.0/19"
+            }
+          }
+        }
+      }
+
       worker {
         max_surge       = 1
         max_unavailable = 0
@@ -57,6 +72,7 @@ resource "gardener_shoot" "test_cluster" {
           type = "Standard_LRS"
         }
         name = "cpu-worker"
+
         machine {
           image {
             name    = "coreos"
@@ -65,6 +81,10 @@ resource "gardener_shoot" "test_cluster" {
           type = "Standard_A4_v2"
         }
       }
+    }
+
+    kubernetes {
+      version = "1.15.4"
     }
   }
 }
