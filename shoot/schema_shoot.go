@@ -4,14 +4,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-
-
-
-
-
-
-
-
 func addonsResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{

@@ -116,8 +116,6 @@ func expandNetworking(networking []interface{}) corev1beta1.Networking {
 	return obj
 }
 
-
-
 func expandAddons(addon []interface{}) *corev1beta1.Addons {
 	obj := &corev1beta1.Addons{}
 
