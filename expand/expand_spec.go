@@ -2,6 +2,7 @@ package expand
 
 import (
 	"encoding/json"
+
 	awsAlpha1 "github.com/gardener/gardener-extension-provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
 	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
@@ -10,13 +11,11 @@ import (
 
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 
-	//v1beta1 "github.com/gardener/gardener/pkg/apis/garden/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
 // Expanders
 func ExpandShoot(shoot []interface{}) corev1beta1.ShootSpec {
-	//obj := v1beta1.ShootSpec{}
 	obj := corev1beta1.ShootSpec{}
 
 	if len(shoot) == 0 || shoot[0] == nil {
@@ -34,9 +33,7 @@ func ExpandShoot(shoot []interface{}) corev1beta1.ShootSpec {
 		purpose := corev1beta1.ShootPurpose(v)
 		obj.Purpose = &purpose
 	}
-	//if v, ok := in["cloud"].([]interface{}); ok && len(v) > 0 {
-	//	obj.Cloud = expandCloud(v)
-	//}
+
 	if v, ok := in["provider"].([]interface{}); ok && len(v) > 0 {
 		obj.Provider = expandProvider(v)
 	}

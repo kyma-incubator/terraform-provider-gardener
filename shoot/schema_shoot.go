@@ -639,21 +639,6 @@ func kubernetesResource() *schema.Resource {
 					},
 				},
 			},
-			//"cloud_controller_manager": {
-			//			//	Type:        schema.TypeList,
-			//			//	Description: "CloudControllerManager contains configuration settings for the cloud-controller-manager.",
-			//			//	Optional:    true,
-			//			//	MaxItems:    1,
-			//			//	Elem: &schema.Resource{
-			//			//		Schema: map[string]*schema.Schema{
-			//			//			"feature_gates": {
-			//			//				Type:        schema.TypeMap,
-			//			//				Description: "FeatureGates contains information about enabled feature gates.",
-			//			//				Optional:    true,
-			//			//			},
-			//			//		},
-			//			//	},
-			//			//},
 			"kube_controller_manager": {
 				Type:        schema.TypeList,
 				Description: "KubeControllerManager contains configuration settings for the kube-controller-manager.",
