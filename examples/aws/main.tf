@@ -82,7 +82,7 @@ resource "gardener_shoot" "test_cluster" {
     }
 
     kubernetes {
-      version = "1.15.4"
+      version = "1.17.3"
     }
   }
 }
