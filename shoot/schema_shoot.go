@@ -4,6 +4,465 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+func workerKubernetes() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"kubelet": {
+				Type:        schema.TypeList,
+				Description: "Kubelet contains configuration settings for the kubelet.",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"pod_pids_limit": {
+							Type:        schema.TypeInt,
+							Description: "PodPIDsLimit is the maximum number of process IDs per pod allowed by the kubelet.",
+							Optional:    true,
+						},
+						"cpu_cfs_quota": {
+							Type:        schema.TypeBool,
+							Description: "CPUCFSQuota allows you to disable/enable CPU throttling for Pods.",
+							Optional:    true,
+						},
+						"cpu_manager_policy": {
+							Type:        schema.TypeString,
+							Description: "CPUManagerPolicy allows to set alternative CPU management policies (default: none).",
+							Optional:    true,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func workerConfig() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"annotations": {
+				Type:        schema.TypeMap,
+				Description: "Annotations is a map of key/value pairs for annotations for all the `Node` objects in this worker pool.",
+				Optional:    true,
+			},
+			"cabundle": {
+				Type:        schema.TypeString,
+				Description: "caBundle configuration",
+				Optional:    true,
+			},
+			"kubernetes": {
+				Type:        schema.TypeList,
+				Description: "Kubernetes contains configuration for Kubernetes components related to this worker pool.",
+				Optional:    true,
+				Elem:        workerKubernetes(),
+			},
+			"labels": {
+				Type:        schema.TypeMap,
+				Description: "Labels is a map of key/value pairs for labels for all the `Node` objects in this worker pool.",
+				Optional:    true,
+			},
+			"name": {
+				Type:        schema.TypeString,
+				Description: "Name is the name of the worker group.",
+				Required:    true,
+			},
+			"machine": {
+				Type:        schema.TypeList,
+				Description: "MachineType is the machine type of the worker group.",
+				Required:    true,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:        schema.TypeString,
+							Description: "Type is the machine type of the worker group.",
+							Required:    true,
+						},
+						"image": {
+							Type:        schema.TypeList,
+							Description: "Image holds information about the machine image to use for all nodes of this pool. It will default to the latest version of the first image stated in the referenced CloudProfile if no value has been provided.",
+							Optional:    true,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Description: "VolumeSize is the size of the root volume.",
+										Required:    true,
+									},
+									"version": {
+										Type:        schema.TypeString,
+										Description: "Version is the version of the shoot's image.",
+										Required:    true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"minimum": {
+				Type:        schema.TypeInt,
+				Description: "Minimum is the minimum number of VMs to create.",
+				Required:    true,
+			},
+			"maximum": {
+				Type:        schema.TypeInt,
+				Description: "Maximum is the maximum number of VMs to create.",
+				Required:    true,
+			},
+			"max_surge": {
+				Type:        schema.TypeInt,
+				Description: "MaxSurge is maximum number of VMs that are created during an update.",
+				Optional:    true,
+			},
+			"max_unavailable": {
+				Type:        schema.TypeInt,
+				Description: "MaxUnavailable is the maximum number of VMs that can be unavailable during an update.",
+				Optional:    true,
+			},
+			"taints": {
+				Type:        schema.TypeList,
+				Description: "Taints is a list of taints for all the `Node` objects in this worker pool.",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"effect": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+			"volume": {
+				Type:        schema.TypeList,
+				Description: "Volume contains information about the volume type and size.",
+				Required:    true,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:        schema.TypeString,
+							Description: "VolumeType is the type of the root volumes.",
+							Required:    true,
+						},
+						"size": {
+							Type:        schema.TypeString,
+							Description: "VolumeSize is the size of the root volume.",
+							Required:    true,
+						},
+					},
+				},
+			},
+			"zones": {
+				Type:        schema.TypeSet,
+				Description: "Zones is a list of availability zones to deploy the Shoot cluster to.",
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Set:         schema.HashString,
+			},
+		},
+	}
+}
+
+func providerResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"type": {
+				Type:        schema.TypeString,
+				Description: "Type is the type of the provider.",
+				Required:    true,
+			},
+			"control_plane_config": {
+				Type:        schema.TypeList,
+				Description: "ControlPlaneConfig contains the provider-specific control plane config blob.",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"gcp": {
+							Type:        schema.TypeList,
+							Description: "GCP contains the Shoot specification for Google Cloud Platform.",
+							Optional:    true,
+							MaxItems:    1,
+							Elem:        gcpControlPlaneResource(),
+						},
+					},
+				},
+			},
+			"infrastructure_config": {
+				Type:        schema.TypeList,
+				Description: "InfrastructureConfig contains the provider-specific infrastructure config blob.",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"azure": {
+							Type:        schema.TypeList,
+							Description: "Azure contains the Shoot specification for the Azure Cloud Platform.",
+							Optional:    true,
+							MaxItems:    1,
+							Elem:        azureResource(),
+						},
+						"aws": {
+							Type:        schema.TypeList,
+							Description: "AWS contains the Shoot specification for the AWS Cloud Platform.",
+							Optional:    true,
+							MaxItems:    1,
+							Elem:        awsResource(),
+						},
+						"gcp": {
+							Type:        schema.TypeList,
+							Description: "GCP contains the Shoot specification for Google Cloud Platform.",
+							Optional:    true,
+							MaxItems:    1,
+							Elem:        gcpResource(),
+						},
+					},
+				},
+			},
+			"worker": {
+				Type:             schema.TypeList,
+				Description:      "Workers is a list of worker groups.",
+				Required:         true,
+				Elem:             workerConfig(),
+				DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
+			},
+		},
+	}
+}
+
+func gcpControlPlaneResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"zone": {
+				Type:        schema.TypeString,
+				Description: "Zone is the GCP zone.",
+				Required:    true,
+			},
+		},
+	}
+}
+
+func gcpResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"networks": {
+				Type:        schema.TypeList,
+				Description: "Networks is the network configuration (VPC, subnets, etc.)",
+				Required:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"vpc": {
+							Type:        schema.TypeList,
+							Description: "VPC indicates whether to use an existing VPC or create a new one.",
+							Optional:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Description: "Name is the VPC name.",
+										Optional:    true,
+									},
+									"cloud_router": {
+										Type:        schema.TypeList,
+										Description: "CloudRouter indicates whether to use an existing CloudRouter or create a new one.",
+										Optional:    true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"name": {
+													Type:        schema.TypeString,
+													Description: "Name is the CloudRouter name.",
+													Optional:    true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"cloud_nat": {
+							Type:        schema.TypeList,
+							Description: "CloudNAT contains configuration about the the CloudNAT configuration",
+							Optional:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"min_ports_per_vm": {
+										Type:        schema.TypeInt,
+										Description: "MinPortsPerVM is the minimum number of ports allocated to a VM in the NAT config. The default value is 2048 ports.",
+										Optional:    true,
+									},
+								},
+							},
+						},
+						"internal": {
+							Type:        schema.TypeString,
+							Description: "Internal is a private subnet (used for internal load balancers).",
+							Optional:    true,
+						},
+						"workers": {
+							Type:        schema.TypeString,
+							Description: "Workers is the worker subnet range to create (used for the VMs).",
+							Required:    true,
+						},
+						"flow_logs": {
+							Type:        schema.TypeList,
+							Description: "FlowLogs contains the flow log configuration for the subnet.",
+							Optional:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"aggregation_interval": {
+										Type:        schema.TypeString,
+										Description: "AggregationInterval for collecting flow logs.",
+										Optional:    true,
+									},
+									"flow_sampling": {
+										Type:        schema.TypeFloat,
+										Description: "FlowSampling sets the sampling rate of VPC flow logs within the subnetwork where 1.0 means all collected logs are reported and 0.0 means no logs are reported.",
+										Optional:    true,
+									},
+									"metadata": {
+										Type:        schema.TypeString,
+										Description: "Metadata configures whether metadata fields should be added to the reported VPC flow logs.",
+										Optional:    true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func azureResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"networks": {
+				Type:        schema.TypeList,
+				Description: "NetworkConfig holds information about the Kubernetes and infrastructure networks.",
+				Required:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"workers": {
+							Type:        schema.TypeString,
+							Description: "Workers is the worker subnet range to create (used for the VMs).",
+							Required:    true,
+						},
+						"service_endpoints": {
+							Type:        schema.TypeSet,
+							Description: "List of Azure service endpoints connect to the created VNet.",
+							Optional:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Set:         schema.HashString,
+						},
+						"vnet": {
+							Type:        schema.TypeList,
+							Description: "VNet indicates whether to use an existing VNet or create a new one.",
+							Required:    true,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Description: "Name is the VNet name.",
+										Optional:    true,
+									},
+									"cidr": {
+										Type:        schema.TypeString,
+										Description: "CIDR is the VNet CIDR.",
+										Optional:    true,
+									},
+									"resource_group": {
+										Type:        schema.TypeString,
+										Description: "ResourceGroup is the resource group where the existing vNet belongs to.",
+										Optional:    true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func awsResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"enableecraccess": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"networks": {
+				Type:        schema.TypeList,
+				Description: "NetworkConfig holds information about the Kubernetes and infrastructure networks.",
+				Required:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"vpc": {
+							Type:        schema.TypeList,
+							Description: "VPC ID or CIDR for aws",
+							Required:    true,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:        schema.TypeString,
+										Description: "ID of the VPC.",
+										Optional:    true,
+									},
+									"cidr": {
+										Type:        schema.TypeString,
+										Description: "CIDR is the VPC CIDR.",
+										Optional:    true,
+									},
+								},
+							},
+						},
+						"zones": {
+							Type:        schema.TypeSet,
+							Description: "List of zones.",
+							Optional:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Description: "Name is the zone name.",
+										Optional:    true,
+									},
+									"internal": {
+										Type:        schema.TypeString,
+										Description: "internal CIDR",
+										Optional:    true,
+									},
+									"public": {
+										Type:        schema.TypeString,
+										Description: "public cidr",
+										Optional:    true,
+									},
+									"workers": {
+										Type:        schema.TypeString,
+										Description: "worker cidr",
+										Optional:    true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func addonsResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -46,21 +505,21 @@ func addonsResource() *schema.Resource {
 func dNSResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"provider": {
-				Type:        schema.TypeString,
-				Description: "Provider is the DNS provider type for the Shoot.",
-				Optional:    true,
-			},
+			// "provider": {
+			// 	Type:        schema.TypeString,
+			// 	Description: "Provider is the DNS provider type for the Shoot.",
+			// 	Optional:    true,
+			// },
 			"domain": {
 				Type:        schema.TypeString,
 				Description: "Domain is the external available domain of the Shoot cluster.",
 				Optional:    true,
 			},
-			"secret_name": {
-				Type:        schema.TypeString,
-				Description: "SecretName is a name of a secret containing credentials for the stated domain and the provider.",
-				Optional:    true,
-			},
+			// "secret_name": {
+			// 	Type:        schema.TypeString,
+			// 	Description: "SecretName is a name of a secret containing credentials for the stated domain and the provider.",
+			// 	Optional:    true,
+			// },
 		},
 	}
 }
@@ -176,21 +635,6 @@ func kubernetesResource() *schema.Resource {
 									},
 								},
 							},
-						},
-					},
-				},
-			},
-			"cloud_controller_manager": {
-				Type:        schema.TypeList,
-				Description: "CloudControllerManager contains configuration settings for the cloud-controller-manager.",
-				Optional:    true,
-				MaxItems:    1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"feature_gates": {
-							Type:        schema.TypeMap,
-							Description: "FeatureGates contains information about enabled feature gates.",
-							Optional:    true,
 						},
 					},
 				},
@@ -371,12 +815,11 @@ func monitoringResource() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"emailreceivers": {
-							Type:        schema.TypeList,
-							Description: "List of people who receiving alerts for this shoots",
-							Optional:    true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
+							Type:             schema.TypeSet,
+							Description:      "List of people who receiving alerts for this shoots",
+							Optional:         true,
+							Elem:             &schema.Schema{Type: schema.TypeString},
+							Set:              schema.HashString,
 							DiffSuppressFunc: suppressEmptyNewValue,
 						},
 					},
@@ -401,12 +844,10 @@ func shootSpecSchema() *schema.Schema {
 					MaxItems:    1,
 					Elem:        addonsResource(),
 				},
-				"cloud": {
-					Type:        schema.TypeList,
-					Description: "Cloud contains information about the cloud environment and their specific settings.",
+				"cloud_profile_name": {
+					Type:        schema.TypeString,
+					Description: "Profile is a name of a CloudProfile object.",
 					Required:    true,
-					MaxItems:    1,
-					Elem:        cloudResource(),
 				},
 				"dns": {
 					Type:        schema.TypeList,
@@ -415,6 +856,11 @@ func shootSpecSchema() *schema.Schema {
 					MaxItems:    1,
 					Elem:        dNSResource(),
 				},
+				//"extensions": {
+				//	Type: schema.TypeList,
+				//	Description: "Extensions contain type and provider information for Shoot extensions.",
+				//	Optional: true,
+				//},
 				"hibernation": {
 					Type:        schema.TypeList,
 					Description: "Hibernation contains information whether the Shoot is suspended or not.",
@@ -428,6 +874,12 @@ func shootSpecSchema() *schema.Schema {
 					Required:    true,
 					MaxItems:    1,
 					Elem:        kubernetesResource(),
+				},
+				"networking": {
+					Type:        schema.TypeList,
+					Description: "Networking contains information about cluster networking such as CNI Plugin type, CIDRs, ...etc.",
+					Required:    true,
+					Elem:        networkingResource(),
 				},
 				"maintenance": {
 					Type:             schema.TypeList,
@@ -445,59 +897,60 @@ func shootSpecSchema() *schema.Schema {
 					Elem:             monitoringResource(),
 					DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
 				},
+				"provider": {
+					Type:             schema.TypeList,
+					Description:      "Provider contains all provider-specific and provider-relevant information.",
+					Required:         true,
+					Elem:             providerResource(),
+					DiffSuppressFunc: suppressMissingOptionalConfigurationBlock,
+				},
+				"purpose": {
+					Type:        schema.TypeString,
+					Description: "Purpose is the purpose class for this cluster.",
+					Optional:    true,
+				},
+				"region": {
+					Type:        schema.TypeString,
+					Description: "Region is a name of a cloud provider region.",
+					Required:    true,
+				},
+				"secret_binding_name": {
+					Type:        schema.TypeString,
+					Description: "Secret binding name is the name of the a SecretBinding that has a reference to the provider secret. The credentials inside the provider secret will be used to create the shoot in the respective account",
+					Required:    true,
+				},
+				"seed_name": {
+					Type:        schema.TypeString,
+					Description: "Seed name is the name of the seed cluster that runs the control plane of the Shoot.",
+					Optional:    true,
+				},
 			},
 		},
 	}
 }
 
-func cloudResource() *schema.Resource {
+func networkingResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"profile": {
+			"type": {
 				Type:        schema.TypeString,
-				Description: "Profile is a name of a CloudProfile object.",
+				Description: "Type identifies the type of the networking plugin.",
 				Required:    true,
 			},
-			"region": {
+			"pods": {
 				Type:        schema.TypeString,
-				Description: "Region is a name of a cloud provider region.",
-				Required:    true,
-			},
-			"secret_binding_ref": {
-				Type:        schema.TypeList,
-				Description: "SecretBindingRef is a reference to a SecretBinding object.",
-				Required:    true,
-				MaxItems:    1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:        schema.TypeString,
-							Description: "Name of the secret.",
-							Required:    true,
-						},
-					},
-				},
-			},
-			"aws": {
-				Type:        schema.TypeList,
-				Description: "AWS contains the Shoot specification for the Amazon Web Services cloud.",
+				Description: "Pods is the CIDR of the pod network.",
 				Optional:    true,
-				MaxItems:    1,
-				Elem:        cloudResourceAWS(),
 			},
-			"gcp": {
-				Type:        schema.TypeList,
-				Description: "GCP contains the Shoot specification for the Google Cloud Platform.",
+			"nodes": {
+				Type:        schema.TypeString,
+				Description: "Nodes is the CIDR of the entire node network.",
 				Optional:    true,
-				MaxItems:    1,
-				Elem:        cloudResourceGCP(),
 			},
-			"azure": {
-				Type:        schema.TypeList,
-				Description: "Azure contains the Shoot specification for the Azure Cloud Platform.",
+			"services": {
+				Type:        schema.TypeString,
+				Description: "Services is the CIDR of the service network.",
 				Optional:    true,
-				MaxItems:    1,
-				Elem:        cloudResourceAzure(),
 			},
 		},
 	}

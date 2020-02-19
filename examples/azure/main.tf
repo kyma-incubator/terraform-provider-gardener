@@ -32,35 +32,59 @@ resource "gardener_shoot" "test_cluster" {
   }
 
   spec {
-    cloud {
-      profile = "az"
-      region  = "westeurope"
-
-      secret_binding_ref {
-        name = "<secret_binding>"
+    cloud_profile_name = "az"
+    secret_binding_name = "<secret_binding>"
+    purpose = "evaluation"
+    networking {
+      nodes = "10.250.0.0/19"
+      pods= "100.96.0.0/11"
+      services= "100.64.0.0/13"
+      type= "calico"
+    }
+    maintenance {
+      auto_update{
+        kubernetes_version = true
+        machine_image_version = true
       }
 
-      azure {
-        networks {
-          vnet {
-            cidr = "10.250.0.0/16"
+      time_window {
+        begin = "030000+0000"
+        end = "040000+0000"
+      }
+    }
+    provider {
+      type = "azure"
+      infrastructure_config {
+        azure {
+          networks {
+            vnet {
+              cidr = "10.250.0.0/16"
+            }
+            workers = "10.250.0.0/19"
+           # service_endpoints = ["microsoft.test"]
           }
-          workers = "10.250.0.0/19"
         }
-
-        worker {
-          name            = "cpu-worker"
-          machine_type    = "Standard_D2_v3"
-          auto_scaler_min = 3
-          auto_scaler_max = 3
-          max_surge       = 1
-          max_unavailable = 0
-          volume_type     = "standard"
-          volume_size     = "50Gi"
+      }
+      worker {
+        max_surge = 1
+        max_unavailable = 0
+        maximum = 2
+        minimum = 2
+        volume {
+          size = "50Gi"
+          type = "Standard_LRS"
+        }
+        name = "cpu-worker"
+        machine {
+          image  {
+            name = "coreos"
+            version = "2303.3.0"
+          }
+          type = "Standard_A4_v2"
         }
       }
     }
-
+    region =  "westeurope"
     kubernetes {
       version = "1.15.4"
     }
