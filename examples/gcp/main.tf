@@ -27,40 +27,67 @@ provider "gardener" {
 resource "gardener_shoot" "test_cluster" {
   metadata {
     name      = "test-cluster"
-    namespace = "garden-<profile>"
-
+    namespace = "garden-berlin"
   }
-
   spec {
-    cloud {
-      profile = "gcp"
-      region  = "europe-west3"
-      secret_binding_ref {
-        name = "<secret_binding>"
+    cloud_profile_name = "gcp"
+    secret_binding_name = "<secret_binding>"
+    region  = "europe-west3"
+
+    maintenance {
+      auto_update{
+        kubernetes_version = true
+        machine_image_version = true
       }
 
-      gcp {
-        networks {
-          workers = ["10.250.0.0/19"]
+      time_window {
+        begin = "030000+0000"
+        end = "040000+0000"
+      }
+    }
+    networking{
+      type = "calico"
+      nodes ="10.250.0.0/16"
+    }
+
+    provider {
+      type = "gcp"
+      control_plane_config {
+        gcp {
+          zone = "europe-west3-a"
         }
 
-        worker {
-          name            = "cpu-worker"
-          machine_type    = "n1-standard-4"
-          auto_scaler_min = 3
-          auto_scaler_max = 3
-          max_surge       = 1
-          max_unavailable = 0
-          volume_type     = "pd-standard"
-          volume_size     = "50Gi"
+      }
+      infrastructure_config {
+        gcp {
+          networks {
+            workers = "10.250.0.0/16"
+          }
         }
-
-        zones = ["europe-west3-b"]
+      }
+      worker {
+        max_surge = 1
+        max_unavailable = 0
+        maximum = 2
+        minimum = 2
+        volume {
+          size = "50Gi"
+          type = "pd-standard"
+        }
+        name = "cpu-worker"
+        machine {
+          image  {
+            name = "coreos"
+            version = "2303.3.0"
+          }
+          type = "n1-standard-4"
+        }
+        zones = ["europe-west3-a"]
       }
     }
 
     kubernetes {
-      version = "1.15.4"
+      version = "1.17.2"
     }
   }
 }
