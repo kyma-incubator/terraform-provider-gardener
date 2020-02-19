@@ -140,7 +140,9 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 		if az, ok := cloud["azure"].([]interface{}); ok && len(az) > 0 {
 			obj.ControlPlaneConfig = getAzControlPlaneConfig()
 		}
-
+		if aws, ok := cloud["aws"].([]interface{}); ok && len(aws) > 0 {
+			obj.ControlPlaneConfig = getAwsControlPlaneConfig()
+		}
 		if gcp, ok := cloud["gcp"].([]interface{}); ok && len(gcp) > 0 {
 			obj.ControlPlaneConfig = getGCPControlPlaneConfig(gcp)
 		}
@@ -152,7 +154,6 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 			obj.InfrastructureConfig = getAzureConfig(az)
 		}
 		if aws, ok := cloud["aws"].([]interface{}); ok && len(aws) > 0 {
-			//obj.ControlPlaneConfig = getAzControlPlaneConfig()
 			obj.InfrastructureConfig = getAwsConfig(aws)
 		}
 		if gcp, ok := cloud["gcp"].([]interface{}); ok && len(gcp) > 0 {
@@ -306,6 +307,15 @@ func getAzControlPlaneConfig() *corev1beta1.ProviderConfig {
       kind: ControlPlaneConfig`
 	obj := corev1beta1.ProviderConfig{}
 	obj.Raw = []byte(azConfig)
+	return &obj
+}
+
+func getAwsControlPlaneConfig() *corev1beta1.ProviderConfig {
+	awsConfig := `
+      apiVersion: aws.provider.extensions.gardener.cloud/v1alpha1
+      kind: ControlPlaneConfig`
+	obj := corev1beta1.ProviderConfig{}
+	obj.Raw = []byte(awsConfig)
 	return &obj
 }
 
