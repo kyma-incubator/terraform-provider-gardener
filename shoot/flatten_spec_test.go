@@ -3,10 +3,11 @@ package shoot
 
 import (
 	"encoding/json"
+	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
 	"testing"
 
-	awsAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-aws/pkg/apis/aws/v1alpha1"
-	azAlpha1 "github.com/gardener/gardener-extensions/controllers/provider-azure/pkg/apis/azure/v1alpha1"
+	awsAlpha1 "github.com/gardener/gardener-extension-provider-aws/pkg/apis/aws/v1alpha1"
+	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
 	"github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	cmp "github.com/google/go-cmp/cmp"
@@ -344,7 +345,10 @@ func TestFlattenShootAzure(t *testing.T) {
 			},
 		},
 	}
-	d.Set("spec", expected)
+	err := d.Set("spec", expected)
+	if err != nil {
+		t.Fatalf("Unable to set the spec: %v\n", err)
+	}
 
 	out, _ := flatten.FlattenShoot(shoot, d, "")
 	if diff := cmp.Diff(expected, out); diff != "" {
@@ -428,6 +432,123 @@ func TestFlattenShootAws(t *testing.T) {
 
 	if err != nil {
 		t.Fatalf("Error setting expected with spec: \n%s", err)
+	}
+
+	out, _ := flatten.FlattenShoot(shoot, d, "")
+	if diff := cmp.Diff(expected, out); diff != "" {
+		t.Fatalf("Error matching output and expected: \n%s", diff)
+	}
+}
+
+func TestFlattenShootGCP(t *testing.T) {
+	minPorts := int32(2)
+	aggregationInterval := "test"
+	metadata := "test"
+	fs := float32(2)
+	internal := "test"
+	gcpControlPlaneConfig, _ := json.Marshal(gcpAlpha1.ControlPlaneConfig{
+		Zone: "zone1",
+	})
+	gcpConfig, _ := json.Marshal(gcpAlpha1.InfrastructureConfig{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "gcp.provider.extensions.gardener.cloud/v1alpha1",
+			Kind:       "InfrastructureConfig",
+		},
+		Networks: gcpAlpha1.NetworkConfig{
+			VPC: &gcpAlpha1.VPC{
+				CloudRouter: &gcpAlpha1.CloudRouter{
+					Name: "bar",
+				},
+				Name: "foo",
+			},
+			Workers: "10.250.0.0/19",
+			CloudNAT: &gcpAlpha1.CloudNAT{
+				MinPortsPerVM: &minPorts,
+			},
+			Internal: &internal,
+			FlowLogs: &gcpAlpha1.FlowLogs{
+				AggregationInterval: &aggregationInterval,
+				FlowSampling:        &fs,
+				Metadata:            &metadata,
+			},
+		},
+	})
+
+	d := ResourceShoot().TestResourceData()
+	shoot := corev1beta1.ShootSpec{
+		Provider: corev1beta1.Provider{
+			Type: "gcp",
+			ControlPlaneConfig: &corev1beta1.ProviderConfig{
+				RawExtension: runtime.RawExtension{
+					Raw: gcpControlPlaneConfig,
+				},
+			},
+			InfrastructureConfig: &corev1beta1.ProviderConfig{
+				RawExtension: runtime.RawExtension{
+					Raw: gcpConfig,
+				},
+			},
+		},
+	}
+	expected := []interface{}{
+		map[string]interface{}{
+			"kubernetes": []interface{}{},
+			"networking": []interface{}{},
+			"provider": []interface{}{
+				map[string]interface{}{
+					"type": "gcp",
+					"control_plane_config": []interface{}{
+						map[string]interface{}{
+							"gcp": []interface{}{
+								map[string]interface{}{
+									"zone": "zone1",
+								},
+							},
+						},
+					},
+					"infrastructure_config": []interface{}{
+						map[string]interface{}{
+							"gcp": []interface{}{
+								map[string]interface{}{
+									"networks": []interface{}{
+										map[string]interface{}{
+											"vpc": []interface{}{
+												map[string]interface{}{
+													"name": "foo",
+													"cloud_router": []interface{}{
+														map[string]interface{}{
+															"name": "bar",
+														},
+													},
+												},
+											},
+											"workers": "10.250.0.0/19",
+											"cloud_nat": []interface{}{
+												map[string]interface{}{
+													"min_ports_per_vm": int32(2),
+												},
+											},
+											"internal": "test",
+											"flow_logs": []interface{}{
+												map[string]interface{}{
+													"aggregation_interval": "test",
+													"flow_sampling":        float32(2),
+													"metadata":             "test",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	err := d.Set("spec", expected)
+	if err != nil {
+		t.Fatalf("Unable to set the spec: %v\n", err)
 	}
 
 	out, _ := flatten.FlattenShoot(shoot, d, "")

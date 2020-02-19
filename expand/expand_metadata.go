@@ -3,7 +3,6 @@ package expand
 import (
 	"time"
 
-	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,10 +61,10 @@ func expandObjectReference(l []interface{}) *v1.ObjectReference {
 	}
 	return obj
 }
-func expandDuration(v string) *corev1beta1.GardenerDuration {
+func expandDuration(v string) *metav1.Duration {
 	d, err := time.ParseDuration(v)
 	if err != nil {
-		return &corev1beta1.GardenerDuration{
+		return &metav1.Duration{
 			Duration: d,
 		}
 	}
