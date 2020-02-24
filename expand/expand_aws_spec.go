@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func getAwsConfig(aws []interface{}) *corev1beta1.ProviderConfig {
+func awsConfig(aws []interface{}) *corev1beta1.ProviderConfig {
 	awsConfigObj := awsAlpha1.InfrastructureConfig{}
 	obj := corev1beta1.ProviderConfig{}
 	if len(aws) == 0 && aws[0] == nil {
@@ -21,13 +21,13 @@ func getAwsConfig(aws []interface{}) *corev1beta1.ProviderConfig {
 		awsConfigObj.EnableECRAccess = &v
 	}
 	if v, ok := in["networks"].([]interface{}); ok && len(v) > 0 {
-		awsConfigObj.Networks = getAwsNetworks(v)
+		awsConfigObj.Networks = awsNetworks(v)
 	}
 	obj.Raw, _ = json.Marshal(awsConfigObj)
 	return &obj
 }
 
-func getAwsNetworks(networks []interface{}) awsAlpha1.Networks {
+func awsNetworks(networks []interface{}) awsAlpha1.Networks {
 	obj := awsAlpha1.Networks{}
 	if networks == nil {
 		return obj
@@ -35,7 +35,7 @@ func getAwsNetworks(networks []interface{}) awsAlpha1.Networks {
 	in := networks[0].(map[string]interface{})
 
 	if v, ok := in["vpc"].([]interface{}); ok {
-		obj.VPC = getVPC(v)
+		obj.VPC = vpc(v)
 	}
 
 	if v, ok := in["zones"].(*schema.Set); ok {
@@ -67,7 +67,7 @@ func expandAwsZones(set *schema.Set) []awsAlpha1.Zone {
 	return result
 }
 
-func getVPC(vpc []interface{}) awsAlpha1.VPC {
+func vpc(vpc []interface{}) awsAlpha1.VPC {
 	obj := awsAlpha1.VPC{}
 
 	if len(vpc) == 0 && vpc[0] == nil {

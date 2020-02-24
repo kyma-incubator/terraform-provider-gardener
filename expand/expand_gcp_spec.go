@@ -6,7 +6,7 @@ import (
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 )
 
-func getGCPControlPlaneConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
+func gcpControlPlaneConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
 	gcpConfigObj := gcpAlpha1.ControlPlaneConfig{}
 	obj := corev1beta1.ProviderConfig{}
 	if len(gcp) == 0 && gcp[0] == nil {
@@ -25,7 +25,7 @@ func getGCPControlPlaneConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
 	return &obj
 }
 
-func getGCPConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
+func gcpConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
 	gcpConfigObj := gcpAlpha1.InfrastructureConfig{}
 	obj := corev1beta1.ProviderConfig{}
 
@@ -38,20 +38,20 @@ func getGCPConfig(gcp []interface{}) *corev1beta1.ProviderConfig {
 	gcpConfigObj.Kind = "InfrastructureConfig"
 
 	if v, ok := in["networks"].([]interface{}); ok && len(v) > 0 {
-		gcpConfigObj.Networks = getGCPNetworks(v)
+		gcpConfigObj.Networks = gcpNetworks(v)
 	}
 	obj.Raw, _ = json.Marshal(gcpConfigObj)
 	return &obj
 }
 
-func getGCPNetworks(networks []interface{}) gcpAlpha1.NetworkConfig {
+func gcpNetworks(networks []interface{}) gcpAlpha1.NetworkConfig {
 	obj := gcpAlpha1.NetworkConfig{}
 	if networks == nil {
 		return obj
 	}
 	in := networks[0].(map[string]interface{})
 	if v, ok := in["vpc"].([]interface{}); ok && len(v) > 0 {
-		obj.VPC = getGCPvpc(v)
+		obj.VPC = gcpVPC(v)
 	}
 	if v, ok := in["workers"].(string); ok && len(v) > 0 {
 		obj.Workers = v
@@ -60,16 +60,16 @@ func getGCPNetworks(networks []interface{}) gcpAlpha1.NetworkConfig {
 		obj.Internal = &v
 	}
 	if v, ok := in["cloud_nat"].([]interface{}); ok && len(v) > 0 {
-		obj.CloudNAT = getGCPCloudNat(v)
+		obj.CloudNAT = gcpCloudNat(v)
 	}
 	if v, ok := in["flow_logs"].([]interface{}); ok && len(v) > 0 {
-		obj.FlowLogs = getGCPFlowLogs(v)
+		obj.FlowLogs = gcpFlowLogs(v)
 	}
 
 	return obj
 }
 
-func getGCPFlowLogs(fl []interface{}) *gcpAlpha1.FlowLogs {
+func gcpFlowLogs(fl []interface{}) *gcpAlpha1.FlowLogs {
 	obj := gcpAlpha1.FlowLogs{}
 	if len(fl) == 0 && fl[0] == nil {
 		return &obj
@@ -90,7 +90,7 @@ func getGCPFlowLogs(fl []interface{}) *gcpAlpha1.FlowLogs {
 
 }
 
-func getGCPCloudNat(cn []interface{}) *gcpAlpha1.CloudNAT {
+func gcpCloudNat(cn []interface{}) *gcpAlpha1.CloudNAT {
 	obj := gcpAlpha1.CloudNAT{}
 	if len(cn) == 0 && cn[0] == nil {
 		return &obj
@@ -105,7 +105,7 @@ func getGCPCloudNat(cn []interface{}) *gcpAlpha1.CloudNAT {
 	return &obj
 }
 
-func getGCPvpc(vpc []interface{}) *gcpAlpha1.VPC {
+func gcpVPC(vpc []interface{}) *gcpAlpha1.VPC {
 	obj := gcpAlpha1.VPC{}
 	if len(vpc) == 0 && vpc[0] == nil {
 		return &obj
@@ -116,12 +116,12 @@ func getGCPvpc(vpc []interface{}) *gcpAlpha1.VPC {
 		obj.Name = v
 	}
 	if v, ok := in["cloud_router"].([]interface{}); ok && len(v) > 0 {
-		obj.CloudRouter = getGCPCloudRouter(v)
+		obj.CloudRouter = gcpCloudRouter(v)
 	}
 	return &obj
 }
 
-func getGCPCloudRouter(cr []interface{}) *gcpAlpha1.CloudRouter {
+func gcpCloudRouter(cr []interface{}) *gcpAlpha1.CloudRouter {
 
 	obj := gcpAlpha1.CloudRouter{}
 	if len(cr) == 0 && cr[0] == nil {

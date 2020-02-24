@@ -13,7 +13,7 @@ func awsResource() *schema.Resource {
 			},
 			"networks": {
 				Type:        schema.TypeList,
-				Description: "NetworkConfig holds information about the Kubernetes and infrastructure networks.",
+				Description: "Networks is the network configuration (VNet, subnets, etc.).",
 				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func getAzControlPlaneConfig() *corev1beta1.ProviderConfig {
+func azControlPlaneConfig() *corev1beta1.ProviderConfig {
 	azConfig := `
       apiVersion: azure.provider.extensions.gardener.cloud/v1alpha1
       kind: ControlPlaneConfig`
@@ -16,7 +16,7 @@ func getAzControlPlaneConfig() *corev1beta1.ProviderConfig {
 	return &obj
 }
 
-func getAzureConfig(az []interface{}) *corev1beta1.ProviderConfig {
+func azureConfig(az []interface{}) *corev1beta1.ProviderConfig {
 	azConfigObj := azAlpha1.InfrastructureConfig{}
 	obj := corev1beta1.ProviderConfig{}
 	if len(az) == 0 && az[0] == nil {
@@ -27,13 +27,13 @@ func getAzureConfig(az []interface{}) *corev1beta1.ProviderConfig {
 	azConfigObj.APIVersion = "azure.provider.extensions.gardener.cloud/v1alpha1"
 	azConfigObj.Kind = "InfrastructureConfig"
 	if v, ok := in["networks"].([]interface{}); ok && len(v) > 0 {
-		azConfigObj.Networks = getNetworks(v)
+		azConfigObj.Networks = azNetworks(v)
 	}
 	obj.Raw, _ = json.Marshal(azConfigObj)
 	return &obj
 }
 
-func getNetworks(networks []interface{}) azAlpha1.NetworkConfig {
+func azNetworks(networks []interface{}) azAlpha1.NetworkConfig {
 	obj := azAlpha1.NetworkConfig{}
 	if networks == nil {
 		return obj
@@ -41,7 +41,7 @@ func getNetworks(networks []interface{}) azAlpha1.NetworkConfig {
 	in := networks[0].(map[string]interface{})
 
 	if v, ok := in["vnet"].([]interface{}); ok {
-		obj.VNet = getVNET(v)
+		obj.VNet = azVNET(v)
 	}
 	if v, ok := in["workers"].(string); ok {
 		obj.Workers = v
@@ -53,7 +53,7 @@ func getNetworks(networks []interface{}) azAlpha1.NetworkConfig {
 	return obj
 }
 
-func getVNET(vnet []interface{}) azAlpha1.VNet {
+func azVNET(vnet []interface{}) azAlpha1.VNet {
 	obj := azAlpha1.VNet{}
 
 	if len(vnet) == 0 && vnet[0] == nil {

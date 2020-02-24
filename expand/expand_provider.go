@@ -21,24 +21,24 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 	if v, ok := in["control_plane_config"].([]interface{}); ok && len(v) > 0 {
 		cloud := v[0].(map[string]interface{})
 		if az, ok := cloud["azure"].([]interface{}); ok && len(az) > 0 {
-			obj.ControlPlaneConfig = getAzControlPlaneConfig()
+			obj.ControlPlaneConfig = azControlPlaneConfig()
 		}
 
 		if gcp, ok := cloud["gcp"].([]interface{}); ok && len(gcp) > 0 {
-			obj.ControlPlaneConfig = getGCPControlPlaneConfig(gcp)
+			obj.ControlPlaneConfig = gcpControlPlaneConfig(gcp)
 		}
 	}
 
 	if v, ok := in["infrastructure_config"].([]interface{}); ok && len(v) > 0 {
 		cloud := v[0].(map[string]interface{})
 		if az, ok := cloud["azure"].([]interface{}); ok && len(az) > 0 {
-			obj.InfrastructureConfig = getAzureConfig(az)
+			obj.InfrastructureConfig = azureConfig(az)
 		}
 		if aws, ok := cloud["aws"].([]interface{}); ok && len(aws) > 0 {
-			obj.InfrastructureConfig = getAwsConfig(aws)
+			obj.InfrastructureConfig = awsConfig(aws)
 		}
 		if gcp, ok := cloud["gcp"].([]interface{}); ok && len(gcp) > 0 {
-			obj.InfrastructureConfig = getGCPConfig(gcp)
+			obj.InfrastructureConfig = gcpConfig(gcp)
 		}
 	}
 	if workers, ok := in["worker"].([]interface{}); ok && len(workers) > 0 {
