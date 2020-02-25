@@ -7,6 +7,15 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+func AwsControlPlaneConfig() *corev1beta1.ProviderConfig {
+	awsConfig := `
+      apiVersion: aws.provider.extensions.gardener.cloud/v1alpha1
+      kind: ControlPlaneConfig`
+	obj := corev1beta1.ProviderConfig{}
+	obj.Raw = []byte(awsConfig)
+	return &obj
+}
+
 func awsConfig(aws []interface{}) *corev1beta1.ProviderConfig {
 	awsConfigObj := awsAlpha1.InfrastructureConfig{}
 	obj := corev1beta1.ProviderConfig{}

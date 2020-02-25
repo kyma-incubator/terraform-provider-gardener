@@ -24,6 +24,10 @@ func expandProvider(provider []interface{}) corev1beta1.Provider {
 			obj.ControlPlaneConfig = azControlPlaneConfig()
 		}
 
+		if aws, ok := cloud["aws"].([]interface{}); ok && len(aws) > 0 {
+			obj.ControlPlaneConfig = AwsControlPlaneConfig()
+		}
+
 		if gcp, ok := cloud["gcp"].([]interface{}); ok && len(gcp) > 0 {
 			obj.ControlPlaneConfig = gcpControlPlaneConfig(gcp)
 		}
