@@ -1,12 +1,6 @@
 package flatten
 
 import (
-	"encoding/json"
-
-	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
-
-	awsAlpha1 "github.com/gardener/gardener-extension-provider-aws/pkg/apis/aws/v1alpha1"
-	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/kyma-incubator/terraform-provider-gardener/expand"
 
@@ -90,11 +84,6 @@ func flattenAddons(in *corev1beta1.Addons) map[string]interface{} {
 		ingress["enabled"] = in.NginxIngress.Enabled
 		att["nginx_ingress"] = []interface{}{ingress}
 	}
-	//if in.ClusterAutoscaler != nil {
-	//	autoscaler := make(map[string]interface{})
-	//	autoscaler["enabled"] = in.ClusterAutoscaler.Enabled
-	//	att["cluster_autoscaler"] = []interface{}{autoscaler}
-	//}
 
 	return att
 }
@@ -125,94 +114,6 @@ func flattenDNS(in *corev1beta1.DNS) []interface{} {
 	}
 	if in.Domain != nil {
 		att["domain"] = *in.Domain
-	}
-
-	return []interface{}{att}
-}
-
-func flattenProvider(in corev1beta1.Provider) []interface{} {
-	att := make(map[string]interface{})
-
-	if len(in.Type) > 0 {
-		att["type"] = in.Type
-	}
-
-	if len(in.Workers) > 0 {
-		workers := make([]interface{}, len(in.Workers))
-		for i, v := range in.Workers {
-			m := map[string]interface{}{}
-
-			if len(v.Name) > 0 {
-				m["name"] = v.Name
-			}
-			if len(v.Zones) > 0 {
-				m["zones"] = v.Zones
-			}
-			if len(v.Taints) > 0 {
-				taints := make([]interface{}, len(v.Taints))
-				for i, v := range v.Taints {
-					m := map[string]interface{}{}
-
-					if v.Key != "" {
-						m["key"] = v.Key
-					}
-					// if v.Operator != "" {
-					// 	m["operator"] = v.Operator
-					// }
-					if v.Value != "" {
-						m["value"] = v.Value
-					}
-					if v.Effect != "" {
-						m["effect"] = v.Effect
-					}
-					taints[i] = m
-				}
-				m["taints"] = taints
-			}
-			if v.MaxSurge != nil {
-				m["max_surge"] = v.MaxSurge.IntValue()
-			}
-			if v.MaxUnavailable != nil {
-				m["max_unavailable"] = v.MaxUnavailable.IntValue()
-			}
-			if v.CABundle != nil {
-				m["cabundle"] = *v.CABundle
-			}
-
-			if v.Minimum != 0 {
-				m["minimum"] = v.Minimum
-			}
-
-			if v.Maximum != 0 {
-				m["maximum"] = v.Maximum
-			}
-
-			if v.Kubernetes != nil {
-				m["kubernetes"] = flattenWorkerKubernetes(v.Kubernetes)
-			}
-
-			if len(v.Annotations) > 0 {
-				m["annotations"] = v.Annotations
-			}
-			if len(v.Labels) > 0 {
-				m["labels"] = v.Labels
-			}
-			if v.Volume != nil {
-				m["volume"] = flattenVolume(v.Volume)
-			}
-			m["machine"] = flattenMachine(v.Machine)
-
-			workers[i] = m
-		}
-		att["worker"] = workers
-	}
-
-	if in.InfrastructureConfig != nil {
-		att["infrastructure_config"] = flattenInfrastructureConfig(in.Type, in.InfrastructureConfig)
-	}
-
-	if in.ControlPlaneConfig != nil {
-		att["control_plane_config"] = flattenControlPlaneConfig(in.Type, in.ControlPlaneConfig)
 	}
 
 	return []interface{}{att}
@@ -259,13 +160,6 @@ func flattenKubernetes(in corev1beta1.Kubernetes) []interface{} {
 		}
 		att["kube_api_server"] = []interface{}{server}
 	}
-	//if in.CloudControllerManager != nil {
-	//	manager := make(map[string]interface{})
-	//	if in.CloudControllerManager.FeatureGates != nil {
-	//		manager["feature_gates"] = in.CloudControllerManager.FeatureGates
-	//	}
-	//	att["cloud_controller_manager"] = []interface{}{manager}
-	//}
 	if in.KubeControllerManager != nil {
 		manager := make(map[string]interface{})
 		if in.KubeControllerManager.FeatureGates != nil {
@@ -305,26 +199,6 @@ func flattenKubernetes(in corev1beta1.Kubernetes) []interface{} {
 			scaler["scale_down_utilization_threshold"] = in.ClusterAutoscaler.ScaleDownUtilizationThreshold
 		}
 		att["cluster_autoscaler"] = []interface{}{scaler}
-	}
-
-	return []interface{}{att}
-}
-
-func flattenWorkerKubernetes(in *corev1beta1.WorkerKubernetes) []interface{} {
-	att := make(map[string]interface{})
-
-	if in.Kubelet != nil {
-		kubelet := make(map[string]interface{})
-		if in.Kubelet.PodPIDsLimit != nil {
-			kubelet["pod_pids_limit"] = *in.Kubelet.PodPIDsLimit
-		}
-		if in.Kubelet.CPUManagerPolicy != nil {
-			kubelet["cpu_manager_policy"] = *in.Kubelet.CPUManagerPolicy
-		}
-		if in.Kubelet.CPUCFSQuota != nil {
-			kubelet["cpu_cfs_quota"] = *in.Kubelet.CPUCFSQuota
-		}
-		att["kubelet"] = []interface{}{kubelet}
 	}
 
 	return []interface{}{att}
@@ -383,207 +257,6 @@ func flattenMonitoring(in *corev1beta1.Monitoring) []interface{} {
 		}
 
 		att["alerting"] = []interface{}{alerting}
-	}
-
-	return []interface{}{att}
-}
-
-func flattenMachine(in corev1beta1.Machine) []interface{} {
-	att := map[string]interface{}{}
-
-	if len(in.Type) > 0 {
-		att["type"] = in.Type
-	}
-	if in.Image != nil {
-		att["image"] = flattenMachineImage(in.Image)
-	}
-
-	return []interface{}{att}
-}
-
-func flattenMachineImage(in *corev1beta1.ShootMachineImage) []interface{} {
-	att := map[string]interface{}{}
-
-	if len(in.Name) > 0 {
-		att["name"] = in.Name
-	}
-	if len(in.Version) > 0 {
-		att["version"] = in.Version
-	}
-
-	return []interface{}{att}
-}
-
-func flattenVolume(in *corev1beta1.Volume) []interface{} {
-	att := map[string]interface{}{}
-
-	if len(in.Size) > 0 {
-		att["size"] = in.Size
-	}
-	if in.Type != nil {
-		att["type"] = *in.Type
-	}
-
-	return []interface{}{att}
-}
-
-func flattenInfrastructureConfig(providerType string, in *corev1beta1.ProviderConfig) []interface{} {
-	att := map[string]interface{}{}
-
-	if providerType == "azure" {
-		azConfigObj := azAlpha1.InfrastructureConfig{}
-		if err := json.Unmarshal(in.RawExtension.Raw, &azConfigObj); err == nil {
-			att["azure"] = flattenAzure(azConfigObj)
-		}
-	}
-
-	if providerType == "aws" {
-		awsConfigObj := awsAlpha1.InfrastructureConfig{}
-		if err := json.Unmarshal(in.RawExtension.Raw, &awsConfigObj); err == nil {
-			att["aws"] = flattenAws(awsConfigObj)
-		}
-	}
-
-	if providerType == "gcp" {
-		gcpConfigObj := gcpAlpha1.InfrastructureConfig{}
-		if err := json.Unmarshal(in.RawExtension.Raw, &gcpConfigObj); err == nil {
-			att["gcp"] = flattenGcpInfra(gcpConfigObj)
-		}
-	}
-
-	return []interface{}{att}
-}
-
-func flattenGcpInfra(in gcpAlpha1.InfrastructureConfig) []interface{} {
-	att := make(map[string]interface{})
-	net := make(map[string]interface{})
-
-	if len(in.Networks.Workers) > 0 {
-		net["workers"] = in.Networks.Workers
-	}
-
-	if in.Networks.Internal != nil {
-		net["internal"] = *in.Networks.Internal
-	}
-
-	vpc := make(map[string]interface{})
-
-	if in.Networks.VPC != nil && len(in.Networks.VPC.Name) > 0 {
-		vpc["name"] = in.Networks.VPC.Name
-	}
-	cr := make(map[string]interface{})
-	if in.Networks.VPC != nil && len(in.Networks.VPC.CloudRouter.Name) > 0 {
-		cr["name"] = in.Networks.VPC.CloudRouter.Name
-		vpc["cloud_router"] = []interface{}{cr}
-	}
-	net["vpc"] = []interface{}{vpc}
-
-	cn := make(map[string]interface{})
-	if in.Networks.CloudNAT != nil && in.Networks.CloudNAT.MinPortsPerVM != nil {
-		cn["min_ports_per_vm"] = *in.Networks.CloudNAT.MinPortsPerVM
-	}
-	net["cloud_nat"] = []interface{}{cn}
-
-	fl := make(map[string]interface{})
-	if in.Networks.FlowLogs != nil && in.Networks.FlowLogs.AggregationInterval != nil {
-		fl["aggregation_interval"] = *in.Networks.FlowLogs.AggregationInterval
-	}
-	if in.Networks.FlowLogs != nil && in.Networks.FlowLogs.Metadata != nil {
-		fl["metadata"] = *in.Networks.FlowLogs.Metadata
-	}
-	if in.Networks.FlowLogs != nil && in.Networks.FlowLogs.FlowSampling != nil {
-		fl["flow_sampling"] = *in.Networks.FlowLogs.FlowSampling
-	}
-
-	net["flow_logs"] = []interface{}{fl}
-	att["networks"] = []interface{}{net}
-
-	return []interface{}{att}
-}
-
-func flattenAzure(in azAlpha1.InfrastructureConfig) []interface{} {
-	att := make(map[string]interface{})
-
-	net := make(map[string]interface{})
-	if len(in.Networks.Workers) > 0 {
-		net["workers"] = in.Networks.Workers
-	}
-	if len(in.Networks.ServiceEndpoints) > 0 {
-		net["service_endpoints"] = in.Networks.ServiceEndpoints
-	}
-	vnet := make(map[string]interface{})
-	if in.Networks.VNet.CIDR != nil {
-		vnet["cidr"] = *in.Networks.VNet.CIDR
-	}
-	if in.Networks.VNet.Name != nil {
-		vnet["name"] = *in.Networks.VNet.Name
-	}
-	if in.Networks.VNet.ResourceGroup != nil {
-		vnet["resource_group"] = *in.Networks.VNet.ResourceGroup
-	}
-	net["vnet"] = []interface{}{vnet}
-	att["networks"] = []interface{}{net}
-
-	return []interface{}{att}
-}
-
-func flattenAws(in awsAlpha1.InfrastructureConfig) []interface{} {
-	att := make(map[string]interface{})
-	net := make(map[string]interface{})
-	vpc := make(map[string]interface{})
-
-	if in.EnableECRAccess != nil {
-		att["enableecraccess"] = in.EnableECRAccess
-	}
-	if in.Networks.VPC.ID != nil {
-		vpc["id"] = in.Networks.VPC.ID
-	}
-	if in.Networks.VPC.CIDR != nil {
-		vpc["cidr"] = in.Networks.VPC.CIDR
-	}
-	net["vpc"] = []interface{}{vpc}
-
-	if len(in.Networks.Zones) > 0 {
-		// zones := make([]interface{}, len(in.Networks.Zones))
-		zones := make([]map[string]interface{}, len(in.Networks.Zones))
-		for i, v := range in.Networks.Zones {
-			zone := map[string]interface{}{}
-			if len(v.Name) > 0 {
-				zone["name"] = v.Name
-			}
-			if len(v.Internal) > 0 {
-				zone["internal"] = v.Internal
-			}
-			if len(v.Public) > 0 {
-				zone["public"] = v.Public
-			}
-			if len(v.Workers) > 0 {
-				zone["workers"] = v.Workers
-			}
-			zones[i] = zone
-		}
-		net["zones"] = zones
-	}
-	att["networks"] = []interface{}{net}
-
-	return []interface{}{att}
-}
-func flattenControlPlaneConfig(providerType string, in *corev1beta1.ProviderConfig) []interface{} {
-	att := map[string]interface{}{}
-	if providerType == "gcp" {
-		gcpConfigObj := gcpAlpha1.ControlPlaneConfig{}
-		if err := json.Unmarshal(in.RawExtension.Raw, &gcpConfigObj); err == nil {
-			att["gcp"] = flattenGcpControlPlane(gcpConfigObj)
-		}
-	}
-	return []interface{}{att}
-}
-
-func flattenGcpControlPlane(in gcpAlpha1.ControlPlaneConfig) []interface{} {
-	att := make(map[string]interface{})
-
-	if len(in.Zone) > 0 {
-		att["zone"] = in.Zone
 	}
 
 	return []interface{}{att}
