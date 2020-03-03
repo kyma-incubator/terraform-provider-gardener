@@ -97,7 +97,7 @@ func resourceServerRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return err
 	}
-	shoot.ObjectMeta.Annotations["confirmation.garden.sapcloud.io/deletion"] = "true"
+	shoot.ObjectMeta.Annotations["confirmation.gardener.cloud/deletion"] = "true"
 	err = d.Set("metadata", flatten.FlattenMetadata(shoot.ObjectMeta, d))
 	if err != nil {
 		return err
