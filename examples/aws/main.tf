@@ -73,7 +73,7 @@ resource "gardener_shoot" "test_cluster" {
           type = "t3.medium"
           image {
             name    = "coreos"
-            version = "ami-d0dcef3"
+            version = "<image_version>"
           }
         }
         
