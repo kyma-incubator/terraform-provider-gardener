@@ -51,7 +51,7 @@ resource "gardener_shoot" "test_cluster" {
               cidr = "10.50.0.0/16"
             }
             zones {
-              name     = "eu-central-1a"
+              name     = "eu-central-1"
               internal = "10.50.112.0/22"
               public   = "10.50.96.0/22"
               workers  = "10.50.0.0/19"
@@ -76,8 +76,8 @@ resource "gardener_shoot" "test_cluster" {
             version = "ami-d0dcef3"
           }
         }
-
-        zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+        
+        zones = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
       }
     }
 
