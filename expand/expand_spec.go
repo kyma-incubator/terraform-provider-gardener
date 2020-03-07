@@ -278,6 +278,10 @@ func expandKubernetesControllerManager(controller []interface{}) *corev1beta1.Ku
 	}
 	in := controller[0].(map[string]interface{})
 
+	if v, ok := in["node_cidr_mask_size"].(int); ok {
+		s := int32(v)
+		obj.NodeCIDRMaskSize = &s
+	}
 	if v, ok := in["feature_gates"].(map[string]interface{}); ok {
 		obj.FeatureGates = expandBoolMap(v)
 	}

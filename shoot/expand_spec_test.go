@@ -37,6 +37,7 @@ func TestExpandShoot(t *testing.T) {
 	hibernationEnd := "00 00 * * 1"
 	hibernationEnabled := true
 	allowPrivilegedContainers := false
+	nodeCidrSize := int32(16)
 
 	shoot := map[string]interface{}{
 		"spec": []interface{}{
@@ -56,6 +57,11 @@ func TestExpandShoot(t *testing.T) {
 				"kubernetes": []interface{}{
 					map[string]interface{}{
 						"version": "1.15.4",
+						"kube_controller_manager": []interface{}{
+							map[string]interface{}{
+								"node_cidr_mask_size": "16",
+							},
+						},
 						"kube_api_server": []interface{}{
 							map[string]interface{}{
 								"audit_config": []interface{}{
@@ -261,7 +267,10 @@ func TestExpandShoot(t *testing.T) {
 		},
 		Region: "westeurope",
 		Kubernetes: corev1beta1.Kubernetes{
-			Version:                   "1.15.4",
+			Version: "1.15.4",
+			KubeControllerManager: &corev1beta1.KubeControllerManagerConfig{
+				NodeCIDRMaskSize: &nodeCidrSize,
+			},
 			AllowPrivilegedContainers: &allowPrivilegedContainers,
 			KubeAPIServer: &corev1beta1.KubeAPIServerConfig{
 				AuditConfig: &corev1beta1.AuditConfig{
