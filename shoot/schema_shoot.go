@@ -177,6 +177,41 @@ func kubernetesResource() *schema.Resource {
 								},
 							},
 						},
+						"audit_config": {
+							Type:        schema.TypeList,
+							Description: "Audit Config contains customized audit config info.",
+							Optional:    true,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"audit_policy": {
+										Type:        schema.TypeList,
+										Description: "Audit Policy contains customized audit policy info.",
+										Optional:    true,
+										MaxItems:    1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"config_map_ref": {
+													Type:        schema.TypeList,
+													Description: "Config Map Ref contains customized config map ref info.",
+													Optional:    true,
+													MaxItems:    1,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"name": {
+																Type:        schema.TypeString,
+																Description: "name of the config map ref",
+																Optional:    true,
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
