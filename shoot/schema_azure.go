@@ -7,6 +7,11 @@ import (
 func azureResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
+			"zoned": {
+				Type:        schema.TypeString,
+				Description: "Boolean telling if the cluster has availability zones",
+				Optional:    true,
+			},
 			"networks": {
 				Type:        schema.TypeList,
 				Description: "Networks is the network configuration (VNet, subnets, etc.).",
