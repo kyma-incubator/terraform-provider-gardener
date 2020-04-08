@@ -46,7 +46,7 @@ resource "gardener_shoot" "test_cluster" {
       type = "gcp"
 
       infrastructure_config {
-        aws {
+        gcp {
           enableecraccess = true
           networks {
             vpc {
