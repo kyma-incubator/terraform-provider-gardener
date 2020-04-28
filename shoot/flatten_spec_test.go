@@ -34,6 +34,8 @@ func TestFlattenShoot(t *testing.T) {
 	hibernationStart := "00 17 * * 1"
 	hibernationEnd := "00 00 * * 1"
 	hibernationEnabled := true
+	allowPrivilegedContainers := true
+	enableBasicAuthentication := true
 
 	d := ResourceShoot().TestResourceData()
 	shoot := corev1beta1.ShootSpec{
@@ -106,7 +108,11 @@ func TestFlattenShoot(t *testing.T) {
 		},
 		Region: "westeurope",
 		Kubernetes: corev1beta1.Kubernetes{
-			Version: "1.15.4",
+			Version:                   "1.15.4",
+			AllowPrivilegedContainers: &allowPrivilegedContainers,
+			KubeAPIServer: &corev1beta1.KubeAPIServerConfig{
+				EnableBasicAuthentication: &enableBasicAuthentication,
+			},
 		},
 		DNS: &corev1beta1.DNS{
 			Domain: &domain,
@@ -156,7 +162,13 @@ func TestFlattenShoot(t *testing.T) {
 			},
 			"kubernetes": []interface{}{
 				map[string]interface{}{
-					"version": "1.15.4",
+					"version":                     "1.15.4",
+					"allow_privileged_containers": true,
+					"kube_api_server": []interface{}{
+						map[string]interface{}{
+							"enable_basic_authentication": true,
+						},
+					},
 				},
 			},
 			"maintenance": []interface{}{

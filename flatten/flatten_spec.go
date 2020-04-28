@@ -151,12 +151,12 @@ func flattenKubernetes(in corev1beta1.Kubernetes) []interface{} {
 	att := make(map[string]interface{})
 
 	if in.AllowPrivilegedContainers != nil {
-		att["allow_privileged_containers"] = in.AllowPrivilegedContainers
+		att["allow_privileged_containers"] = *in.AllowPrivilegedContainers
 	}
 	if in.KubeAPIServer != nil {
 		server := make(map[string]interface{})
-		if in.KubeAPIServer.FeatureGates != nil {
-			server["enable_basic_authentication"] = in.KubeAPIServer.EnableBasicAuthentication
+		if in.KubeAPIServer.EnableBasicAuthentication != nil {
+			server["enable_basic_authentication"] = *in.KubeAPIServer.EnableBasicAuthentication
 		}
 		att["kube_api_server"] = []interface{}{server}
 	}

@@ -35,7 +35,8 @@ func TestExpandShoot(t *testing.T) {
 	hibernationStart := "00 17 * * 1"
 	hibernationEnd := "00 00 * * 1"
 	hibernationEnabled := true
-	allowPrivilegedContainers := false
+	allowPrivilegedContainers := true
+	enableBasicAuthentication := true
 
 	shoot := map[string]interface{}{
 		"spec": []interface{}{
@@ -54,7 +55,13 @@ func TestExpandShoot(t *testing.T) {
 				},
 				"kubernetes": []interface{}{
 					map[string]interface{}{
-						"version": "1.15.4",
+						"version":                     "1.15.4",
+						"allow_privileged_containers": true,
+						"kube_api_server": []interface{}{
+							map[string]interface{}{
+								"enable_basic_authentication": true,
+							},
+						},
 					},
 				},
 				"maintenance": []interface{}{
@@ -245,6 +252,9 @@ func TestExpandShoot(t *testing.T) {
 		Kubernetes: corev1beta1.Kubernetes{
 			Version:                   "1.15.4",
 			AllowPrivilegedContainers: &allowPrivilegedContainers,
+			KubeAPIServer: &corev1beta1.KubeAPIServerConfig{
+				EnableBasicAuthentication: &enableBasicAuthentication,
+			},
 		},
 		DNS: &corev1beta1.DNS{
 			Domain: &domain,
