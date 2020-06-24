@@ -3,8 +3,9 @@ package shoot
 
 import (
 	"encoding/json"
-	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
 	"testing"
+
+	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
 
 	awsAlpha1 "github.com/gardener/gardener-extension-provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
@@ -55,11 +56,24 @@ func TestExpandShoot(t *testing.T) {
 				},
 				"kubernetes": []interface{}{
 					map[string]interface{}{
-						"version":                     "1.15.4",
-						"allow_privileged_containers": true,
+						"version": "1.15.4",
+            "allow_privileged_containers": true,
 						"kube_api_server": []interface{}{
 							map[string]interface{}{
-								"enable_basic_authentication": true,
+                "enable_basic_authentication": true,
+								"audit_config": []interface{}{
+									map[string]interface{}{
+										"audit_policy": []interface{}{
+											map[string]interface{}{
+												"config_map_ref": []interface{}{
+													map[string]interface{}{
+														"name": "audit-policy",
+													},
+												},
+											},
+										},
+									},
+								},
 							},
 						},
 					},
@@ -254,6 +268,13 @@ func TestExpandShoot(t *testing.T) {
 			AllowPrivilegedContainers: &allowPrivilegedContainers,
 			KubeAPIServer: &corev1beta1.KubeAPIServerConfig{
 				EnableBasicAuthentication: &enableBasicAuthentication,
+				AuditConfig: &corev1beta1.AuditConfig{
+					AuditPolicy: &corev1beta1.AuditPolicy{
+						ConfigMapRef: &corev1.ObjectReference{
+							Name: "audit-policy",
+						},
+					},
+				},
 			},
 		},
 		DNS: &corev1beta1.DNS{

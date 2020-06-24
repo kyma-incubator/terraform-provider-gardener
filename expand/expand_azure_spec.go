@@ -2,6 +2,8 @@ package expand
 
 import (
 	"encoding/json"
+	"strconv"
+
 	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
 	corev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -28,6 +30,9 @@ func azureConfig(az []interface{}) *corev1beta1.ProviderConfig {
 	azConfigObj.Kind = "InfrastructureConfig"
 	if v, ok := in["networks"].([]interface{}); ok && len(v) > 0 {
 		azConfigObj.Networks = azNetworks(v)
+	}
+	if v, ok := in["zoned"].(string); ok {
+		azConfigObj.Zoned, _ = strconv.ParseBool(v) // we ignore the error because it will already set "zoned" to false, which is the default.
 	}
 	obj.Raw, _ = json.Marshal(azConfigObj)
 	return &obj
