@@ -325,6 +325,10 @@ func expandKubernetesAPIServer(server []interface{}) *corev1beta1.KubeAPIServerC
 	if v, ok := in["runtime_config"].(map[string]interface{}); ok {
 		obj.RuntimeConfig = expandBoolMap(v)
 	}
+
+	if v, ok := in["enable_basic_authentication"].(bool); ok {
+		obj.EnableBasicAuthentication = &v
+	}
 	if v, ok := in["oidc_config"].([]interface{}); ok && len(v) > 0 {
 		v := v[0].(map[string]interface{})
 		obj.OIDCConfig = &corev1beta1.OIDCConfig{}

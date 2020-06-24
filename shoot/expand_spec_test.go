@@ -36,7 +36,8 @@ func TestExpandShoot(t *testing.T) {
 	hibernationStart := "00 17 * * 1"
 	hibernationEnd := "00 00 * * 1"
 	hibernationEnabled := true
-	allowPrivilegedContainers := false
+	allowPrivilegedContainers := true
+	enableBasicAuthentication := true
 
 	shoot := map[string]interface{}{
 		"spec": []interface{}{
@@ -55,9 +56,11 @@ func TestExpandShoot(t *testing.T) {
 				},
 				"kubernetes": []interface{}{
 					map[string]interface{}{
-						"version": "1.15.4",
+						"version":                     "1.15.4",
+						"allow_privileged_containers": true,
 						"kube_api_server": []interface{}{
 							map[string]interface{}{
+								"enable_basic_authentication": true,
 								"audit_config": []interface{}{
 									map[string]interface{}{
 										"audit_policy": []interface{}{
@@ -213,7 +216,7 @@ func TestExpandShoot(t *testing.T) {
 		},
 		Provider: corev1beta1.Provider{
 			Workers: []corev1beta1.Worker{
-				corev1beta1.Worker{
+				{
 					MaxSurge: &intstr.IntOrString{
 						IntVal: 1,
 					},
@@ -243,7 +246,7 @@ func TestExpandShoot(t *testing.T) {
 					CABundle: &caBundle,
 					Zones:    []string{"bar", "foo"},
 					Taints: []corev1.Taint{
-						corev1.Taint{
+						{
 							Key:    "key",
 							Value:  "value",
 							Effect: corev1.TaintEffectNoExecute,
@@ -264,6 +267,7 @@ func TestExpandShoot(t *testing.T) {
 			Version:                   "1.15.4",
 			AllowPrivilegedContainers: &allowPrivilegedContainers,
 			KubeAPIServer: &corev1beta1.KubeAPIServerConfig{
+				EnableBasicAuthentication: &enableBasicAuthentication,
 				AuditConfig: &corev1beta1.AuditConfig{
 					AuditPolicy: &corev1beta1.AuditPolicy{
 						ConfigMapRef: &corev1.ObjectReference{
@@ -292,7 +296,7 @@ func TestExpandShoot(t *testing.T) {
 		Hibernation: &corev1beta1.Hibernation{
 			Enabled: &hibernationEnabled,
 			Schedules: []corev1beta1.HibernationSchedule{
-				corev1beta1.HibernationSchedule{
+				{
 					Start:    &hibernationStart,
 					End:      &hibernationEnd,
 					Location: &location,
@@ -397,7 +401,7 @@ func TestExpandShootAws(t *testing.T) {
 				CIDR: &vpcCIDR,
 			},
 			Zones: []awsAlpha1.Zone{
-				awsAlpha1.Zone{
+				{
 					Name:     "eu-central-1a",
 					Internal: vpcCIDR,
 					Public:   vpcCIDR,
