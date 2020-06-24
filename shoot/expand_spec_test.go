@@ -57,10 +57,10 @@ func TestExpandShoot(t *testing.T) {
 				"kubernetes": []interface{}{
 					map[string]interface{}{
 						"version": "1.15.4",
-            "allow_privileged_containers": true,
+						"allow_privileged_containers": true,
 						"kube_api_server": []interface{}{
 							map[string]interface{}{
-                "enable_basic_authentication": true,
+								"enable_basic_authentication": true,
 								"audit_config": []interface{}{
 									map[string]interface{}{
 										"audit_policy": []interface{}{
