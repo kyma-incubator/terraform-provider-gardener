@@ -24,50 +24,76 @@ provider "gardener" {
     EOT*/
 }
 
-resource "gardener_shoot" "test_cluster" {
+resource "gardener_shoot" "gardener_cluster" {
   metadata {
     name      = "test-cluster"
     namespace = "garden-<profile>"
-
   }
-
+  timeouts {
+    create = "30m0s"
+    update = "30m0s"
+    delete = "20m0s"
+  }
   spec {
-    cloud {
-      profile = "aws"
-      region  = "eu-central-1"
-
-      secret_binding_ref {
-        name = "<secret_binding>"
+    cloud_profile_name  = "aws"
+    region              = "eu-central-1"
+    secret_binding_name = "<secret_binding>"
+    networking {
+      nodes    = "10.250.0.0/16"
+      pods     = ""
+      services = ""
+      type     = "calico"
+    }
+    maintenance {
+      auto_update {
+        kubernetes_version    = "true"
+        machine_image_version = "true"
       }
-
-      aws {
-        networks {
-          vpc {
-            cidr = "10.250.0.0/16"
-          }
-
-          internal = ["10.250.112.0/22"]
-          public   = ["10.250.96.0/22"]
-          workers  = ["10.250.0.0/19"]
-        }
-
-        worker {
-          name            = "cpu-worker"
-          machine_type    = "m5.large"
-          auto_scaler_min = 3
-          auto_scaler_max = 4
-          max_surge       = 1
-          max_unavailable = 0
-          volume_type     = "gp2"
-          volume_size     = "50Gi"
-        }
-
-        zones = ["eu-central-1a"]
+      time_window {
+        begin = "030000+0000"
+        end   = "040000+0000"
       }
     }
-
+    provider {
+      type = "aws"
+      infrastructure_config {
+        aws {
+          networks {
+            vpc {
+              cidr = "10.250.0.0/16"
+            }
+            zones {
+              name     = "eu-central-1a"
+              workers  = "10.250.0.0/19"
+              public   = "10.250.32.0/20"
+              internal = "10.250.48.0/20"
+            }
+          }
+        }
+      }
+      worker {
+        name            = "cpu-worker"
+        zones           = ["eu-central-1a"]
+        max_surge       = "3"
+        max_unavailable = "1"
+        maximum         = "4"
+        minimum         = "2"
+        volume {
+          size = "30Gi"
+          type = "gp2"
+        }
+        machine {
+          image {
+            name    = "gardenlinux"
+            version = "27.1.0"
+          }
+          type = "m5.xlarge"
+        }
+      }
+    }
     kubernetes {
-      version = "1.15.4"
+      allow_privileged_containers = true
+      version                     = "1.18"
     }
   }
 }
