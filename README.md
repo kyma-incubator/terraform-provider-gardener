@@ -22,11 +22,30 @@ Perform the following steps to build the providers:
     ```
 2. Move the gardener provider binary into the terraform plugins folder:
 
-   On MacOS:
-   ```bash
-   mv terraform-provider-gardener ~/.terraform.d/plugins/terraform-provider-gardener
+   On MacOS with terraform >= 0.13
+
+   ```sh
+   # Create plugin cache folder
+   mkdir -p "$HOME/.terraform.d/plugins/kyma-project.io/kyma-incubator/gardener/0.0.9/darwin_amd64"
+   # install binary
+   cp terraform-provider-gardener "$HOME/.terraform.d/plugins/kyma-project.io/kyma-incubator/gardener/0.0.9/darwin_amd64"
    ```
-   For other systems and further details, see [this](https://www.terraform.io/docs/plugins/basics.html#installing-plugins) document.
+
+   With the plugin installed in the cache folder as shown above, you can use the source address `kyma-project.io/kyma-incubator/gardener` for the provider, e.g.
+
+   ```tf
+   terraform {
+     required_version = ">= 0.13"
+     required_providers {
+       gardener = {
+         source  = "kyma-project.io/kyma-incubator/gardener"
+         version = ">= 0.0.9"
+       }
+     }
+   }
+   ```
+
+   For other systems and further details, see [this](https://www.terraform.io/docs/configuration/provider-requirements.html#in-house-providers) document.
 
 ## Usage
 
