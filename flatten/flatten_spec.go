@@ -154,11 +154,7 @@ func flattenKubernetes(in corev1beta1.Kubernetes) []interface{} {
 		att["allow_privileged_containers"] = *in.AllowPrivilegedContainers
 	}
 	if in.KubeAPIServer != nil {
-		server := make(map[string]interface{})
-		if in.KubeAPIServer.EnableBasicAuthentication != nil {
-			server["enable_basic_authentication"] = *in.KubeAPIServer.EnableBasicAuthentication
-		}
-		att["kube_api_server"] = []interface{}{server}
+		att["kube_api_server"] = flattenKubeAPIServer(in.KubeAPIServer)
 	}
 	if in.KubeControllerManager != nil {
 		manager := make(map[string]interface{})
@@ -199,6 +195,50 @@ func flattenKubernetes(in corev1beta1.Kubernetes) []interface{} {
 			scaler["scale_down_utilization_threshold"] = in.ClusterAutoscaler.ScaleDownUtilizationThreshold
 		}
 		att["cluster_autoscaler"] = []interface{}{scaler}
+	}
+
+	return []interface{}{att}
+}
+
+func flattenKubeAPIServer(in *corev1beta1.KubeAPIServerConfig) []interface{} {
+	att := make(map[string]interface{})
+
+	if in.EnableBasicAuthentication != nil {
+		att["enable_basic_authentication"] = *in.EnableBasicAuthentication
+	}
+
+	if in.OIDCConfig != nil {
+		config := make(map[string]interface{})
+
+		if in.OIDCConfig.CABundle != nil {
+			config["ca_bundle"] = *in.OIDCConfig.CABundle
+		}
+		if in.OIDCConfig.ClientID != nil {
+			config["client_id"] = *in.OIDCConfig.ClientID
+		}
+		if in.OIDCConfig.GroupsClaim != nil {
+			config["groups_claim"] = *in.OIDCConfig.GroupsClaim
+		}
+		if in.OIDCConfig.GroupsPrefix != nil {
+			config["groups_prefix"] = *in.OIDCConfig.GroupsPrefix
+		}
+		if in.OIDCConfig.IssuerURL != nil {
+			config["issuer_url"] = *in.OIDCConfig.IssuerURL
+		}
+		if in.OIDCConfig.RequiredClaims != nil {
+			config["required_claims"] = in.OIDCConfig.RequiredClaims
+		}
+		if len(in.OIDCConfig.SigningAlgs) > 0 {
+			config["signing_algs"] = in.OIDCConfig.SigningAlgs
+		}
+		if in.OIDCConfig.UsernameClaim != nil {
+			config["username_claim"] = *in.OIDCConfig.UsernameClaim
+		}
+		if in.OIDCConfig.UsernamePrefix != nil {
+			config["username_prefix"] = *in.OIDCConfig.UsernamePrefix
+		}
+
+		att["oidc_config"] = []interface{}{config}
 	}
 
 	return []interface{}{att}

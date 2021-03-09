@@ -155,14 +155,16 @@ func kubernetesResource() *schema.Resource {
 										Optional:    true,
 									},
 									"required_claims": {
-										Type:        schema.TypeString,
+										Type:        schema.TypeMap,
 										Description: "required_claims for oidc config in kube api server section",
 										Optional:    true,
 									},
 									"signing_algs": {
-										Type:        schema.TypeString,
+										Type:        schema.TypeSet,
 										Description: "signing_algs for oidc config in kube api server section",
 										Optional:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Set:         schema.HashString,
 									},
 									"username_claim": {
 										Type:        schema.TypeString,
