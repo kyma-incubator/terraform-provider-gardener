@@ -3,8 +3,9 @@ package shoot
 
 import (
 	"encoding/json"
-	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
 	"testing"
+
+	gcpAlpha1 "github.com/gardener/gardener-extension-provider-gcp/pkg/apis/gcp/v1alpha1"
 
 	awsAlpha1 "github.com/gardener/gardener-extension-provider-aws/pkg/apis/aws/v1alpha1"
 	azAlpha1 "github.com/gardener/gardener-extension-provider-azure/pkg/apis/azure/v1alpha1"
@@ -36,6 +37,12 @@ func TestFlattenShoot(t *testing.T) {
 	hibernationEnabled := true
 	allowPrivilegedContainers := true
 	enableBasicAuthentication := true
+	clientID := "ClientID"
+	groupsClaim := "GroupsClaim"
+	groupsPrefix := "GroupsPrefix"
+	issuerURL := "IssuerURL"
+	usernameClaim := "UsernameClaim"
+	usernamePrefix := "UsernamePrefix"
 
 	d := ResourceShoot().TestResourceData()
 	shoot := corev1beta1.ShootSpec{
@@ -112,6 +119,17 @@ func TestFlattenShoot(t *testing.T) {
 			AllowPrivilegedContainers: &allowPrivilegedContainers,
 			KubeAPIServer: &corev1beta1.KubeAPIServerConfig{
 				EnableBasicAuthentication: &enableBasicAuthentication,
+				OIDCConfig: &corev1beta1.OIDCConfig{
+					CABundle:       &caBundle,
+					ClientID:       &clientID,
+					GroupsClaim:    &groupsClaim,
+					GroupsPrefix:   &groupsPrefix,
+					IssuerURL:      &issuerURL,
+					RequiredClaims: map[string]string{"key": "value"},
+					SigningAlgs:    []string{"bar", "foo"},
+					UsernameClaim:  &usernameClaim,
+					UsernamePrefix: &usernamePrefix,
+				},
 			},
 		},
 		DNS: &corev1beta1.DNS{
@@ -167,6 +185,19 @@ func TestFlattenShoot(t *testing.T) {
 					"kube_api_server": []interface{}{
 						map[string]interface{}{
 							"enable_basic_authentication": true,
+							"oidc_config": []interface{}{
+								map[string]interface{}{
+									"ca_bundle":       caBundle,
+									"client_id":       clientID,
+									"groups_claim":    groupsClaim,
+									"groups_prefix":   groupsPrefix,
+									"issuer_url":      issuerURL,
+									"required_claims": map[string]string{"key": "value"},
+									"signing_algs":    []string{"bar", "foo"},
+									"username_claim":  usernameClaim,
+									"username_prefix": usernamePrefix,
+								},
+							},
 						},
 					},
 				},

@@ -38,6 +38,12 @@ func TestExpandShoot(t *testing.T) {
 	hibernationEnabled := true
 	allowPrivilegedContainers := true
 	enableBasicAuthentication := true
+	clientID := "ClientID"
+	groupsClaim := "GroupsClaim"
+	groupsPrefix := "GroupsPrefix"
+	issuerURL := "IssuerURL"
+	usernameClaim := "UsernameClaim"
+	usernamePrefix := "UsernamePrefix"
 
 	shoot := map[string]interface{}{
 		"spec": []interface{}{
@@ -61,6 +67,19 @@ func TestExpandShoot(t *testing.T) {
 						"kube_api_server": []interface{}{
 							map[string]interface{}{
 								"enable_basic_authentication": true,
+								"oidc_config": []interface{}{
+									map[string]interface{}{
+										"ca_bundle":       caBundle,
+										"client_id":       clientID,
+										"groups_claim":    groupsClaim,
+										"groups_prefix":   groupsPrefix,
+										"issuer_url":      issuerURL,
+										"required_claims": map[string]interface{}{"key": "value"},
+										"signing_algs":    []interface{}{"foo", "bar"},
+										"username_claim":  usernameClaim,
+										"username_prefix": usernamePrefix,
+									},
+								},
 								"audit_config": []interface{}{
 									map[string]interface{}{
 										"audit_policy": []interface{}{
@@ -268,6 +287,17 @@ func TestExpandShoot(t *testing.T) {
 			AllowPrivilegedContainers: &allowPrivilegedContainers,
 			KubeAPIServer: &corev1beta1.KubeAPIServerConfig{
 				EnableBasicAuthentication: &enableBasicAuthentication,
+				OIDCConfig: &corev1beta1.OIDCConfig{
+					CABundle:       &caBundle,
+					ClientID:       &clientID,
+					GroupsClaim:    &groupsClaim,
+					GroupsPrefix:   &groupsPrefix,
+					IssuerURL:      &issuerURL,
+					RequiredClaims: map[string]string{"key": "value"},
+					SigningAlgs:    []string{"bar", "foo"},
+					UsernameClaim:  &usernameClaim,
+					UsernamePrefix: &usernamePrefix,
+				},
 				AuditConfig: &corev1beta1.AuditConfig{
 					AuditPolicy: &corev1beta1.AuditPolicy{
 						ConfigMapRef: &corev1.ObjectReference{
