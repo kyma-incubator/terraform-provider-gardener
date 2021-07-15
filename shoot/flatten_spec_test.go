@@ -130,6 +130,13 @@ func TestFlattenShoot(t *testing.T) {
 					UsernameClaim:  &usernameClaim,
 					UsernamePrefix: &usernamePrefix,
 				},
+				AuditConfig: &corev1beta1.AuditConfig{
+					AuditPolicy: &corev1beta1.AuditPolicy{
+						ConfigMapRef: &corev1.ObjectReference{
+							Name: "audit-policy",
+						},
+					},
+				},
 			},
 		},
 		DNS: &corev1beta1.DNS{
@@ -196,6 +203,19 @@ func TestFlattenShoot(t *testing.T) {
 									"signing_algs":    []string{"bar", "foo"},
 									"username_claim":  usernameClaim,
 									"username_prefix": usernamePrefix,
+								},
+							},
+							"audit_config": []interface{}{
+								map[string]interface{}{
+									"audit_policy": []interface{}{
+										map[string]interface{}{
+											"config_map_ref": []interface{}{
+												map[string]interface{}{
+													"name": "audit-policy",
+												},
+											},
+										},
+									},
 								},
 							},
 						},

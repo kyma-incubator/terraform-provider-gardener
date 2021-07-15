@@ -241,6 +241,28 @@ func flattenKubeAPIServer(in *corev1beta1.KubeAPIServerConfig) []interface{} {
 		att["oidc_config"] = []interface{}{config}
 	}
 
+	if in.AuditConfig != nil {
+		config := make(map[string]interface{})
+
+		if in.AuditConfig.AuditPolicy != nil {
+			policy := make(map[string]interface{})
+
+			if in.AuditConfig.AuditPolicy.ConfigMapRef != nil {
+				reference := make(map[string]interface{})
+
+				if len(in.AuditConfig.AuditPolicy.ConfigMapRef.Name) > 0 {
+					reference["name"] = in.AuditConfig.AuditPolicy.ConfigMapRef.Name
+				}
+
+				policy["config_map_ref"] = []interface{}{reference}
+			}
+
+			config["audit_policy"] = []interface{}{policy}
+		}
+
+		att["audit_config"] = []interface{}{config}
+	}
+
 	return []interface{}{att}
 }
 
