@@ -17,8 +17,8 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	golang.org/x/time v0.0.0-20190921001708-c4c64cad1fd0 // indirect
 	google.golang.org/appengine v1.6.4 // indirect
-	k8s.io/api v0.17.2
-	k8s.io/apimachinery v0.21.3
+	k8s.io/api v0.17.17
+	k8s.io/apimachinery v0.17.17
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 )
 
