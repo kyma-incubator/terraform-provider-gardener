@@ -1,3 +1,6 @@
+## :warning: **Archived**
+
+This repository has been deprecated and archived on Oct 27th, 2022. There is no known direct replacement available, see also https://github.com/kyma-incubator/terraform-provider-gardener/issues/83 for potential inspiration.
 
 # Terraform Provider for Gardener
 
